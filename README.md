@@ -120,13 +120,31 @@ To compile, from command line in python program directory type `python -m compil
 
 # Methodology
 ## Key Considerations and Constraints
-TODO: list out the key considerations for making/maintaining this application
+Some of the considerations and/or constraints in making this project are listed below, roughly in order of importance.
+- Above all else, the UI should be easy to navigate
+- As a close second, user feedback like error messages must be descriptive
+		- A simple "cannot save" is not sufficient. Users should be told WHY they can't perform an action
+- When possible, There should be visual indicators to what can and cannot be done, at any time
+		- For example, if a current page is not selected, the "add element" buttons should be disabled to prevent users from clicking them
+		- For example, a dependent field (like the CAN remote request frequency) should only be enabled if its parent field (in this case, the RTR field) satisfies the appropriate conditions.
 
 ## Application and Codebase Features
 The following sections describe the thought process behind some of the different key features in the code. This is not meant as a definitive list but is meant to help supplement the comments in the code and explain some of the various aspects of the code. As a disclaimer, I'm a hobbyist button masher so there likely are some "non-pythonic" things going on in the code which I apologize for in advance.
 
 ### Graphical Layout
-TODO: explain the various application views
+The intent was to break up the user view into several sections, detailed below. Each of these serve a separate purpose and 
+
+1. Menu Bar
+		a. All core definitions like theme, CAN channels, and other information is contained in the menu.
+2. Editor Controls
+		a. This area contains the page selection combo box and buttons for adding and removing elements to the current dash page
+		b. This section should be how users navigate the dash configuration and add/remove elements
+3. Editor Display
+		a. This is the visual representation of the PyDash page and its elements. Above all else, this needs to replicate how the dash will look when the configuration file is loaded by the PyDash in the vehicle.
+		b. Additional "grpahical" controls should be implemented so that users can click/drag elements easily to edit.
+4. Element Properties
+		a. This view displays the properties assocaited with the currently selected dash element.
+		b. Users are able to directly edit/select properties here associated with the element. Updating element properties in this view will also update the graphical display real-time
 
 ### Application Flow
 TODO: explain the various application elements, like the "core config", "CAN config", etc and how they all fit into the workflow. This isn't a user guide on how to use those parts of the program, but the intended reason why they're included.
@@ -135,10 +153,33 @@ TODO: explain the various application elements, like the "core config", "CAN con
 The following discusses some of the code elements and library files along with the intent of their operation/existence. Again, this is not meant as a complete definitive guide but should supplement the existing code comments.
 
 #### Files and Libraries
-TODO: list out the various files and what they contain
+The following is a list of the various files in the project and their intended purpose or contained code segments
 
-#### Code Elements
-TODO: Discuss the various code elements like classes and function groups and what the purpose of them are.
+- MainWindow
+		- This is the main application window that contains the various UI elements and functions that interact with the rest of the codebase
+		- Where possible, the code here should be relatively terse and any repeated/common functions should be in the library files. The intent was to make it so that if functions can be instanced/used/implemented in other parts of the codebase, they're common to the whole project, not just the main window class.
+- com_defs
+		- the "com_defs" or "common definitions" file is intended to contain code elements that are used throughout the code
+		- Note that while some of the "element types" may be somewhat "system wide" they're contained in the com defs file as they're more specific to various dash functions than they are the system operation. This is a bit of a hazy line but the general takeaway is that if it's required for code elements of the editor, its in the "sys" file. If its related to editor objects, its in the "com defs" file.
+- editor_control
+		- The "editor control" file contains various classes used for the primary control of the editor UI.
+		- Some of these persist (like the primary "editrCntl" class), others are directly tied to the various dash page elements to handle editor functions (like the "bind_widget_control" class), and others are only used intermitently when placing widgets.
+		- The intent of the primary "editrCntl" class was to track the current state of the editor and how that drives other interactions. It additional provides a quick reference for things like the name of the current selected page and current selected dash element.
+- editor_windows
+		- The "editor windows" file contains various toplevel classes that are used when navigating the software via various menu views.
+		- The exception to this rule is the "widget property" or "element property" class which is used in the editor window (to be moved later)
+- XML
+		- the "XML" file contains all functions related to opening, saving, and editing XML files. This includes both the final PyDash configuration file, as well as the builder "save files".
+		- Generally, the naming convention splits up the files by their function:
+				- xmlfile_<xxx>: Functions that deal with XML file handling. An exceptions are the "XML_open" and "XML_save" functions which directly handl the opening and saving of files
+				- parseXML_<xxx>: Functions that deal with parsing or reading XML files. These are primarily used in reading the dash configuration save files
+				- genXML_<xxx>: Functions called by the "editorXML_gen" function to make the various aspects of the dash configuration save file.
+				- XML_dashCFG_<xxx>: functions that deal with saving the output dash configuration file. This is the file that will be transferred to the PyDash for display.
+- sys
+		- The "sys" or "system" file is a repository for common liraries, global constants, and system (or program) wide settings.
+		- For example, the defined "font" strings here are used throughout the code. These are just a simplified means of having several defined theme constants that get used globally and can be edited/updated in one spot.
+		- Additional default options are also defined here
+		- Finally, some program specific values are also set here like the click/drag delay and the verbose error pop-up wrap length (window width)
 
 # Application HELP file
 See the "User_Guide.md" markdown file for a full user guide 
