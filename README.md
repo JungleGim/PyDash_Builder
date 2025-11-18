@@ -2,8 +2,9 @@
 This readme covers the dash builder portion of the PyDash. For the Dash App, PCB design, Enclosure design, or OS design, see the below repositories:
 - PyDash_PCB
 - [PyDash_App](https://github.com/JungleGim/PyDash_App)
-- PyDash_Enclosure
 - [PyDash_OS](https://github.com/JungleGim/PyDash_OS)
+- PyDash_Enclosure
+- [PyDash_Builder](https://github.com/JungleGim/PyDash_Builder)
 
 ## Introduction
 The PyDash buidler (also just "builder" or "dash configurator") is a python script that launches a graphical user environment to build a PyDash layout configuration file, that is then sent to the PyDash app. The builder graphical environment should be an easy to navigate visual editor environment where users can pick, place, and update the various aspects that define a PyDash layout.
@@ -197,3 +198,4 @@ The information included is provided "as is", without warranty of any kind, expr
 
 # Note from the "Developer"
 While I am an engineer by trade, my area of focus is not computer architecture, system engineering, or any computer sciences. Likely, some people have already looked at various aspects of the codebase and just shook their heads. That being said, I'm giving it the good ole college try with this project (and GitHub) and will do my best to keep things up to date.
+
