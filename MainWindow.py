@@ -8,8 +8,8 @@ class wndw_Main(tk.Tk):
         #----high-level variables that store the loaded configuration
         self.cfg_pages = {}                 #dict of dash pages defined for the display. Format is {name: FrameClass}
         self.cfg_CAN = CAN_core()           #reference for the CAN information. Format is class:CAN_core
-        self.cfg_core = config()            #dict of the primary dash config values. format is {property_name: value}
-        self.cfg_theme = theme()            #reference for dash theme information. Format is class:theme
+        self.cfg_core = dash_config()            #dict of the primary dash config values. format is {property_name: value}
+        self.cfg_theme = dash_theme()            #reference for dash theme information. Format is class:theme
 
         self.editr_cntl = editrCntl(self)                   #instance editor control class
         self.init_window()                                  #intialize editor window

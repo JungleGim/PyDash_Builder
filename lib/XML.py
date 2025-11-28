@@ -52,7 +52,7 @@ def parseXML(master, config_tree):
     buildPages(master, master.cfg_pages)                            #build canvas items for the pages
 
 def parseXML_CORE(block):
-    tmp_config = config()                           #temp core config opt instance
+    tmp_config = dash_config()                           #temp core config opt instance
     read_DISPconfig = {}                            #temp dict for read values
     
     for disp in block.findall('DISP'):
@@ -63,7 +63,7 @@ def parseXML_CORE(block):
     return tmp_config
 
 def parseXML_THEME(block):
-    tmp_theme = theme()                             #temp dash theme instance
+    tmp_theme = dash_theme()                             #temp dash theme instance
     for clrs in block.findall('COLORS'):        #read all colors
         read_colors = {}                            #temp colors dict for read values
         for clr in clrs.findall('COLOR'):           #cycle through all parsed colors
@@ -75,7 +75,7 @@ def parseXML_THEME(block):
         for fnt in fnts.findall('FONT'):
             for font_props in fnt:
                 read_fnts_data.update({font_props.tag : font_props.text})       #append font to temp dict
-            read_fnts.append(font(fnt.attrib.get('NAME'), **read_fnts_data))    #append font data to temp array
+            read_fnts.append(dash_font(fnt.attrib.get('NAME'), **read_fnts_data))    #append font data to temp array
         tmp_theme.set_fonts(read_fnts)              #set theme fonts
     for imgs in block.findall('IMAGES'):        #read all images
         read_imgs = {}                              #temp dict for read images
@@ -121,7 +121,7 @@ def parseXML_PAGES(block):
             if atrb.tag != 'ELM':
                 read_frame_props.update({atrb.tag : atrb.text})
                 
-        read_frame = Page(**read_frame_props)   #new read frame 
+        read_frame = dash_page(**read_frame_props)   #new read frame 
         read_frame_props.clear()                #clear temp dict
 
         for elmnts in child.findall('ELM'):     #elements in frame

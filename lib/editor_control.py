@@ -9,6 +9,8 @@ from .com_defs import Label_Static, Label_Data, Indicator_Bullet, Indicator_Bar 
 
 #------------editor control class
 class editrCntl:
+    """class is for the primary dash editor control functions. Tracks things like the current canvas,
+    file names, and other significant references that are passed to many functions when updating elements"""
     def __init__(self, master):
         self.master_ref = master            #master window ref
         self.current_canv_name = None       #name of the current canvas
@@ -19,10 +21,19 @@ class editrCntl:
         self.current_wigtCfg = None         #config of the currently clicked widget
 
     def ChangeEditorCanv(self, event):
+        """function updates the displayed dash page when selected from the dropdown box
+        
+        "param event: (unused) event args from the combobox update
+        """
         sel_frame = self.master_ref.cbo_frame.get() #get name of the selected frame
-        self.gotoEditorCanv(sel_frame)    #goto selected frame
+        self.gotoEditorCanv(sel_frame)              #goto selected frame
 
     def gotoEditorCanv(self, canvName):
+        """function goes to the passed dash page (via its canvas object).
+
+        :param canvName: the defined name of the dash page (shared by its canvas definition)
+        :type canvName: `string`
+        """
         self.current_canv_name = canvName                                   #set current canvas name
         self.master_ref.cbo_frame.set(self.current_canv_name)               #set combo box selection (only needed if loading)
         try: self.current_canv.pack_forget()                                #remove the current canvas (if its been set)
@@ -33,29 +44,45 @@ class editrCntl:
         self.current_canv.pack(fill= tk.BOTH, expand=True)                  #place the new canvas in frame
 
     def cboFrames_upd(self):
-        self.master_ref.cbo_frame.config(values=list(self.master_ref.cfg_pages.keys()))      #update values in the frames combo box
+        """function updates the "pages" or "frames" combobox on the main window. This is typically
+        useful when adding new pages or deleting existing pages. When the combobox is updated, the
+        selected page is also displayed/updated/refreshed. This is needed when deleting the currently
+        viewed page and ensures that a blank screen is shown."""
+        self.master_ref.cbo_frame.config(values=list(self.master_ref.cfg_pages.keys())) #update values in the frames combo box
         if self.current_canv is None:
-            self.master_ref.cbo_frame.set('Select Page')                           #if the current frame is none, then change to 'select'
+            self.master_ref.cbo_frame.set('Select Page')                                #if the current frame is none, then change to 'select'
         else:
-            self.master_ref.cbo_frame.set(self.current_canv_name)                  #otherwise make sure its set to the current canvas name
+            self.master_ref.cbo_frame.set(self.current_canv_name)                       #otherwise make sure its set to the current canvas name
     
     def CheckReset(self):
+        """function checks to see if the editor should be reset. This is usually in cases where a
+        page is being deleted. The nomenclature of "Reset" w.r.t. the main editor means that it should
+        be reverted back to a default state"""
         if self.current_canv_name in self.master_ref.cfg_pages: pass  #if the current canvas is still in the pages dict, then everything's OK
         else: self.ResetEditor()                  #otherwise the editor needs to be reset (likely has been deleted)
 
     def ResetEditor(self):
-        #the goal here is to clear out the active frame and clear the current window so everything goes back to an "unselected" state
+        """function resets the editor window. The goal is to clear out the active frame and clear 
+        the current window so everything goes back to an "unselected" state"""
         try: self.current_canv.pack_forget()    #remove the current canvas (if its been set)
         except: pass                            #if its not set then not needed
         self.current_canv = None                #set current canvas to None
         self.cboFrames_upd()          #reset combo selection box for frames
     
     def buildAllPages(self):
-        '''cycle through all pages in main dict and build the elements in their config'''
+        """function cycles through all the defined pages in the instanced `pages` dict and builds how
+        it should be displated. This means adding defined elements, etc. A full update of the visual state
+        of the dash page based on its current config."""
         for page in self.master_ref.cfg_pages.values():         #loop through all pages in config
             self.buildPage(page)
 
     def buildPage(self, psd_page):
+        """function builds the passed page, including all visual elements like the page background color
+        or image and any elements that are contained on the page
+        
+        :param psd_page: the defined name of the dash page (shared by its canvas definition)
+        :type psd_page: `dash_page` class instance
+        """
         pg_canv = psd_page.canvObj  #canvas object for the editor
 
         #--add page background image
@@ -75,13 +102,26 @@ class editrCntl:
             self.addWidget(DashEle_types['IND_BAR'], pg_canv, ele_cfg)
 
     def addWidget(self, ele_type, ref_canv, ele_cfg):
+        """function instances new dash element to the passed canvas. This is typically used when
+        loading an existing dash configuration but is also used when adding a new element from the editor.
+        When instancing a new dash element, it is placed on the passed canavas, all of the required action 
+        bindings for the editor control, and external references required for the class definition are also
+        set or assigned.
+        
+        :param ele_type: the element type being created
+        :type ele_type: `DashEle_types`
+        :param ref_canv: the parent canvas the widget (dash element) is placed on
+        :type ref_canv: `tk.canvas` reference
+        :param ele_cfg: the completed element configuration to create
+        :type ele_cfg: `element` class instance - IE `label_static` or `indicator_bar` etc
+        """
         ele_cfg.master_ref = self.master_ref                                    #set the master ref (for theme processing)
         ele_refID, ele_padID = instance_widget(ele_type,
                                                ref_canv,
                                                ele_cfg.get_edtr_wgt_kwargs())   #create new widget and assign to object ref in class
         ele_cfg.upd_config({'objID':ele_refID, 'padID':ele_padID})              #set editor canvas refID and background pad ID
         
-        try:    #re-order the element if specified
+        try:    #re-order the element if an order is specified
             if ele_cfg.ordr == Ele_Order['BG']: ref_canv.lower(ele_cfg.objID)
         except: pass
 
@@ -90,13 +130,17 @@ class editrCntl:
         ele_cfg.upd_ele_def_refs()                                              #update external references for new element
 
     def delWidget(self):
+        """function deletes the currently selected widget"""
         if self.current_wigtCfg is not None:
             self.current_page.del_element(self.current_wigtCfg)             #delete current selected widget
         else:
             messagebox.showerror("Error", "No element selected to delete!") #or display error
            
     def updCFG_addEle(self, ele_info):
-        """Function to add a new page element to the cfg_pages class being edited"""
+        """Function to add a new widget (dash element) to the current page being edited
+        :param ele_info: kwargs to create a new dash element
+        :type ele_info: `dict` formatted {element_kwarg_name:kwarg_value}
+        """
         tmp_ele_info = ele_info.copy()              #copy passed element info for local modifications
         ele_type = tmp_ele_info.pop('type')         #pop off the element type
         
@@ -111,12 +155,8 @@ class editrCntl:
         return eleCfg_ref           #return element config ref
 
     def clicked_wgt(self, passed_cfg):
+        """function to update the reference in the editor control class for the currently clicked widget."""
         self.current_wigtCfg = passed_cfg   #update the current working cfg to the one of the newly clicked widget
-    
-    def enable_editor_controls(self):
-        """function updates element control enable/disable status based on the current page"""
-        
-        pass
 
 #------------widget moving class
 class FrmEdit_bind_widget_control:
@@ -130,17 +170,25 @@ class FrmEdit_bind_widget_control:
         self.frameEditor_widgetBind()               #call bindings    
 
     def upd_refs(self):
+        """function updates any class refs that are used for editor widget manipulation. For example, each
+        dash element (in the editor) may have a background pad object which is updated here. This is so the
+        local refs in this class are maintained."""
         if hasattr(self.ele_cfg, 'padID'):self.pad_id = self.ele_cfg.padID    #background pad reference ID
         else: self.pad_id = None
 
-#------------bind mounse controls to passed widget
     def frameEditor_widgetBind(self):
+        """function binds mouse actions to the widget (dash element)"""
         self.parent_canv.tag_bind(self.ele_ID, '<ButtonPress-1>', self.widget_click)
         self.parent_canv.tag_bind(self.ele_ID, "<B1-Motion>", self.widget_drag)
         self.parent_canv.tag_bind(self.ele_ID, "<ButtonRelease-1>", self.widget_release)
 
-#------------mouse action functions while editing
     def widget_click(self, evnt):
+        """function handles the actions to perform when a widget is clicked. An example of this is
+        updating the "properties" pane when a new widget is clicked.
+        
+        :param evnt: the event information about the triggering event.
+        :type evnt: `Event` tkinter object
+        """
         self.frmEditor_widgetLocked = True                          #lock widget temporarily
         self.frmEditor_tClick = datetime.now()                      #set time mouse was clicked - for "debounce" of clicks
         self.frmEditor_x0 = evnt.x ; self.frmEditor_y0 = evnt.y     #set the initial "zero" point for the widget being moved (based on mouse position)
@@ -149,19 +197,28 @@ class FrmEdit_bind_widget_control:
         self.master_ref.editr_cntl.clicked_wgt(self.ele_cfg)        #update the current clicked widget in the control class
     
     def widget_drag(self, event):
+        """function handles when a widget can be click/dragged in the editor by a user. Includes a built-in
+        "debounce" so that users don't accidentally move when initially clicking
+        
+        :param evnt: the event information about the triggering event.
+        :type evnt: `Event` tkinter object
+        """
         #--mouse click/unlock for "debounce" of the click/drag
         if(self.frmEditor_widgetLocked):                #if mouse is clicked and widget is locked
             dt = self.delta_ms(self.frmEditor_tClick)   #calc time difference
             if (dt > click_delay):                      #if the "debounce" or time delay has elapsed
                 self.frmEditor_widgetLocked = False     #then unlock widget movement
-                self.uXhelperGrid_make()                #and draw helper gridlines
         
         #--updating position if its a valid drag
         if (not self.frmEditor_widgetLocked):           #if widget is unlocked, then move it
             self.uXmoveRect_updPos(event)               #update position of the "positioning" rectangle for visual indication
             
     def widget_release(self, event):
-        self.uXhelperGrid_del()                                             #delete the helper grid lines
+        """function handles the updates to a dash element after a click/drag and the mouse is released
+        
+        :param evnt: the event information about the triggering event.
+        :type evnt: `Event` tkinter object
+        """
         self.uXmoveRect_del()                                               #delete the "positioning" rectangle
         if (not self.frmEditor_widgetLocked):                               #if widget is unlocked, then calculate updated position
             dx = event.x - self.frmEditor_x0; dy = event.y - self.frmEditor_y0  #calculate change in mouse position
@@ -174,14 +231,26 @@ class FrmEdit_bind_widget_control:
                 self.ele_cfg.upd_config({'x1': new_x1, 'y1': new_y1})           #update config information with new position
             self.master_ref.editr_wgtProps.clicked_wgt(self.ele_cfg)        #call function to update the properties view
 
-#------------positioning rectangle actions
     def delta_ms(self, start_time):
+        """function handles the "debounce" when a user attempts to click/drag a dash element
+        
+        :param start_time: the time assigned when an element is first clicked
+        :type start_time: `int`
+        :returns: time delta from the start time to current
+        :rtype: `int`
+        """
         crnt_time = datetime.now()                  #get current time object
         dt = crnt_time - start_time                 #find overall time delta
         dt = math.trunc(dt.total_seconds()*1000)    #convert to ms    
         return dt
    
     def uXmoveRect_make(self, evnt):
+        """function makes the UI helper "move rectangle" that shows the element position when
+        a click/drag operation is started
+        
+        :param evnt: the event information about the triggering event.
+        :type evnt: `Event` tkinter object
+        """
         if self.pad_id is not None:
             wX0, wY0, wX1, wY1 = self.parent_canv.bbox(self.pad_id)     #bounding box dims are the outer pad element
         else: wX0, wY0, wX1, wY1 = self.parent_canv.bbox(self.ele_ID)   #otherwise just the object
@@ -190,27 +259,25 @@ class FrmEdit_bind_widget_control:
                                                                   outline='black', width=2) #make the "positioning" rectangle
     
     def uXmoveRect_updPos(self, evnt):
-        '''---uxRect moving notes
-            ~remember that event.x and event.y are the mouse position relative to the 0,0 of the widget
-                that is clicked (upper-left corner)
-            ~also remember that x_root and y_root are relative to the SCREEN not the widget
-        '''
+        """Function handles the position updates for the UI helper "move rectangle. Some important
+        things to remember about this:
+            ~event.x and event.y are the mouse position relative to the 0,0 of the widget that is clicked
+            (upper-left corner) not the canvas
+            ~x_root and y_root are relative to the phyasical computer monitor not the widget, or editor application
+
+        param evnt: the event information about the triggering event.
+        :type evnt: `Event` tkinter object
+        """
         dx = evnt.x - self.uxRect_x0; self.uxRect_x0=evnt.x     #calculate pixels moved and update new "zero" position
         dy = evnt.y - self.uxRect_y0; self.uxRect_y0=evnt.y
         self.parent_canv.move(self.frmEditor_UXrect, dx, dy)    #move "positioning" rect
 
     def uXmoveRect_del(self):
+        """function handles removing the UI helper "move rectangle" when the mouse is released"""
         self.parent_canv.delete(self.frmEditor_UXrect)          #delte the "positioning" rectangle
 
-    def uXhelperGrid_make(self):
-        """function to draw dotted helper grid lines on the editing canvas"""
-        pass
-
-    def uXhelperGrid_del(self):
-        """function to delete dotted helper grid lines on the editing canvas"""
-        pass
-
 class FrmEdit_widget_place:
+    """class to handle the required functions when placing a new widget created from the editor window"""
     def __init__(self, master, ele_type, passed_wgt_kwarg):
         self.master_ref = master                        #master window ref
         self.ref_canv = master.editr_cntl.current_canv  #canvas to make the widget on
@@ -230,20 +297,42 @@ class FrmEdit_widget_place:
         self.ref_canv.bind('<ButtonPress-1>', self.place_click)  #bind the click action to place label
 
     def place_enter(self, event):
+        """function handles drawing the UI helper "move rectangle" when the mouse enters the dash editor area. As
+        a remidner the nomenclature of "enter" is NOT the <enter> key but when the mouse enters the frame.
+        
+        :param evnt: the event information about the triggering event.
+        :type evnt: `Event` tkinter object
+        """
         if not self.placed.get():
             self.uXmoveRect_make(event)     #make the "positioning" rectangle
             self.allow_place = True         #allow placing the widget if in frame
     
     def place_leave(self, event):
+        """function handles removing the UI helper "move rectangle" when the mouse leaves the dash editor area
+        
+        :param evnt: (not used) the event information about the triggering event.
+        :type evnt: `Event` tkinter object
+        """
         if not self.placed.get():
             self.uXmoveRect_del()           #delete the "positioning" rectangle
             self.allow_place = False        #do not allow placing the widget if out of frame
     
     def place_move(self, event):
+        """function handles drawing the UI helper "move rectangle" when the mouse moves around in the editor area.
+        This is meant to help visually show the user where the widget (dash element) will be placed.
+        
+        :param evnt: the event information about the triggering event.
+        :type evnt: `Event` tkinter object
+        """
         if not self.placed.get():
             self.uXmoveRect_updPos(event)               #update position of the "positioning" rectangle for visual indication
 
     def place_click(self, event):
+        """function handles the actual placement of the new widget (dash element) when clicking in the editor window
+        
+        :param evnt: the event information about the triggering event.
+        :type evnt: `Event` tkinter object
+        """
         if not self.placed.get() and self.allow_place:
             self.placed_coords.update({'x0':event.x, 'y0':event.y})         #set the resultant placed coords
             if hasattr(self.wgt_kwarg, 'x1'):                               #if element requires x1, y1 coords then update those as well
@@ -254,6 +343,11 @@ class FrmEdit_widget_place:
             self.placed.set(True)                                   #update the positioning flag
 
     def uXmoveRect_make(self, evnt):
+        """function handles making the UI helper "move rectangle" based on the widget (dash element) being placed
+        
+        :param evnt: the event information about the triggering event.
+        :type evnt: `Event` tkinter object
+        """
         self.uxRect_x0 = evnt.x; self.uxRect_y0 = evnt.y    #calculate the initial "zero" point for "positioning" rectangle
         uxRect_w = self.uxRect_x0+self.widgt_width          #calculate width "end" pixel
         uxRect_h = self.uxRect_y0 + self.widgt_height       #calculate height "end" pixel
@@ -262,11 +356,15 @@ class FrmEdit_widget_place:
                                                                 outline='black', width=2)         #make the "positioning" rectangle
     
     def uXmoveRect_updPos(self, evnt):
-        '''---uxRect moving notes
-            ~remember that event.x and event.y are the mouse position relative to the 0,0 of the widget
-                that is clicked (upper-left corner)
-            ~also remember that x_root and y_root are relative to the SCREEN not the widget
-        '''
+        """Function handles the position updates for the UI helper "move rectangle. Some important
+        things to remember about this:
+            ~event.x and event.y are the mouse position relative to the 0,0 of the widget that is clicked
+            (upper-left corner) not the canvas
+            ~x_root and y_root are relative to the phyasical computer monitor not the widget, or editor application
+
+        :param evnt: the event information about the triggering event.
+        :type evnt: `Event` tkinter object
+        """
         rect = self.frmEditor_UXrect
         prnt_canv = self.ref_canv  #parent canvas
         dx = evnt.x - self.uxRect_x0; self.uxRect_x0=evnt.x     #calculate pixels moved and update new "zero" position
@@ -274,10 +372,16 @@ class FrmEdit_widget_place:
         prnt_canv.move(rect, dx, dy)                            #move "positioning" rect
 
     def uXmoveRect_del(self):
+        """function handles removing the UI helper "move rectangle" when the mouse is released"""
         self.ref_canv.delete(self.frmEditor_UXrect)    #delte the "positioning" rectangle
 
     def preCalc_widgetSize(self):
-        """function to calculate the widget size before placing. Used to set the helper placement rectangle"""
+        """function calculates the size of the new widget before placing. This information is
+        used to set the UI "helper rectangle" dimentions
+        
+        :returns: `width` and `height` of the widget being placed
+        :rtype: `int`, `int`
+        """
         tmp_widg_kwargs = self.wgt_kwarg.copy()
         tmp_widg_kwargs.update({'x0':0,'y0':0})                             #add dummy position for the temp widget
         if hasattr(tmp_widg_kwargs, 'x1'):                                  #if element requires x1, y1 coords then update those as well

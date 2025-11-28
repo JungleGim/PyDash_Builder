@@ -56,9 +56,10 @@ The below is a list of wants/needs for future revisions, listed in no order of i
     - Another example of code cleanup is that in the "page" class, there really doesn't need to be a dict for each element type.
         + In theory, having the separate dicts allows for different elements with the same ref name but like...that's not really a concern in practice. I think chaning to a single "elements" dict would be fine and would arguably streamline a few of the places in the code. Each element would have its own unique key anyway and then the various values (element type class) don't care.
         + There are a couple different spots where there's an actual element dependent action could be handled by a switch statement and determining what the associated class is OR could add a common "type" attribute to all classes and then ignored when/where not needed
-    - Another is that in the common dash element type defs, some of the functions are shared across the different element types
-        + For example, the "upd_pad_obj" function is identical between static and data labels.
-        + Figure out the best way that these could be condensed and/or use a single function. They're the same in both cases so having it twice is just error prone. Maybe use a single common function definition that has passed object references which would make it more modular?
+    - Another is that in the common dash element type defs, some of the methods are shared (or very similar) across the different element types
+        + For example, the "upd_pad_obj" method is identical between static and data labels.
+		+ this was initially done so that when needed, the various methods could be called by using <instance>.<method>. It additionally means any element-specific idiosynchrasies can be modified within the class defintion.
+        + Figure out the best way that these could be condensed and/or use a single method. Maybe as-is really is the best way to do it still. The concern is that currently with multiple similar methods its just a maintainence nightmare and is a potential error trap when udpating. Maybe use a single common function definition with "multiple displatch" that has passed object references which would make it more modular (and still retain per-element differences)?
     - Also consolidate by function
         + for example, many of the "com_defs" functions would fit well into the "editor control" class...but then I'm not sure how many of those are used outside of that main window (like in the XML file). So some of them being in the "com defs" may be better/cleaner than passing a master ref everywhere. But also if the master ref is already there.....
     - variable and function naming clarity
@@ -89,6 +90,25 @@ The below is a list of wants/needs for future revisions, listed in no order of i
 * Improve custom notification window class
     - currently works but needs some tweaking to be better
     - make the window vertically resizable up to a certain size, at which point if more space is needed (because of long text) a vertical scroll bar should appear
+* Feature requests
+	- Add a new "analog gauge" dash element
+		+ not 100% sure how this would work yet, but some ideas:
+			* treat as a square (circle) and use a "size" param similar to the existing bullet indicator to scale the gauge
+			* "default" would be a solid background color with the foreground color for the markings
+			* standard shape would be just a circle, but can also provide a "sweep" parameter. Default needle "Sweep" would be like 300* with a 60* wedge centered at the bottom for the gauge display name
+			* Otional gauge background image - should figure out how to "fill" a round object with the image or maybe restrict it to an image format for the gauges? latter would be much easier to implement but onus is on the user then to make their own backgrounds
+			* Optional needle color (default use same as foreground color)
+			* Needle is maybe just a long/thin rectangle?
+			* much like the current "indicator_bar" class, the min/max values would set the bounds of the "sweep" and then the needle position would be relative to the defined min/max values.
+			* would also need "major" and "minor" divisions for the definition to provide gauge tic-marks
+			* would need a new function to handle the drawing of the text
+		+ since all of this is relatively complex (lots of elements) potentially the easiest way to handle this in the editor would be to use a sub-canvas for each analog gauge.
+			* That would keep everything inside of it relative as well and so any "move" commands with click/drag or position updates would just move the chanvas and handling all the individiual gauge element moves wouldn't be needed.
+			* Also may handle the "gauge shape" easier with a mask or something (via PIL library)? Would make the gauge face just a similar background color/object like pages are now. Then chosing a "shape" in the gauge drop-down would change how it's masked. Then users would just need to keep the image as a "square" and keep relative positioning for any like, gauge colors or self-imposed text/labels in mind.
+		+ When done, so much of the above is just "static" w.r.t. the actual dash. The dash editor will need to keep these dynamic for user changes in the editor but the dash doesn't (and shouldn't) need to make it programatically.
+			* A good solution for this in the "gauge definition" would then to make each of those user defined "digital gauges" just static images. The dash then could use the "place image" function similar to any other image to put them on screen
+			* This is already possible with the PIL library using the "ImageGrab" function and would make the downstream dash implemtentation SO much easier.
+			* The additional args in the "gauge" element then would be something like the data channel name, "min/max" values, and "sweep angle min/max" limits to draw the needle where it's supposed to be in the dash. Then all the "update" function for this in the dash would need to be is calculate the "needle" angle based on the current data channel value, min/max value, and min/max sweep limits.
 
 ## Repository Directory Map
 The following information describes the folders found in the root directory of this repository
@@ -198,4 +218,3 @@ The information included is provided "as is", without warranty of any kind, expr
 
 # Note from the "Developer"
 While I am an engineer by trade, my area of focus is not computer architecture, system engineering, or any computer sciences. Likely, some people have already looked at various aspects of the codebase and just shook their heads. That being said, I'm giving it the good ole college try with this project (and GitHub) and will do my best to keep things up to date.
-

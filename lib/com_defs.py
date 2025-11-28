@@ -45,7 +45,7 @@ def int_str(val, frmt=10):
     """converts passed value to integer value
 
     function can handle a `string`(int), `string`(fraction), `integer`, `float`, 
-    or `none` type. If passed a `none`, then `none` is returned. If passed value
+    or `none` type. If passed a `none` or zero-length string, then `none` is returned. If passed value
     is fractional representation, i.e. (1/10) then it is converted into a float (0.1)
 
     :param val: value to convert
@@ -80,19 +80,53 @@ def list_str(val, offset):
     return frm_list                             #return list
 
 def strvar_str(val):
-    """function converst the passed value for use with stringvars. The most useful implementation
+    """function converts the passed value for use with stringvars. The most useful implementation
         of this is when trying to represent a (None) value in a stringvar. In this case, the function
-        will return a zero-length string (blank string)"""
+        will return a zero-length string (blank string)
+        
+    :param val: value to convert
+    :type val: `string` or `char`
+    :returns: the converted value
+    :rtype: `string`
+    """
     
     rtn_val = ''
     if val is not None: rtn_val=val
     return rtn_val
 
 def tup_str(tup):
+    """function converts the passed tuple into a comma-separated string
+        
+    :param tup: value to convert
+    :type tup: `tuple` of any type
+    :returns: the converted value
+    :rtype: `string`
+    """
     csr = ", ".join(tup)
     return csr
 
 def draw_rectangle(prnt_canv, x0, y0, x1, y1, clr, r=pad_radius):
+    """function draws a rectagle on the parent canvas. Rectangle is based on the passed coords.
+    The start coordinate is upper-left corner of the rectangle, end coordinate is lower-left corner 
+    of the rectangle. Can pass an optional value (r) to add a radius to the rectangle corners    
+        
+    :param prnt_canv: parent canvas to draw rectangle on
+    :type prnt_canv: `tk.Canvas`
+    :param x0: start x coordinate
+    :type x0: `int`
+    :param y0: start y coordinate
+    :type y0: `int`
+    :param x1: end x coordinate
+    :type x1: `int`
+    :param y1: end y coordinate
+    :type y1: `int`
+    :param clr: color
+    :type clr: HEX string color value
+    :param r: (optional) rectangle corner radius
+    :type r: num pixels in `int`
+    :returns: reference ID of the created object
+    :rtype: `tk.canvas` reference
+    """
     points = [x0+r, y0, x0+r, y0,   #create the polycon points
               x1-r, y0, x1-r, y0,
               x1, y0,
@@ -109,19 +143,18 @@ def draw_rectangle(prnt_canv, x0, y0, x1, y1, clr, r=pad_radius):
     return prnt_canv.create_polygon(points, smooth = True, fill=clr)    #create the background polygon and return refID
 
 def instance_widget(ele_type, prnt_canv, widg_kwargs):
-    """function to create a new element in the editor. returns the created widget type
+    """function to create a new element in the dash page editor. If only an opbject is created, the
+    retrun value will be a tuple of the reference ID and `none` as the second value. If the created 
+    widget has a "background pad" rectangle it will also return the ref ID of the background object.
 
-    :param master_ref: reference back to the master editor window to access configuration information
     :param ele_type: the dash element type being created
     :type ele_type: Dict DashEle_types
     :param prnt_canv: parent canvas to make object on
-    :type prnt_canv: class `Tk.Canvas()`
-    :param ele_args: element arguments - used for later processing in XML file creation
-    :type ele_args: Dict {xml_field_name \: value}
+    :type prnt_canv: `Tk.Canvas` class
     :param widg_kwargs: widget creation KWARGs - Will be converted here based on the named objects (for font, color, etc.)
     :type widg_kwargs: Dict {kwarg_name \: value}
-    :returns: widget object
-    :rtype: Tk widget class: (Label, Elipse, Rectangle)
+    :returns: tuple of reference ID of the created object, and pad reference
+    :rtype: `tk.canvas` reference
     """
     wigt_ref = None
     
@@ -146,6 +179,18 @@ def instance_widget(ele_type, prnt_canv, widg_kwargs):
     else: return wigt_ref, None         #otherwise, only return created widget reference
 
 def elePad_create(prnt_canv, prnt_wgt, pad_clr):
+    """function supports dash element creation. If element has a "background pad" rectangle, this function
+    is used to create it.
+
+    :param prnt_canv: parent canvas to make object on
+    :type prnt_canv: `Tk.Canvas` class
+    :param prnt_wgt: parent object the background pad is placed behind
+    :type prnt_wgt: `tk.canvas` reference
+    :param pad_clr: fill color
+    :type pad_clr: HEX string color value
+    :returns: tuple of reference ID of the created object
+    :rtype: `tk.canvas` reference
+    """
     prntX0, prntY0, prntX1, prntY1 = prnt_canv.bbox(prnt_wgt)           #find the size of the parent widget
     padX0=prntX0-pad_margin; padX1=prntX1+pad_margin                    #calculate X0, x1 for background pad object
     padY0=prntY0; padY1=prntY1                                          #calcualte Y0, Y1 for background pad object
@@ -154,50 +199,122 @@ def elePad_create(prnt_canv, prnt_wgt, pad_clr):
     return pad_ref_id   #return the background pad ID
 
 def elePad_delete(prnt_canv, pad_ID):
+    """function deletes a background pad object. When deleting, None is returned so the parent
+    element object control class has its reference updated appropriately
+
+    :param prnt_canv: parent canvas to make object on
+    :type prnt_canv: `Tk.Canvas` class
+    :param pad_ID: element reference ID
+    :type pad_ID: `tk.canvas` reference
+    :returns: `None` value
+    """
+
     prnt_canv.delete(pad_ID)
     return None
 
 def xmlGen_str(obj):
-    """Function returns string of the passed object unless (None) which returns a blank string"""
+    """Function returns a string of any passed object unless (None) which returns a blank string. Particularly
+    helpful when creating XML files and placing objects as strings.
+    
+    :param obj: object to typecast using str(obj)
+    :type obj: any type that can be typecast to string
+    :returns: string
+    :rtype: `string`
+    """
     rtn_str = ''
     if obj is not None: rtn_str = str(obj)
 
     return rtn_str
 
-def buildPages(master_ref, passed_pages):    
+def buildPages(master_ref, passed_pages):
+    """Function loops through the passed page(s) and runs the "buildPages" function to create the
+    individual page and the elements on the page. This is typically used when loading saved configurations.
+    
+    :param master_ref: reference back to the main/master window
+    :type master_ref: `tk.window` ref
+    :param passed_pages: dictionary of pages
+    :type passed_pages: `dict` of 'Page` class type
+    """
     for v in passed_pages.values():
         v.master_ref = master_ref   #set master ref for in-class functions
         v.buildPages_canv()         #loop through all pages and make the canvas object
 
 def updPages(master_ref):
+    """Function loops through the page(s) in the instanced page dict in the master window. This dict contains the
+    defined editor pages. For each page, it's individual "update_page" function is called. This is typically
+    helpful when a core definition like a named color ref is updated and all objects that reference the named
+    core definition need to be updated. Think of it like a "refesh" based on the current values in the configuration
+    dictionaries.
+    
+    :param master_ref: reference back to the main/master window
+    :type master_ref: `tk.window` ref
+    """
     for page in master_ref.cfg_pages.values(): page.update_page()   #cycle through all pages and update
 
 def addImg(canv, image, x=0, y=0):
+    """Function loops through the page(s) in the instanced page dict in the master window. This dict contains the
+    defined editor pages. For each page, it's individual "update_page" function is called. This is typically
+    helpful when a core definition like a named color ref is updated and all objects that reference the named
+    core definition need to be updated. Think of it like a "refesh" based on the current values in the configuration
+    dictionaries.
+    
+    :param canv: parent canvas to make object on
+    :type canv: `Tk.Canvas` class
+    :param image: absolute filepath to image
+    :type image: string
+    :param x: x0 position of the image, upper-left corner (default=0)
+    :type x: `int`
+    :param y: y0 position of the image, upper-left corner (default=0)
+    :type y: `int`
+    :returns: PhotoImage reference
+    :rtype: `tk.PhotoImage` int
+    """
     tkImg = tk.PhotoImage(master=canv, file=image)                  #create tk photoImage
     canv.create_image(x, y, image = tkImg, anchor=tk.NW)            #place image
     return tkImg    #return tk image for ref
 
-def upd_definition_refs(master_ref, ele_name, ref_dict):
-    """function updates the named dicts in the various editor core items like fonts, colors, images, etc
-        when a dash element's config is updated. These are used to help navigate if a particular definition
-        is used elsewhere.
-        
-        For example, if a color is used in a static label, don't allow the deleltion of that color in the definitions"""
+def upd_definition_refs(master_ref, obj_name, ref_dict):
+    """function updates the named reference dicts in the various editor core items like fonts, colors, images, etc
+    when a dash config is updated. As a reminder the various reference dicts are used to help navigate 
+    if a particular definition is used elsewhere. This is important when attempting to delete the base defintion.
+    
+    For example, if a color is used in a static label, the external reference dict in the `colors` instance 
+    will not allow the deleltion of that color since it has an external dependency
+
+    :param master_ref: reference back to the main/master window
+    :type master_ref: `tk.window` ref
+    :param obj_name: object name that uses the reference
+    :type obj_name: `string`
+    :param ref_dict: dict to add/update to the reference dictionary.
+    :type ref_dict: `dictionary` object, any length
+    """
     try: can_ext_refs = {}; can_ext_refs['CAN_CH'] = ref_dict.pop('CAN_CH')  #pop off CAN external refs
     except: pass
 
     theme_ext_refs = ref_dict                                           #remaining are all theme related
-    master_ref.cfg_theme.upd_ext_refs(ele_name, theme_ext_refs)         #update theme external refs
-    master_ref.cfg_CAN.upd_ext_refs(ele_name, can_ext_refs)             #update CAN channels external refs
+    master_ref.cfg_theme.upd_ext_refs(obj_name, theme_ext_refs)         #update theme external refs
+    master_ref.cfg_CAN.upd_ext_refs(obj_name, can_ext_refs)             #update CAN channels external refs
 
-def del_definition_refs(master_ref, ele_name):
-    """function deletes any references in the external refs associated with the element name passed"""
-    master_ref.cfg_theme.del_ext_refs(ele_name)
-    master_ref.cfg_CAN.del_ext_refs(ele_name)
+def del_definition_refs(master_ref, obj_name):
+    """function deletes any references in the external refs associated with the object name passed
+    As a reminder the various reference dicts are used to help navigate 
+    if a particular definition is used elsewhere. This is important when attempting to delete the base defintion.
+    
+    For example, if a color is used in a static label, the external reference dict in the `colors` instance 
+    will not allow the deleltion of that color since it has an external dependency
+
+    :param master_ref: reference back to the main/master window
+    :type master_ref: `tk.window` ref
+    :param obj_name: object name that uses the reference (that is being removed)
+    :type obj_name: `string`
+    """
+    master_ref.cfg_theme.del_ext_refs(obj_name)
+    master_ref.cfg_CAN.del_ext_refs(obj_name)
 
 #---------------------configuration classes used in multiple files---------------------
-class config:
-    '''Configuration class for core dash options (HW configuration)'''
+class dash_config:
+    """Configuration class for core dash options (HW configuration). Examples of contained information
+    includes screen resolution, backlight PWM value, and other "core" options."""
     def __init__(self):
         self.Res_x = None       #window x-resolution
         self.Res_y = None       #window y-resolution
@@ -205,6 +322,14 @@ class config:
         self.Baklite = None     #backlight brightness - default full bright
 
     def len(self):
+        """function counts the number of set attributes and returns how many are set. Intended to emulate
+        other python len() functions like len(my_dict) or len(my_tuple). An attribute is considered "set"
+        if the value is not None.
+        
+        :returns: num set attributes
+        :rtype: `int`
+        """
+
         tmp_count = 0                                   #temp count of any filled fields
         for attr_value in self.__dict__.items():        #loop through defined attributes and see if they are set
             if attr_value[1] is not None: tmp_count += 1   #increment count if they are set
@@ -212,20 +337,41 @@ class config:
         return tmp_count
 
     def clear(self):
+        """function clears out all class attributes and sets to None"""
         for attr in self.__dict__.keys():   #loop through defined attributes
             setattr(self, attr, None)       #and set to None
 
     def set_core(self, **kwargs):
+        """ function sets attributes based on the passed KWARGs. All KWARGs have default values
+        for typical display values.
+
+        :param kwargs: dict of class inputs
+        :type kwargs: any type that can be typecast to string
+        """
         kwargs = {k.upper(): v for k, v in kwargs.items()}  #convert kwarg names to uppercase. Allows for use with XML and editor attributes
-        self.Res_x = int_str(kwargs.get('RES_X', 1024))
-        self.Res_y = int_str(kwargs.get('RES_Y', 600))
-        self.Refresh = int_str(kwargs.get('REFRESH', 67))
-        self.Baklite = int_str(kwargs.get('BAKLITE', 100))
+        self.Res_x = int_str(kwargs.get('RES_X', dash_xSz))
+        self.Res_y = int_str(kwargs.get('RES_Y', dash_ySz))
+        self.Refresh = int_str(kwargs.get('REFRESH', refrsh_rt))
+        self.Baklite = int_str(kwargs.get('BAKLITE', deflt_backlite))
 
     def backlt_upd(self, PWM):
+        """function updates the backlight PWM value
+        
+        :param PWM: 0-100 PWM duty cycle for backlight brightness
+        :type PWM: `int`
+        """
         self.Baklite = PWM   #update PWM percentage to passed value
     
     def XML_dashCFG_checkErrs(self):
+        """function checks the required class attributes to see if they are set and if the set value is
+        a correct format and/or reference. If it is not set, or the value is not correct for the configuration,
+        then the attribute name, and an error message are added to the temporary error dict. Once complete
+        this error dict is passed to the custom warning window message to indicate where in a dash configuration
+        there may be issues.
+        
+        :returns: dict of attributes with errors
+        :rtype: `dictionary` {attribute_name:"error message"}
+        """
         tmp_err_list = {}   #temp dict for compiling errors
 
         for att, val in self.__dict__.items():  #loop through all attributes
@@ -233,8 +379,8 @@ class config:
 
         return tmp_err_list
 
-class theme:
-    '''Configuration class for theme configurations (fonts and colors)'''
+class dash_theme:
+    '''Configuration class for theme configurations items like fonts, colors, images, etc.'''
     def __init__(self):
         #-----local Vars
         self.fonts = {}         #dictionary for named font data. Format is {name : font_class}
@@ -251,6 +397,13 @@ class theme:
         self.images_ext_ref = {}
 
     def len(self):
+        """function counts the number of set attributes and returns how many are set. Intended to emulate
+        other python len() functions like len(my_dict) or len(my_tuple). An attribute is considered "set"
+        if the value is not None.
+        
+        :returns: num set attributes
+        :rtype: `int`
+        """
         tmp_count = 0       #temp count of any filled fields
         tmp_count += len(self.fonts)
         tmp_count += len(self.colors)
@@ -259,23 +412,44 @@ class theme:
         return tmp_count
 
     def clear(self):
+        """function clears out all class attributes and sets to None"""
         self.fonts.clear()
         self.colors.clear()
         self.images.clear()
 
     def set_colors(self, passed_colors):
+        """function sets/updates the defined theme color(s) based on the passed dict.
+        
+        :param passed_colors: dict of color(s) to update the theme with
+        :type passed_colors: `dictionary` {color_name:#HEX_VAL}
+        """
         self.colors.update(passed_colors)               #update theme colors
 
     def set_fonts(self, passed_fonts):
+        """function sets/updates the defined theme font(s) based on the passed dict.
+        
+        :param passed_fonts: dict of font(s) to update the theme with
+        :type passed_fonts: custom defined `font` class {font_name:`font class`}
+        """
         for f in passed_fonts:                          #cycle through all passed fonts
             self.fonts.update({f.font_name:f})          #update theme font data
 
     def set_imgs(self, passed_img):
+        """function sets/updates the defined theme images(s) based on the passed dict.
+        
+        :param passed_img: dict of images(s) to update the theme with
+        :type passed_img: `dictionary` {img_name:`absolute_filepath`}
+        """
         for k,v in passed_img.items():
             self.images.update({k : v})                 #update theme image data
 
     def set_alert_colors(self, passed_colors):
-        """function sets any of the passed alert colors"""
+        """function sets the colors used in limit warnings (like the warning and/or danger limits). Function
+        also updates external color refs for the assigned colors.
+        
+        :param passed_colors: dict of color key values to update
+        :type passed_colors: `dictionary` {color_name:#HEX_VAL}
+        """
         #--convert passed color names to uppercase. Allows for use with XML and editor attributes
         passed_colors = {k.upper(): v for k, v in passed_colors.items()}
 
@@ -290,6 +464,18 @@ class theme:
         self.upd_ext_refs('alert_DNGR', {'COLORS':self.alert_dngr})
 
     def upd_ext_refs(self, ele_name, ext_refs):
+        """function updates the external theme refs for theme objects. As a reminder, these are the
+        external named objects that use one of the defined theme values. For example, if a static label
+        uses a color named "FRGND", then the colors_ext_ref dict should have that static label's name 
+        included associated with color "FRGND". The self.colors_ext_ref entry would look like {`label_name`:`FRGND`}
+        NOTE: the actual tkinter reference isn't needed for these objects. The user-assigned name is actually
+        much more helpful when generating error messages.
+
+        :param ele_name: element name using the external reference
+        :type ele_name: `string`
+        :param ext_refs: dict of theme references to update
+        :type ext_refs: `dictionary` {theme_object:theme_object_ref_name}  
+        """
         if ext_refs is not None:
             for k, v in ext_refs.items():   #cycle through the passed dict of used refs
                 if k == 'COLORS': self.colors_ext_ref.update({ele_name: v})     #update colors external refs
@@ -298,14 +484,22 @@ class theme:
 
     def del_ext_refs(self, ele_name):
         """function removes the named element from any external ref dicts. Typically performed when deleting
-        an object in the editor"""
+        an object in the editor
+        
+        :param ele_name: element name using the external reference
+        :type ele_name: `string`
+        """
         self.colors_ext_ref.pop(ele_name,None)
         self.fonts_ext_ref.pop(ele_name,None)
         self.images_ext_ref.pop(ele_name,None)
 
     def chk_ref_colors(self, clr_name):
         """function checks the external color references dict and returns a list of the named objects that
-        reference that color. If color is not referenced a blank tuple is returned"""
+        reference that color. If color is not referenced a blank tuple is returned
+        
+        :param clr_name: theme definition - named color
+        :type clr_name: `string`
+        """
         clr_ref_names = ()      #temp ref for the list of elements that reference a color name
         for k, v in self.colors_ext_ref.items():        #cycle through all the external refs
             if clr_name in v: clr_ref_names += (k,)     #if an external ref uses the color, append to the output
@@ -313,7 +507,11 @@ class theme:
     
     def chk_ref_fonts(self, fnt_name):
         """function checks the external font references dict and returns a list of the named objects that
-        reference that font. If font is not referenced a blank tuple is returned"""
+        reference that font. If font is not referenced a blank tuple is returned
+        
+        :param fnt_name: theme definition - named font
+        :type fnt_name: `string`
+        """
         fnt_ref_names = ()      #temp ref for the list of elements that reference a font name
         for k, v in self.fonts_ext_ref.items():         #cycle through all the external refs
             if fnt_name in v: fnt_ref_names += (k,)     #if an external ref uses the font, append to the output
@@ -321,13 +519,26 @@ class theme:
     
     def chk_ref_imgs(self, img_name):
         """function checks the external font references dict and returns a list of the named objects that
-        reference that font. If font is not referenced a blank tuple is returned"""
+        reference that font. If font is not referenced a blank tuple is returned
+        
+        :param img_name: theme definition - named image
+        :type img_name: `string`
+        """
         img_ref_names = ()      #temp ref for the list of elements that reference an image name
         for k, v in self.images_ext_ref.items():        #cycle through all the external refs
             if img_name in v: img_ref_names += (k,)     #if an external ref uses the image, append to the output
         return img_ref_names    #return the list of elements that use the named image
 
     def XML_dashCFG_checkErrs(self):
+        """function checks the required class attributes to see if they are set and if the set value is
+        a correct format and/or reference. If it is not set, or the value is not correct for the configuration,
+        then the attribute name, and an error message are added to the temporary error dict. Once complete
+        this error dict is passed to the custom warning window message to indicate where in a dash configuration
+        there may be issues.
+        
+        :returns: dict of attributes with errors
+        :rtype: `dictionary` {attribute_name:"error message"}
+        """
         tmp_err_list = {}   #temp dict for compiling errors
         for k,v, in self.colors.items():
             valid_color_pattern = r"^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"    #string to match hex color codes
@@ -367,8 +578,9 @@ class theme:
         elif img_name in self.images: return True
         else: return False   
 
-class font:
+class dash_font:
     def __init__(self, font_name, **kwargs):
+        """Configuration class for theme fonts"""
         kwargs = {k.upper(): v for k, v in kwargs.items()}  #convert kwarg names to uppercase. Allows for use with XML and editor attributes
         self.font_name = font_name
         self.typeface = kwargs.get('TYPEFACE', 'Helvetica') #font typeface
@@ -389,6 +601,8 @@ class font:
         self.fields_dashCFG = ('fnt_tup')
 
     def build_font_tpl(self):
+        """function builds an appropriate font tuple that is typical of the format
+        used in various tkinter inputs. The tupple is then stored in a class attribute."""
         #tuple format is (family, size, weight, slant)
         self.fnt_tup = (self.typeface,
                         str(self.point),
@@ -396,6 +610,15 @@ class font:
                         ('italic' if self.bold else 'roman'))
 
     def XML_dashCFG_checkErrs(self):
+        """function checks the required class attributes to see if they are set and if the set value is
+        a correct format and/or reference. If it is not set, or the value is not correct for the configuration,
+        then the attribute name, and an error message are added to the temporary error dict. Once complete
+        this error dict is passed to the custom warning window message to indicate where in a dash configuration
+        there may be issues.
+        
+        :returns: dict of attributes with errors
+        :rtype: `dictionary` {attribute_name:"error message"}
+        """
         errs = False
         fnt_dict = {'family': self.fnt_tup[0],
                          'size': self.fnt_tup[1],
@@ -439,6 +662,13 @@ class CAN_core:
         self.CAN_CH_ext_ref = {}
     
     def len(self):
+        """function counts the number of set attributes and returns how many are set. Intended to emulate
+        other python len() functions like len(my_dict) or len(my_tuple). An attribute is considered "set"
+        if the value is not None.
+        
+        :returns: num set attributes
+        :rtype: `int`
+        """
         tmp_count = 0   #temp count of any filled fields
         if self.base_PID is not None: tmp_count += 1
         if self.rx_filter is True: tmp_count += 1
@@ -446,13 +676,14 @@ class CAN_core:
         return tmp_count
     
     def clear(self):
+        """function clears out all class attributes and sets to None"""
         self.data_ch.clear()
         self.base_PID = None
         self.rx_filter = None
     
     def set_CAN_ch(self, passed_ch):
-        """updates the data_ch dictionary of stored chan channles
-        with the passed `CAN_ch` class object
+        """function updates the data_ch dictionary of stored chan channles with the passed `CAN_ch` class object.
+        This is typically used when updating configs but also is useful when first storing/defining new configs.
 
         :param passed_ch: can channel data class
         :type passed_ch: `CAN_ch` class
@@ -461,26 +692,53 @@ class CAN_core:
             self.data_ch.update({ch.name : ch})             #add or update CANch data
     
     def upd_ext_refs(self, ele_name, ext_refs):
-        """function appends passed element and the named reference(s) to the external reference dictionary. This
-        is used to condition deletions of definitions that are used somewhere in the dash configuration."""
+        """function updates the external theme refs for theme objects. As a reminder, these are the
+        external named objects that use one of the defined theme values. For example, if a data label
+        uses a CAN channel named "RPM", then the CAN_CH_ext_ref dict should have that data label's name 
+        included associated with CAN_ch "RPM". The self.CAN_CH_ext_ref entry would look like {`label_name`:`RPM`}
+        NOTE: the actual tkinter reference isn't needed for these objects. The user-assigned name is actually
+        much more helpful when generating error messages.
+
+        :param ele_name: element name using the external reference
+        :type ele_name: `string`
+        :param ext_refs: dict of theme references to update
+        :type ext_refs: `dictionary` {theme_object:theme_object_ref_name}  
+        """
         if ext_refs is not None:
             for k, v in ext_refs.items():
                 if k == 'CAN_CH': self.CAN_CH_ext_ref.update({ele_name:v})  #update CAN_ch external refs
 
     def del_ext_refs(self, ele_name):
         """function removes the named element from any external ref dicts. Typically performed when deleting
-        an object in the editor"""
+        an object in the editor
+        
+        :param ele_name: element name using the external reference
+        :type ele_name: `string`
+        """
         self.CAN_CH_ext_ref.pop(ele_name,None)
 
     def chk_ref_CANch(self, ch_name):
         """function checks the external CAN channel references dict and returns a list of the named objects that
-        reference that CAN channel. If a CAN channel is not referenced, a blank tuple is returned"""
+        reference that CAN channel. If a CAN channel is not referenced, a blank tuple is returned
+
+        :param clr_name: theme definition - named color
+        :type clr_name: `string`
+        """
         ch_ref_names = ()      #temp ref for the list of elements that reference a CAN channel name
         for k, v in self.CAN_CH_ext_ref.items():        #cycle through all the external refs
             if ch_name in v: ch_ref_names += (k,)       #if an external ref uses the CAN channel, append to the output
         return ch_ref_names    #return the list of elements that use the named CAN channel
     
     def XML_dashCFG_checkErrs(self):
+        """function checks the required class attributes to see if they are set and if the set value is
+        a correct format and/or reference. If it is not set, or the value is not correct for the configuration,
+        then the attribute name, and an error message are added to the temporary error dict. Once complete
+        this error dict is passed to the custom warning window message to indicate where in a dash configuration
+        there may be issues.
+        
+        :returns: dict of attributes with errors
+        :rtype: `dictionary` {attribute_name:"error message"}
+        """
         tmp_err_list = {}   #temp dict for compiling errors
 
         if self.base_PID is None or self.base_PID == '': tmp_err_list.update({'Base_PID':'No base PID is defined and is required'})
@@ -492,39 +750,20 @@ class CAN_core:
         return tmp_err_list
 
     def chk_exist_CANch(self, ch_name):
-        """function checks if CAN data channel is defined in theme dictionary. Returns true if it is"""
+        """function checks if CAN data channel is currently defined
+        
+        :param ch_name: defined name for can channel
+        :type ch_name: `string`
+        :returns: can channel name is defined
+        :rtype: `boolean` - TRUE if channel is defined
+        """
         if ch_name is None: return False
         elif ch_name in self.data_ch: return True
         else: return False   
 
 class CAN_ch:
     def __init__(self, **kwargs):
-        """The CAN data channel class that contains parameters for processing
-        inputs from a CAN PID
-
-        :param name: channel name
-        :type name: char
-        :param PID: CAN data PID
-        :type PID: integer
-        :param ext: extended CAN frame
-        :type ext: boolean
-        :param dlc: expected number of frames
-        :type dlc: integer
-        :param rem_req: PID requires remote request
-        :type rem_req: boolean
-        :param req_freq: frequency for remote request frame
-        :type req_freq: integer - in milliseconds
-        :param calc_frames: frames used to calculate decimal value
-        :type calc_frames: integer list
-        :param calc_scalar: scalar to apply after multiplying when calculating value
-        :type calc_scalar: float
-        :param calc_offset: decimal offset when calculating value
-        :type calc_offset: signed float or integer
-        :param RX_data: raw RX'd data frame
-        :type RX_data: integer list
-        :param dec_val: converted value from the RX'd frames
-        :type dec_val: integer or float
-        """
+        """The CAN data channel class that contains parameters for processing inputs from a CAN PID"""
         kwargs = {k.upper(): v for k, v in kwargs.items()}      #convert kwarg names to uppercase. Allows for use with XML and editor attributes
         #-----control params
         self.name = kwargs.get('NAME', None)                    #channel name
@@ -549,6 +788,15 @@ class CAN_ch:
         self.fields_dashCFG = self.fields_editorCFG
     
     def XML_dashCFG_checkErrs(self):
+        """function checks the required class attributes to see if they are set and if the set value is
+        a correct format and/or reference. If it is not set, or the value is not correct for the configuration,
+        then the attribute name, and an error message are added to the temporary error dict. Once complete
+        this error dict is passed to the custom warning window message to indicate where in a dash configuration
+        there may be issues.
+        
+        :returns: dict of attributes with errors
+        :rtype: `dictionary` {attribute_name:"error message"}
+        """
         tmp_err_list = {}   #temp dict for compiling errors
         for attr, val in self.__dict__.items():
             if attr in self.fields_editorCFG:
@@ -558,7 +806,7 @@ class CAN_ch:
                     tmp_err_list.update({self.name +'-'+ attr:'Remote request is enabled but no frequency is defined'})
         return tmp_err_list #return error list
 
-class Page:
+class dash_page:
     '''Configuration class to store page elements and the canvas reference object to edit'''
     def __init__(self, **kwargs):
         kwargs = {k.upper(): v for k, v in kwargs.items()}  #convert kwarg names to uppercase. Allows for use with XML and editor attributes
@@ -587,6 +835,13 @@ class Page:
         self.fields_dashCFG = self.fields_editorCFG
     
     def buildPages_canv(self):
+        """Function creates the canvas object for the page editor. When creating the canvas object
+        where dash elements are placed, it's reference is also stored locally in a class attribute
+        for future use when adding new elements.
+
+        If the current page configuration includes a background image and color, they are also
+        assigned at creation.
+        """
         #--shorthand refs to various config paths - primarily for reading code and var length
         thm = self.master_ref.cfg_theme             #defined themes
         cfg = self.master_ref.cfg_core              #defined core params
@@ -611,8 +866,11 @@ class Page:
         self.upd_page_def_refs()                    #update external refs
     
     def update_page(self):
-        """function updates the page canvas object with any properties in the config class. Additionally updates
-        any of the contained widgets on the page to their current configs"""
+        """function updates the various editor canvas object(s) using their own (class specific) update
+        function so their visual display matches their curent configuraiton data.
+        
+        Additionally, function updates the external_ref dicts for theme references related to the page
+        attributes (IE background color, background image, etc.)"""
         
         for elm in self.Lbl_stc.values(): elm.upd_editor_obj()  #update all static labels
         for elm in self.Lbl_dat.values(): elm.upd_editor_obj()  #update all data labels
@@ -621,11 +879,22 @@ class Page:
         self.upd_page_def_refs()                                #update any page refs
 
     def upd_config(self, kwargs):
-        """function updates configuration values based on the passed kwargs"""
+        """function updates configuration values based on the passed kwargs
+        
+        :param kwargs: page attributes to update
+        :type kwargs: `dict` formatted {kwarg_name:value}
+        """
         self.__dict__.update(kwargs)
     
-    def update_eleCfg(self, passed_labels):
-        for k, v in passed_labels.items():
+    def update_eleCfg(self, passed_eles):
+        """function updates the contained dash element dictionaries based on the dict of passed element(s).
+        The passed dict can consiste of elements of various types and assignment to the appropriate
+        definition is handled here.
+        
+        :param passed_eles: page editor widgets to add or update
+        :type passed_eles: `dict` formatted {element_name:`element class`} - Example of an element class instance would be `Label_Static`
+        """
+        for k, v in passed_eles.items():
             match v:
                 case Label_Static():
                     self.Lbl_stc.update({k:v})   #add or update static label
@@ -637,7 +906,15 @@ class Page:
                     self.Ind_bar.update({k:v})   #add or update bar indicator
 
     def get_eleCfg(self, ele_type, ele_name):
-        """function to return element configuration reference based on type and name"""
+        """function returns the dash element configuration based on the passed type and name.
+        
+        :param ele_type: page editor element type
+        :type ele_type: defined by `DashEle_types`
+        :param ele_name: element's defined name
+        :type ele_name: `string`
+        :returns: page element configuration
+        :rtype: `element_class` - Example of an object class instance would be `Label_Static`
+        """
         ele_cfg = None #element config reference
         if ele_type == DashEle_types['LBL_STAT']: ele_cfg = self.Lbl_stc[ele_name]
         elif ele_type == DashEle_types['LBL_DAT']: ele_cfg = self.Lbl_dat[ele_name]
@@ -647,8 +924,10 @@ class Page:
         return ele_cfg
 
     def upd_page_def_refs(self):
-        """function builds the reference dict to update the core references. For example, if the
-            page uses colors named "FG" and "BG" the output ref_dict would be {'COLORS':(FG,BG)}"""
+        """function builds the reference dict to pass off to external references. For example, if the
+        page uses colors named "FG" and "BG" the output ref_dict would be {'COLORS':(FG,BG)}. This
+        will then ensure the instanced `color` theme class .external_refs dict is updated with the
+        value of {page_name:color_name}"""
         colors = (self.bg_clr,)         #colors used for page
         images = (self.bg_img,)         #images used for page
         ref_dict = {'COLORS':colors,
@@ -656,7 +935,13 @@ class Page:
         upd_definition_refs(self.master_ref, self.name, ref_dict)   #update the core references
     
     def del_element(self, ele_cfg):
-        """fucntion deletes element from page"""
+        """function deletes a passed element from the page. Additionally, when deleting the page element
+        the external references related to that element are also removed.
+        
+        :param ele_cfg: passed element configuration
+        :type ele_cfg: `element_class` - Example of an object class instance would be `Label_Static`
+        """
+
         obj_name = ele_cfg.name                         #object name
         obj_objId = ele_cfg.objID                       #object refID
         obj_padID = getattr(ele_cfg, 'padID', None)     #object background pad ID
@@ -672,13 +957,25 @@ class Page:
             case Indicator_Bar(): self.Ind_bar.pop(obj_name)
     
     def del_page_ext_refs(self):
-        """function deletes all external refs for page elements, in preparation for deleting a page"""
+        """function deletes all external refs for page elements, in preparation for deleting a page. Additionally
+        cleans up any page related external references (like background color and image)"""
+
+        del_definition_refs(self.master_ref, self.name) #page references
         for stat in self.Lbl_stc.keys(): del_definition_refs(self.master_ref, stat) #static labels
         for dat in self.Lbl_stc.keys(): del_definition_refs(self.master_ref, dat) #data labels
         for blt in self.Lbl_stc.keys(): del_definition_refs(self.master_ref, blt) #bullet indicators
         for bar in self.Lbl_stc.keys(): del_definition_refs(self.master_ref, bar) #bar indicators
     
     def XML_dashCFG_checkErrs(self):
+        """function checks the required class attributes to see if they are set and if the set value is
+        a correct format and/or reference. If it is not set, or the value is not correct for the configuration,
+        then the attribute name, and an error message are added to the temporary error dict. Once complete
+        this error dict is passed to the custom warning window message to indicate where in a dash configuration
+        there may be issues.
+        
+        :returns: dict of attributes with errors
+        :rtype: `dictionary` {attribute_name:"error message"}
+        """
         tmp_err_list = {}   #temp dict for compiling errors
         
         #--check core page properties
@@ -732,11 +1029,21 @@ class Label_Static:
         self.fields_dashCFG = self.fields_editorCFG
     
     def upd_config(self, kwargs):
-        """function updates configuration values based on the passed kwargs"""
+        """function updates element configuration values based on the passed kwargs. This is
+        typically used when instancing a new element.
+        
+        :param kwargs: element attributes to update
+        :type kwargs: `dict` formatted {kwarg_name:value}
+        """
         self.__dict__.update(kwargs)                    #update config
     
     def editor_upd_config(self, passed_args):
-        """function updates the configuration values and editor object"""
+        """function updates the visual state and stored configuration of a dash element based on
+        the passed arguments. This is typically used when changing the element via the editor.
+        
+        :param passed_args: element attributes to update
+        :type passed_args: `dict` formatted {kwarg_name:value}
+        """
         #condition coords: needed for manual editor updating
         x=passed_args.get('x0'); y=passed_args.get('y0')
         if x=='' or x==None: passed_args.update({'x0':0})
@@ -749,13 +1056,30 @@ class Label_Static:
         self.upd_ele_def_refs()                                     #update core references (like fonts, colors, etc)
     
     def upd_editor_obj(self, dx=0, dy=0):
-        """function updates the editor object"""
+        """function updates the canvas object that is in the dash editor. Also handles moving
+        and object via the "delta" or change in position arguments. The remainder of the element
+        properties are taken from the elemtn config.
+        
+        :param dx: (optional) change in x position - Default 0
+        :type dx: `int` in pixels
+        :param dy: (optional) change in y position - Default 0
+        :type dy: `int` in pixels
+        """
         temp_kwargs = self.get_edtr_wgt_kwargs(False)               #get widget kwargs from config args - NO PAD kwargs
         temp_kwargs.pop('x0'); temp_kwargs.pop('y0')                #coords handled separately - pop off
         self.editor_canvObj.itemconfigure(self.objID, temp_kwargs)  #update canvas object props
         self.editor_canvObj.move(self.objID, dx, dy)                #update primary element position
 
     def upd_pad_obj(self):
+        """function updates the background pad object, if set. This includes moving the position when a dash
+        element is moved/updated as well as any color changes.
+        
+        Note, that when changing position, the choice to delete and re-building the canvas element (vs just
+        updating it's properties) was made because when deleting/re-making any change in size of the parent 
+        object is automatically accounted for. The background pad oject is programatically generated based on
+        the size of the parent object. Deleting+re-making allows an easier re-scaling on font change or value
+        change and then also inherently adjusts for position and all the "expected" changes as well.
+        """
         #--shorthand refs for theme items
         thm_clrs = self.master_ref.cfg_theme.colors
         try: pad_clr = thm_clrs[self.clr_bg]    #try to get pad color
@@ -769,16 +1093,21 @@ class Label_Static:
             else:                       #there is a color defined
                 self.padID = elePad_create(self.editor_canvObj, self.objID, pad_clr)    #then create the pad object - with the specified color
         elif self.pad==True and self.padID is not None:             #if there is a valid background pad
-            '''Instead of just updating the color and position, deleting and re-building also accounts
-                for the size change of a parent object. This allows re-scaling on font change or value
-                change and then also inherently adjusts for position and all that good stuff too.'''
             self.padID = elePad_delete(self.editor_canvObj, self.padID)             #then delete pad object
             self.padID = elePad_create(self.editor_canvObj, self.objID, pad_clr)    #and rebuild
         
         self.wgtCtl.upd_refs()  #update control bindings after changes have been made
     
     def get_edtr_wgt_kwargs(self, inc_pad=True):
-        """function gets the kwargs required to create or update the editor canvas object"""
+        """function gets the kwargs required to create or update the editor canvas object. Returns a dict of
+        parameters that's typically used to pass to tkinter functions. Optionally can include the background
+        pad argument (not always used).
+        
+        :param inc_pad: (optional) include "background pad" arg in returned dict - Default true
+        :type inc_pad: `bool` - true to include pad parameter
+        :returns: dict of element kwargs
+        :rtype: `dictionary` {element_kwarg_name:value}
+        """
         #--shorthand refs for theme items
         thm_clrs = self.master_ref.cfg_theme.colors
         thm_fnts = self.master_ref.cfg_theme.fonts
@@ -800,8 +1129,12 @@ class Label_Static:
         return out_kwargs   #retun the complete kwarg dict
 
     def upd_ele_def_refs(self):
-        """function builds the reference dict to update the core references. For example, if the
-            element uses colors named "FG" and "BG" the output ref_dict would be {'COLORS':(FG,BG)}"""
+        """function builds the reference dict to update the external refs for core definitions. For example,
+        if the dash element uses colors named "FG" and "BG" the generated ref_dict would be {'COLORS':(FG,BG)}.
+        After creating the ref dict, the external references are updated. In the above example, the "colors"
+        theme defition would have its `external_refs` dict updated to include the entry for this named element
+        against it's used colors.
+        """
         colors = (self.fill, self.clr_bg)   #colors used for element
         fonts = (self.font,)                #fonts used for element
         ref_dict = {'COLORS':colors,
@@ -809,6 +1142,17 @@ class Label_Static:
         upd_definition_refs(self.master_ref, self.name, ref_dict)   #update the core references  
 
     def XML_dashCFG_checkErrs(self, pg_name):
+        """function checks the required class attributes to see if they are set and if the set value is
+        a correct format and/or reference. If it is not set, or the value is not correct for the configuration,
+        then the attribute name, and an error message are added to the temporary error dict. Once complete
+        this error dict is passed to the custom warning window message to indicate where in a dash configuration
+        there may be issues.
+        
+        :param pg_name: the dash page which the element is contained on - makes for a better error message fi needed
+        :type pg_name: `string`
+        :returns: dict of attributes with errors
+        :rtype: `dictionary` {attribute_name:"error message"}
+        """
         tmp_err_list = {}   #temp dict for compiling errors
 
         for attr, val in self.__dict__.items():
@@ -868,11 +1212,21 @@ class Label_Data:
         self.fields_dashCFG = ('x0', 'y0', 'fill', 'font', 'data_ch', 'pad', 'clr_bg', 'warn_en', 'lim_DngrLo', 'lim_WarnLo', 'lim_WarnHi', 'lim_DngrHi')
     
     def upd_config(self, kwargs):
-        """function updates configuration values based on the passed kwargs"""
+        """function updates element configuration values based on the passed kwargs. This is
+        typically used when instancing a new element.
+        
+        :param kwargs: element attributes to update
+        :type kwargs: `dict` formatted {kwarg_name:value}
+        """
         self.__dict__.update(kwargs)
     
     def editor_upd_config(self, passed_args):
-        """function updates the configuration values and editor object"""
+        """function updates the visual state and stored configuration of a dash element based on
+        the passed arguments. This is typically used when changing the element via the editor.
+        
+        :param passed_args: element attributes to update
+        :type passed_args: `dict` formatted {kwarg_name:value}
+        """
         #condition coords: needed for manual editor updating
         x=passed_args.get('x0'); y=passed_args.get('y0')
         if x=='' or x==None: passed_args.update({'x0':0})
@@ -885,13 +1239,30 @@ class Label_Data:
         self.upd_ele_def_refs()                                     #update core references (like fonts, colors, etc)
     
     def upd_editor_obj(self, dx=0, dy=0):
-        """function updates the editor object"""
+        """function updates the canvas object that is in the dash editor. Also handles moving
+        and object via the "delta" or change in position arguments. The remainder of the element
+        properties are taken from the elemtn config.
+        
+        :param dx: (optional) change in x position - Default 0
+        :type dx: `int` in pixels
+        :param dy: (optional) change in y position - Default 0
+        :type dy: `int` in pixels
+        """
         temp_kwargs = self.get_edtr_wgt_kwargs(False)               #get widget kwargs from config args - NO PAD kwargs
         temp_kwargs.pop('x0'); temp_kwargs.pop('y0')                #coords handled separately - pop off
         self.editor_canvObj.itemconfigure(self.objID, temp_kwargs)  #update canvas object props
         self.editor_canvObj.move(self.objID, dx, dy)                #update primary element position
 
     def upd_pad_obj(self):
+        """function updates the background pad object, if set. This includes moving the position when a dash
+        element is moved/updated as well as any color changes.
+        
+        Note, that when changing position, the choice to delete and re-building the canvas element (vs just
+        updating it's properties) was made because when deleting/re-making any change in size of the parent 
+        object is automatically accounted for. The background pad oject is programatically generated based on
+        the size of the parent object. Deleting+re-making allows an easier re-scaling on font change or value
+        change and then also inherently adjusts for position and all the "expected" changes as well.
+        """
         #--shorthand refs for theme items
         thm_clrs = self.master_ref.cfg_theme.colors
         try: pad_clr = thm_clrs[self.clr_bg]    #try to get pad color
@@ -914,7 +1285,15 @@ class Label_Data:
         self.wgtCtl.upd_refs()  #update control bindings after changes have been made
 
     def get_edtr_wgt_kwargs(self, inc_pad=True):
-        """function gets the kwargs required to create or update the editor canvas object"""
+        """function gets the kwargs required to create or update the editor canvas object. Returns a dict of
+        parameters that's typically used to pass to tkinter functions. Optionally can include the background
+        pad argument (not always used).
+        
+        :param inc_pad: (optional) include "background pad" arg in returned dict - Default true
+        :type inc_pad: `bool` - true to include pad parameter
+        :returns: dict of element kwargs
+        :rtype: `dictionary` {element_kwarg_name:value}
+        """
         #--shorthand refs for theme items
         thm_clrs = self.master_ref.cfg_theme.colors
         thm_fnts = self.master_ref.cfg_theme.fonts
@@ -936,8 +1315,12 @@ class Label_Data:
         return out_kwargs   #retun the complete kwarg dict
 
     def upd_ele_def_refs(self):
-        """function builds the reference dict to update the core references. For example, if the
-            element uses colors named "FG" and "BG" the output ref_dict would be {'COLORS':(FG,BG)}"""
+        """function builds the reference dict to update the external refs for core definitions. For example,
+        if the dash element uses colors named "FG" and "BG" the generated ref_dict would be {'COLORS':(FG,BG)}.
+        After creating the ref dict, the external references are updated. In the above example, the "colors"
+        theme defition would have its `external_refs` dict updated to include the entry for this named element
+        against it's used colors.
+        """
         colors = (self.fill, self.clr_bg)   #colors used for element
         fonts = (self.font,)                #fonts used for element
         can_chs = (self.data_ch,)           #CAN channels used for element
@@ -947,6 +1330,17 @@ class Label_Data:
         upd_definition_refs(self.master_ref, self.name, ref_dict)   #update the core references  
 
     def XML_dashCFG_checkErrs(self, pg_name):
+        """function checks the required class attributes to see if they are set and if the set value is
+        a correct format and/or reference. If it is not set, or the value is not correct for the configuration,
+        then the attribute name, and an error message are added to the temporary error dict. Once complete
+        this error dict is passed to the custom warning window message to indicate where in a dash configuration
+        there may be issues.
+        
+        :param pg_name: the dash page which the element is contained on - makes for a better error message fi needed
+        :type pg_name: `string`
+        :returns: dict of attributes with errors
+        :rtype: `dictionary` {attribute_name:"error message"}
+        """
         tmp_err_list = {}   #temp dict for compiling errors
 
         for attr, val in self.__dict__.items():
@@ -1020,11 +1414,21 @@ class Indicator_Bullet:
         self.fields_dashCFG = self.fields_editorCFG
     
     def upd_config(self, kwargs):
-        """function updates configuration values based on the passed kwargs"""
+        """function updates element configuration values based on the passed kwargs. This is
+        typically used when instancing a new element.
+        
+        :param kwargs: element attributes to update
+        :type kwargs: `dict` formatted {kwarg_name:value}
+        """
         self.__dict__.update(kwargs)
     
     def editor_upd_config(self, passed_args):
-        """function updates the configuration values and editor object"""
+        """function updates the visual state and stored configuration of a dash element based on
+        the passed arguments. This is typically used when changing the element via the editor.
+        
+        :param passed_args: element attributes to update
+        :type passed_args: `dict` formatted {kwarg_name:value}
+        """
         #condition coords: needed for manual editor updating
         x=passed_args.get('x0'); y=passed_args.get('y0'); sz = passed_args.get('size')
         if x=='' or x==None: passed_args.update({'x0':0})
@@ -1036,7 +1440,15 @@ class Indicator_Bullet:
         self.upd_ele_def_refs()                     #update core references (like fonts, colors, etc)
     
     def upd_editor_obj(self):
-        """function updates the editor object"""
+        """function updates the canvas object that is in the dash editor. Also handles moving
+        and object via the "delta" or change in position arguments. The remainder of the element
+        properties are taken from the elemtn config.
+        
+        :param dx: (optional) change in x position - Default 0
+        :type dx: `int` in pixels
+        :param dy: (optional) change in y position - Default 0
+        :type dy: `int` in pixels
+        """
         temp_kwargs = self.get_edtr_wgt_kwargs()    #get widget kwargs from config args
         x0 = temp_kwargs.pop('x0'); y0 = temp_kwargs.pop('y0')      #pop off coords/size
         x1 = temp_kwargs.pop('x1'); y1 = temp_kwargs.pop('y1')
@@ -1044,7 +1456,15 @@ class Indicator_Bullet:
         self.editor_canvObj.coords(self.objID, x0, y0, x1, y1)      #update position/size
 
     def get_edtr_wgt_kwargs(self):
-        """function gets the kwargs required to create or update the editor canvas object"""
+        """function gets the kwargs required to create or update the editor canvas object. Returns a dict of
+        parameters that's typically used to pass to tkinter functions. Optionally can include the background
+        pad argument (not always used).
+        
+        :param inc_pad: (optional) include "background pad" arg in returned dict - Default true
+        :type inc_pad: `bool` - true to include pad parameter
+        :returns: dict of element kwargs
+        :rtype: `dictionary` {element_kwarg_name:value}
+        """
         #--shorthand refs for theme items
         thm_clrs = self.master_ref.cfg_theme.colors
         
@@ -1059,8 +1479,12 @@ class Indicator_Bullet:
         return out_kwargs   #retun the complete kwarg dict
     
     def upd_ele_def_refs(self):
-        """function builds the reference dict to update the core references. For example, if the
-            element uses colors named "FG" and "BG" the output ref_dict would be {'COLORS':(FG,BG)}"""
+        """function builds the reference dict to update the external refs for core definitions. For example,
+        if the dash element uses colors named "FG" and "BG" the generated ref_dict would be {'COLORS':(FG,BG)}.
+        After creating the ref dict, the external references are updated. In the above example, the "colors"
+        theme defition would have its `external_refs` dict updated to include the entry for this named element
+        against it's used colors.
+        """
         colors = (self.fill, self.outln)    #colors used for element
         can_chs = (self.data_ch,)           #CAN channels used for element
         ref_dict = {'COLORS':colors,
@@ -1068,6 +1492,17 @@ class Indicator_Bullet:
         upd_definition_refs(self.master_ref, self.name, ref_dict)   #update the core references  
 
     def XML_dashCFG_checkErrs(self, pg_name):
+        """function checks the required class attributes to see if they are set and if the set value is
+        a correct format and/or reference. If it is not set, or the value is not correct for the configuration,
+        then the attribute name, and an error message are added to the temporary error dict. Once complete
+        this error dict is passed to the custom warning window message to indicate where in a dash configuration
+        there may be issues.
+        
+        :param pg_name: the dash page which the element is contained on - makes for a better error message fi needed
+        :type pg_name: `string`
+        :returns: dict of attributes with errors
+        :rtype: `dictionary` {attribute_name:"error message"}
+        """
         tmp_err_list = {}   #temp dict for compiling errors
 
         for attr, val in self.__dict__.items():
@@ -1143,11 +1578,21 @@ class Indicator_Bar:
         self.fields_dashCFG = self.fields_editorCFG
     
     def upd_config(self, kwargs):
-        """function updates configuration values based on the passed kwargs"""
+        """function updates element configuration values based on the passed kwargs. This is
+        typically used when instancing a new element.
+        
+        :param kwargs: element attributes to update
+        :type kwargs: `dict` formatted {kwarg_name:value}
+        """
         self.__dict__.update(kwargs)
     
     def editor_upd_config(self, passed_args):
-        """function updates the configuration values and editor object"""
+        """function updates the visual state and stored configuration of a dash element based on
+        the passed arguments. This is typically used when changing the element via the editor.
+        
+        :param passed_args: element attributes to update
+        :type passed_args: `dict` formatted {kwarg_name:value}
+        """
         #condition coords: needed for manual editor updating
         x=passed_args.get('x0'); y=passed_args.get('y0')
         if x=='' or x==None: passed_args.update({'x0':0})
@@ -1158,7 +1603,15 @@ class Indicator_Bar:
         self.upd_ele_def_refs()                     #update core references (like fonts, colors, etc)
     
     def upd_editor_obj(self):
-        """function updates the editor object"""
+        """function updates the canvas object that is in the dash editor. Also handles moving
+        and object via the "delta" or change in position arguments. The remainder of the element
+        properties are taken from the elemtn config.
+        
+        :param dx: (optional) change in x position - Default 0
+        :type dx: `int` in pixels
+        :param dy: (optional) change in y position - Default 0
+        :type dy: `int` in pixels
+        """
         temp_kwargs = self.get_edtr_wgt_kwargs()    #get widget kwargs from config args
         x0 = temp_kwargs.pop('x0'); y0 = temp_kwargs.pop('y0')      #pop off coords/size
         x1 = temp_kwargs.pop('x1'); y1 = temp_kwargs.pop('y1')
@@ -1166,7 +1619,15 @@ class Indicator_Bar:
         self.editor_canvObj.coords(self.objID, x0, y0, x1, y1)      #update position/size
 
     def get_edtr_wgt_kwargs(self):
-        """function gets the kwargs required to create or update the editor canvas object"""
+        """function gets the kwargs required to create or update the editor canvas object. Returns a dict of
+        parameters that's typically used to pass to tkinter functions. Optionally can include the background
+        pad argument (not always used).
+        
+        :param inc_pad: (optional) include "background pad" arg in returned dict - Default true
+        :type inc_pad: `bool` - true to include pad parameter
+        :returns: dict of element kwargs
+        :rtype: `dictionary` {element_kwarg_name:value}
+        """
         #--shorthand refs for theme items
         thm_clrs = self.master_ref.cfg_theme.colors
         
@@ -1181,8 +1642,12 @@ class Indicator_Bar:
         return out_kwargs   #retun the complete kwarg dict
     
     def upd_ele_def_refs(self):
-        """function builds the reference dict to update the core references. For example, if the
-            element uses colors named "FG" and "BG" the output ref_dict would be {'COLORS':(FG,BG)}"""
+        """function builds the reference dict to update the external refs for core definitions. For example,
+        if the dash element uses colors named "FG" and "BG" the generated ref_dict would be {'COLORS':(FG,BG)}.
+        After creating the ref dict, the external references are updated. In the above example, the "colors"
+        theme defition would have its `external_refs` dict updated to include the entry for this named element
+        against it's used colors.
+        """
         colors = (self.fill, self.outln)    #colors used for element
         can_chs = (self.data_ch,)           #CAN channels used for element
         ref_dict = {'COLORS':colors,
@@ -1190,6 +1655,17 @@ class Indicator_Bar:
         upd_definition_refs(self.master_ref, self.name, ref_dict)   #update the core references  
 
     def XML_dashCFG_checkErrs(self, pg_name):
+        """function checks the required class attributes to see if they are set and if the set value is
+        a correct format and/or reference. If it is not set, or the value is not correct for the configuration,
+        then the attribute name, and an error message are added to the temporary error dict. Once complete
+        this error dict is passed to the custom warning window message to indicate where in a dash configuration
+        there may be issues.
+        
+        :param pg_name: the dash page which the element is contained on - makes for a better error message fi needed
+        :type pg_name: `string`
+        :returns: dict of attributes with errors
+        :rtype: `dictionary` {attribute_name:"error message"}
+        """
         tmp_err_list = {}   #temp dict for compiling errors
 
         for attr, val in self.__dict__.items():
@@ -1239,9 +1715,9 @@ class wndw_notify(tk.Toplevel):
         self.resizable(False,False)     #not resizable
 
         #---frames for grouping widgets
-        self.frm_icon = tk.Frame(self); self.frm_icon.grid(row=0, column=0, padx=(20,10))   #frame space for icon
-        self.frm_text = tk.Frame(self); self.frm_text.grid(row=0, column=1, padx=(0,20))                 #frame space for the user text
-        self.frm_ctl = tk.Frame(self); self.frm_ctl.grid(row=1, column=0, columnspan=2, pady=10)     #frame space for control buttons
+        self.frm_icon = tk.Frame(self); self.frm_icon.grid(row=0, column=0, padx=(20,10))           #frame space for icon
+        self.frm_text = tk.Frame(self); self.frm_text.grid(row=0, column=1, padx=(0,20))            #frame space for the user text
+        self.frm_ctl = tk.Frame(self); self.frm_ctl.grid(row=1, column=0, columnspan=2, pady=10)    #frame space for control buttons
         self.grid_columnconfigure(1, weight=1)  #assign the extra weight to column 1 (message text space)
         
         #---local vars for window elements

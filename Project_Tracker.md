@@ -12,10 +12,12 @@ Build Date: 11/17/2025
         + TODO code changes:
             * finish the "gen_dashCFG" function in the "mainwindow" file
             * make the dash config generation code
+* Output package
+    - After the "save dash config" part is done, work on the output package
+    - Make a function to place the dash definition (XML + any needed IMG files) into a zip - named the same as the dash config file + date/time
 * code documentation
     - Update all the functions/methods and include proper text and input attribute/type entires similar to the main CAN channel class
-    - make a user guide word file / PDF and upload to github
-        + also upload to github
+    - make a full user guide word file / PDF and upload to github
 * System Fonts
 		- Find and implement a list of the available fonts for the builder to use with widgets
 
