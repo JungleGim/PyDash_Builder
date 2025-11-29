@@ -1,3 +1,10 @@
+"""
+File:       XML.py
+Function:   This file handles any classes or functions used when handling XML files. This is primarily
+            when reading or creating dash editor config files, or when generating the output dash
+            configuration.
+"""
+
 from .sys import *
 from .com_defs import *
 import xml.etree.ElementTree as ET

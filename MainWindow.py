@@ -1,3 +1,8 @@
+"""
+File:   MainWindow.py
+Function:   This file contains the main application window called when running the application.
+"""
+
 from lib import *
 
 class wndw_Main(tk.Tk):
@@ -132,7 +137,8 @@ class wndw_Main(tk.Tk):
         lbl_frm_properties = tk.Label(self.frm_alt, text="Element Properties", font=font_hdr2)
         lbl_frm_properties.grid(row=0, column=0, padx=10, pady=(10,5))
         self.frm_alt.grid_rowconfigure(1,weight=1)      #let the properties row soak up any extra height
-        self.frm_properties = tk.Frame(self.frm_alt, highlightthickness=dbg_brdr,highlightbackground='black')
+        #self.frm_properties = tk.Frame(self.frm_alt, highlightthickness=dbg_brdr,highlightbackground='black')
+        self.frm_properties = tk.Frame(self.frm_alt)
         self.frm_properties.grid_propagate(False)  #prevent from resizing based on children
         self.frm_properties.grid(row=1, column=0, padx=10, pady=(0,10), sticky=tk.NSEW)
 
@@ -252,17 +258,19 @@ class wndw_Main(tk.Tk):
 
     def gen_dashCFG(self):
         """function generates the output files to save a dash configuration"""
-        if self.gen_dashCFG_check():    #if no errors were found
-            #TODO: generate XML for the dash configuration
-            #TODO: generate total package for dash config (including images)
-            pass
+        if self.gen_dashCFG_check():                    #if no errors were found, make a download package
+            if self.create_dash_definition_package():   #creation of the download package was successful
+                messagebox.showinfo("Success", "Successfully created download package!")
 
     def gen_dashCFG_check(self):
         """function checks the current dash configuration for potential errors. Any identified errors may cause an issue when
         saving the dash editor file for later use, but is primarily intended for identifying errors that would not create a valid
         dash config file to save to the PyDash.
         
-        If any errors are detected, they are displayed for the user to resolve"""
+        If any errors are detected, they are displayed for the user to resolve
+        :returns: configuration status
+        :rtype: `bool` - FALSE if errors are found
+        """
         errors_list = self.gen_dashCFG_VV()     #check for potential errors
         if len(errors_list) != 0:               #error result is not blank, so there are errors
             err_msg = "Error detected in configuration. Please fix the following issues before a dash config can be saved:\n\n"
@@ -276,8 +284,23 @@ class wndw_Main(tk.Tk):
     def gen_dashCFG_VV(self):
         """function checks current config for any errors that would result in an invalid configuration.
         
-        :return error_dict: errors in the format of {'issue_location':'issue description'}"""
+        :returns: any errors identified in the V&V process
+        :rtype: `dictionary` in the format of {'issue_location':'issue description'}
+        """
         return XML_dashCFG_checkErrs(self)  # check for errors and return list of issues
+    
+    def create_dash_definition_package(self):
+        """function compiles the required dash configuration package used for a PyDash
+        
+        :returns: output package status
+        :rtype: `bool` - True if a download package was successfully created
+        """
+
+        #TODO: ask user where they would like to save the output configuration
+        #TODO: generate XML for the dash configuration
+        #TODO: generate total package for dash config (including images)
+        return True
+
 #-----------------------------main loop
 if __name__ == "__main__":
     app = wndw_Main()

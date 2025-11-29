@@ -1,6 +1,15 @@
+"""
+File:       editor_windows.py
+Function:   This file contains the various tkinter class definitions for secondary windows
+            in the application. This is most prominent in the various menu items for editing
+            the configuration definitions, but also includes things like the toplevel window
+            that is displayed when adding a new widget, and other similar "new windows" that
+            suppliment the primary application window
+"""
+
 from .sys import *
-from .com_defs import font, CAN_ch          #needed for adding fonts, CANchannels
-from .com_defs import Page                  #needed for Dash Pages
+from .com_defs import dash_font, CAN_ch     #needed for adding fonts, CANchannels
+from .com_defs import dash_page             #needed for Dash Pages
 from .com_defs import DashEle_types         #needed for element processing
 from .com_defs import Ele_Order             #needed for element ordering in editor
 from .com_defs import Move_Page             #needed for page manipulation
@@ -10,7 +19,6 @@ from .com_defs import tup_str               #needed for deletion error messages
 from .com_defs import elePad_create         #needed for danger/warning color window
 from tkinter import Text, Scrollbar         #needed for help file
 from .com_defs import Label_Static, Label_Data, Indicator_Bullet, Indicator_Bar     #needed for handling properties
-
 
 class wndw_Colors(tk.Toplevel):
     '''Editor window for theme colors'''
@@ -29,6 +37,7 @@ class wndw_Colors(tk.Toplevel):
         self.wait_window()              #stay in this window until updated/closed
 
     def config_window(self):
+        """function loads the various elements of the configuration pop-up window"""
         self.frm_main = tk.Frame(self, highlightthickness=0)
         self.frm_alt = tk.Frame(self, highlightthickness=0)
         self.frm_main.grid(row=0, column=0)
@@ -59,7 +68,11 @@ class wndw_Colors(tk.Toplevel):
         btn_clrDel.grid(row=2, column=0, padx=10, pady=10)
 
     def upd_preview(self, event):
-        """function called when listbox item is clicked to update the preview"""
+        """function called when listbox item is clicked to update the preview
+        
+        :param evnt: the event information about the triggering event.
+        :type evnt: `Event` tkinter object
+        """
         selected_clr = event.widget.curselection()                 #get the selected color
         if selected_clr:
             sel_clr = list(self.colors_ref.keys())[selected_clr[0]]     #selected color key
@@ -67,17 +80,20 @@ class wndw_Colors(tk.Toplevel):
             self.obj_preview.configure(bg=sel_clr_val)                  #update the preview object
 
     def lstbx_colors_upd(self):
+        """function updates the listbox that shows the defined configurations"""
         self.lstbx_colors.delete(0,tk.END)                      #clear any existing entries
         
-        if (self.colors_ref is None): pass                          #no values to populate
+        if (self.colors_ref is None): pass                      #no values to populate
         else:
             for key in self.colors_ref.keys():
                 self.lstbx_colors.insert(tk.END, key)           #populate with current list
     
     def color_add(self):
+        """function calls the configuration editor window for creating a new element, no config is passed"""
         self.color_modify(None)
 
     def color_edit(self):
+        """function calls the configuration editor window for editing an existing element"""
         if(len(self.lstbx_colors.curselection()) == 0):
             messagebox.showwarning("Warning", "No Color Selected. Please select a color to edit.")
         else:
@@ -87,6 +103,16 @@ class wndw_Colors(tk.Toplevel):
             self.color_modify(sel_clr_dict)
 
     def color_modify(self, sel_color):
+        """function opens the configuration editor window for editing definitions. After the config
+        has been modified in another window, it also updates the core definitions and also updates 
+        any instanced elements that reference the definition. For example, if an existing color is
+        modified, the elements in the dash editor that reference (the modified color def) will be
+        updated to display the new color.
+        
+        :param sel_color: a passed color definition to update
+        :type sel_color: `dash_color` definition
+        """
+
         new_color = self.color_props(self, sel_color)
         self.grab_set() #force re-focus on current window
             
@@ -96,6 +122,10 @@ class wndw_Colors(tk.Toplevel):
             updPages(self.master_ref)                   #update all pages with edited property
 
     def color_del(self):
+        """function removes the configuration definition. Additionally, before removing, the external
+        references of the configuration to be removed are checked. If an editor element references
+        the configuration, a warning is displayed and it is not removed."""
+
         if(len(self.lstbx_colors.curselection()) == 0):
             messagebox.showwarning("Warning", "No Color Selected. Please select a color to delete.")
         else:
@@ -111,6 +141,9 @@ class wndw_Colors(tk.Toplevel):
                 messagebox.showwarning("Warning", msg_str)
 
     class color_props(tk.Toplevel):
+        """toplevel window for modifing font configuration definitions. When instancing, if no configuration
+        information is passed, all fields are left blank. If a configuration is passed, the available entry fields
+        are populated with the passed values for modification."""
         def __init__(self, master, passed_color):
             super().__init__(master)
             self.grab_set()                     #force focus
@@ -157,6 +190,11 @@ class wndw_Colors(tk.Toplevel):
             self.wait_window()  #wait in this window until destroyed
         
         def on_save(self):
+            """function is called when the configuration is saved, to set the result dictionary used
+            to update the configuraiton definition. Additionally, when saving, required fields for the
+            definition are checked to ensure they are populated/valid. If they are invalid, then a warning
+            is displayed and the configuration is not allowed to be saved."""
+
             if self.missing_req_fields() :
                 messagebox.showwarning("Warning", "Required fields are missing, cannot save.")
             else:
@@ -164,9 +202,15 @@ class wndw_Colors(tk.Toplevel):
                 self.destroy()
 
         def on_close(self): #make no changes
+            """function is called when the close or exit buttons are selected. No configuraiton is saved."""
             self.destroy()
 
         def missing_req_fields(self):
+            """function checks to ensure that all required fields for the configuration defintion are populated.
+            
+            :returns: required fields are missing status
+            :rtype: `bool` - true if required fields are missing
+            """
             #--create tuple of required fields
             req_fields = (self.color_name.get() or None,)
             req_fields += (self.RGB.get(),)
@@ -175,13 +219,14 @@ class wndw_Colors(tk.Toplevel):
             else: return False
 
         def choose_color(self):
+            """function displays the color chooser dialog for defining the RGB hex values of a color"""
             sel_color = colorchooser.askcolor(title="Select a color")
             if sel_color[1]:
                 self.RGB.set(sel_color[1].upper())          #set RGB hex value
                 self.btn_color.config(bg=self.RGB.get())    #update color indicator to match
 
 class wndw_AlertColors(tk.Toplevel):
-    """Editor window for setting/adjusting the warning colors"""
+    """Editor window for setting/adjusting the alert colors"""
     def __init__(self, master):
         super().__init__(master)
         self.grab_set()                 #force focus
@@ -203,6 +248,7 @@ class wndw_AlertColors(tk.Toplevel):
         self.wait_window()      #wait in this window until destroyed
 
     def config_window(self):
+        """function loads the various elements of the configuration pop-up window"""
         #--frame layout
         self.frm_main = tk.Frame(self, highlightthickness=0)    #main frame with labels and buttons
         self.frm_prvw = tk.Frame(self, highlightthickness=0)    #preview element frame
@@ -247,11 +293,21 @@ class wndw_AlertColors(tk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.on_close)    #Handle window close button
     
     def build_tmp_color_dict(self, clr_name):
+        """function builds a temporary dict of the color name and its value. Effectively a 
+        "color return" picker based on the passed name
+        
+        :param clr_name: color definition name
+        :type clr_name: `string`
+        :returns: dict of the color name and hex value
+        :rtype: `dictionary` in format {color_def_name:#HEX_VAL} 
+        """
         hex_val = self.master_ref.cfg_theme.colors.get(clr_name)
         tmp_clr_dict = {'name':clr_name,'val':hex_val}
         return tmp_clr_dict
 
     def pick_color(self, attrb_name):
+        """function displays a top-level popup containing the currently defined theme colors to select
+        from. It also updates the preview after a color is selected for the associated warning theme object."""
         new_clr = self.theme_color_picker(self)     #display a pop-up with the available theme colors
         self.grab_set()                             #force re-focus on current window
         if new_clr.result is not None:              #if a color was chosen, build the result dict
@@ -260,7 +316,7 @@ class wndw_AlertColors(tk.Toplevel):
         self.upd_preview()                          #update the buttons and preview text
 
     def load_settings(self):
-        """function gets any existing config or sets them to defaults"""
+        """function loads the existing warning color config or sets them to defaults"""
         #--get values from main theme config if not defined, assign defaults
         if not self.theme_ref.colors.get(self.theme_ref.alert_FG, None):    #if the master theme value is not defined, then use a default color for display
             self.alert_FG.clear(); self.alert_FG.update({'name':'deflt_FG','val':clr_dflt_FG})
@@ -273,6 +329,7 @@ class wndw_AlertColors(tk.Toplevel):
         else: self.alert_dngr = self.build_tmp_color_dict(self.theme_ref.alert_dngr)
 
     def upd_preview(self):
+        """function updates the preview window with the currently set warning/danger colors"""
         #--update preview/select buttons
         self.fg_btn.configure(bg=self.alert_FG.get('val'))
         self.warn_btn.configure(bg=self.alert_warn.get('val'))
@@ -285,6 +342,7 @@ class wndw_AlertColors(tk.Toplevel):
         self.canv_prvw.itemconfig(self.prvw_dngr_pad, fill=self.alert_dngr.get('val'))
 
     def on_save(self):
+        """function sets the alert colors in the theme definition on save."""
         #--update the theme config
         self.theme_ref.set_alert_colors({'alert_FG':self.alert_FG.get('name'),
                                          'alert_warn':self.alert_warn.get('name'),
@@ -292,9 +350,11 @@ class wndw_AlertColors(tk.Toplevel):
         self.destroy()
 
     def on_close(self): #make no changes
+        """function is called when the close or exit buttons are selected. No configuraiton is saved."""
         self.destroy()
     
     class theme_color_picker(tk.Toplevel):
+        """top-level window class for choosing from defined colors"""
         def __init__(self, master):
             super().__init__(master)
             self.grab_set()                     #force focus
@@ -309,6 +369,7 @@ class wndw_AlertColors(tk.Toplevel):
             self.wait_window()                  #wait in this window until destroyed
 
         def init_window(self):
+            """function builds the various window elements"""
             #--main frames for elements
             self.frm_main = tk.Frame(self, highlightthickness=0)
             self.frm_alt = tk.Frame(self, highlightthickness=0)
@@ -338,7 +399,7 @@ class wndw_AlertColors(tk.Toplevel):
             self.protocol("WM_DELETE_WINDOW", self.on_close)    #Handle window close button
 
         def upd_preview(self, event):
-            """function called when listbox item is clicked to update the preview"""
+            """function updates the color preview box when a new color from the list is selected"""
             selected_clr = event.widget.curselection()                      #get the selected color index
             if selected_clr:
                 sel_clr = list(self.colors_ref.keys())[selected_clr[0]]     #selected color key
@@ -346,16 +407,20 @@ class wndw_AlertColors(tk.Toplevel):
                 self.obj_preview.configure(bg=sel_clr_val)                  #update the preview object
 
         def lstbx_colors_upd(self):
+            """function populates the listbox of available colors based on the current theme definition"""
             self.lstbx_colors.delete(0,tk.END)                      #clear any existing entries
             for key in self.colors_ref.keys():
-                self.lstbx_colors.insert(tk.END, key)           #populate with current list
+                self.lstbx_colors.insert(tk.END, key)               #populate with current list
         
         def on_save(self):
+            """function is called when the configuration is saved, to set the result dictionary used
+            to update the selected color in the alert definition"""
             selected_clr = self.lstbx_colors.curselection()             #get the selected color index
             self.result = list(self.colors_ref.keys())[selected_clr[0]] #selected color key
             self.destroy()
 
         def on_close(self): #make no changes
+            """function is called when the close or exit buttons are selected. No configuraiton is saved."""
             self.destroy()
 
 class wndw_Fonts(tk.Toplevel):
@@ -375,6 +440,7 @@ class wndw_Fonts(tk.Toplevel):
         self.wait_window()              #stay in this window until updated/closed
 
     def config_window(self):
+        """function loads the various elements of the configuration pop-up window"""
         self.frm_main = tk.Frame(self, highlightthickness=0)
         self.frm_main.grid(row=0, column=0, sticky=tk.NS)
         self.frm_alt = tk.Frame(self, highlightthickness=0)
@@ -405,7 +471,7 @@ class wndw_Fonts(tk.Toplevel):
         btn_fontDel.grid(row=2, column=0, padx=10, pady=10)
 
     def upd_preview(self, event):
-        """function called when listbox item is clicked to update the preview"""
+        """function called when a listbox item is clicked to update the preview"""
         selected_font = event.widget.curselection()                 #get the selected font
         if selected_font:
             sel_font = list(self.fonts_ref.keys())[selected_font[0]]    #and its actual key name
@@ -414,14 +480,17 @@ class wndw_Fonts(tk.Toplevel):
             self.obj_preview.configure(font=preview_font_tuple)         #update the preview object
 
     def lstbx_fonts_upd(self):
+        """function populates the listbox of available config definitions based on the current theme values"""
         self.lstbx_fonts.delete(0,tk.END)           #clear any existing entries
         for key in self.fonts_ref.keys():
             self.lstbx_fonts.insert(tk.END, key)    #populate with current list
 
     def font_add(self):
+        """function calls the config modification window for a new entry."""
         self.font_modify(None)
 
     def font_edit(self):
+        """function calls the config modification window for an existing entry."""
         if(len(self.lstbx_fonts.curselection()) == 0):
             messagebox.showwarning("Warning", "No Font Selected. Please select a font to edit.")
         else:
@@ -430,6 +499,10 @@ class wndw_Fonts(tk.Toplevel):
             self.font_modify(self.fonts_ref.get(sel_font))          #selected font
 
     def font_del(self):
+        """function removes the configuration definition. Additionally, before removing, the external
+        references of the configuration to be removed are checked. If an editor element references
+        the configuration, a warning is displayed and it is not removed."""
+
         if(len(self.lstbx_fonts.curselection()) == 0):
             messagebox.showwarning("Warning", "No Font Selected. Please select a font to delete.")
         else:
@@ -445,6 +518,7 @@ class wndw_Fonts(tk.Toplevel):
                 messagebox.showwarning("Warning", msg_str)
 
     def font_modify(self, sel_font):
+        """function calls the config modification toplevel window"""
         new_font = self.font_props(self, sel_font)
         self.grab_set() #force re-focus on current window  
         if(new_font.result is not None):                        #if a record was added or modified
@@ -453,6 +527,9 @@ class wndw_Fonts(tk.Toplevel):
             updPages(self.master_ref)                           #update all pages with edited property
 
     class font_props(tk.Toplevel):
+        """toplevel window for modifing font configuration definitions. When instancing, if no configuration
+        information is passed, all fields are left blank. If a configuration is passed, the available entry fields
+        are populated with the passed values for modification."""
         def __init__(self, master, passed_font):
             super().__init__(master)
             self.grab_set()                     #force focus
@@ -519,6 +596,11 @@ class wndw_Fonts(tk.Toplevel):
             self.wait_window()  #wait in this window until destroyed
 
         def on_save(self):
+            """function is called when the configuration is saved, to set the result dictionary used
+            to update the configuraiton definition. Additionally, when saving, required fields for the
+            definition are checked to ensure they are populated/valid. If they are invalid, then a warning
+            is displayed and the configuration is not allowed to be saved."""
+
             if self.missing_req_fields() :
                 messagebox.showwarning("Warning", "Required fields are missing, cannot save.")
             else:
@@ -530,14 +612,21 @@ class wndw_Fonts(tk.Toplevel):
                                'UNDERLINE' : self.uline_var.get(), 
                                'PAD' : int(self.pad_var.get() or 0)}
                 
-                self.result = font(self.font_name.get(), **font_kwargs) #define font from entered values
+                self.result = dash_font(self.font_name.get(), **font_kwargs) #define font from entered values
 
                 self.destroy()
 
-        def on_close(self): #make no changes
+        def on_close(self):
+            """function is called when the close or exit buttons are selected. No configuraiton is saved."""
             self.destroy()
 
         def missing_req_fields(self):
+            """function checks to ensure that all required fields for the configuration defintion are populated.
+            
+            :returns: required fields are missing status
+            :rtype: `bool` - true if required fields are missing
+            """
+
             #--create tuple of required fields
             req_fields = (self.font_name.get() or None,)
             req_fields += (self.font_sz.get() or None,)
@@ -564,6 +653,7 @@ class wndw_Imgs(tk.Toplevel):
         self.wait_window()              #stay in this window until updated/closed
 
     def config_window(self):
+        """function loads the various elements of the configuration pop-up window"""
         self.frm_main = tk.Frame(self, highlightthickness=0)
         self.frm_alt = tk.Frame(self, highlightthickness=0)
         self.frm_main.grid(row=0, column=0)
@@ -594,7 +684,7 @@ class wndw_Imgs(tk.Toplevel):
         btn_clrDel.grid(row=2, column=0, padx=10, pady=10)
 
     def upd_preview(self, event):
-        """function called when listbox item is clicked to update the preview"""
+        """function called when a listbox item is clicked to update the preview"""
         selected_image = event.widget.curselection()                #get the selected image
         if selected_image:
             sel_img = list(self.imgs_ref.keys())[selected_image[0]] #selected image key
@@ -610,6 +700,7 @@ class wndw_Imgs(tk.Toplevel):
             else: self.obj_preview.configure(image=self.prvw_img_blank) #else, blank the preview if not a valid image file
     
     def lstbx_imgs_upd(self):
+        """function populates the listbox of available config definitions based on the current theme values"""
         self.lstbx_imgs.delete(0,tk.END)                        #clear any existing entries
         if (self.imgs_ref is None): pass                        #no values to populate
         else:
@@ -617,9 +708,11 @@ class wndw_Imgs(tk.Toplevel):
                 self.lstbx_imgs.insert(tk.END, key)  #populate with current list
     
     def img_add(self):
+        """function calls the config modification window for a new entry."""
         self.img_modify(None)
 
     def img_edit(self):
+        """function calls the config modification window for an existing entry."""
         if(len(self.lstbx_imgs.curselection()) == 0):
             messagebox.showwarning("Warning", "No Image Selected. Please select an image to edit.")
         else:
@@ -629,6 +722,7 @@ class wndw_Imgs(tk.Toplevel):
             self.img_modify(sel_img_dict)
 
     def img_modify(self, sel_img):
+        """function calls the config modification toplevel window"""
         new_img = self.img_props(self, sel_img)
         self.grab_set() #force re-focus on current window
             
@@ -638,6 +732,10 @@ class wndw_Imgs(tk.Toplevel):
             updPages(self.master_ref)                   #update all pages with edited property
 
     def img_del(self):
+        """function removes the configuration definition. Additionally, before removing, the external
+        references of the configuration to be removed are checked. If an editor element references
+        the configuration, a warning is displayed and it is not removed."""
+
         if(len(self.lstbx_imgs.curselection()) == 0):
             messagebox.showwarning("Warning", "No Image Selected. Please select an image to delete.")
         else:
@@ -653,6 +751,9 @@ class wndw_Imgs(tk.Toplevel):
                 messagebox.showwarning("Warning", msg_str)
 
     class img_props(tk.Toplevel):
+        """toplevel window for modifing font configuration definitions. When instancing, if no configuration
+        information is passed, all fields are left blank. If a configuration is passed, the available entry fields
+        are populated with the passed values for modification."""
         def __init__(self, master, passed_img):
             super().__init__(master)
             self.grab_set()                     #force focus
@@ -690,20 +791,33 @@ class wndw_Imgs(tk.Toplevel):
                 self.on_close()
         
         def choose_img(self):
+            """function displays the filebrowser window for users to navigate to and select a file"""
             new_imgpath = self.img_browse()                 #open filebrowser to find image
             if new_imgpath: self.img_path.set(new_imgpath)  #if new image was selected, update image path
 
         def on_save(self):
+            """function is called when the configuration is saved, to set the result dictionary used
+            to update the configuraiton definition. Additionally, when saving, required fields for the
+            definition are checked to ensure they are populated/valid. If they are invalid, then a warning
+            is displayed and the configuration is not allowed to be saved."""
+
             if self.missing_req_fields() :
                 messagebox.showwarning("Warning", "Required fields are missing, cannot save.")
             else:
                 self.result = {self.img_name.get(): self.img_path.get()} #set new image value
                 self.destroy()
 
-        def on_close(self): #make no changes
+        def on_close(self):
+            """function is called when the close or exit buttons are selected. No configuraiton is saved."""
             self.destroy()
 
         def missing_req_fields(self):
+            """function checks to ensure that all required fields for the configuration defintion are populated.
+            
+            :returns: required fields are missing status
+            :rtype: `bool` - true if required fields are missing
+            """
+
             #--create tuple of required fields
             req_fields = (self.img_name.get() or None,)
             req_fields += (self.img_path.get() or None,)
@@ -712,6 +826,17 @@ class wndw_Imgs(tk.Toplevel):
             else: return False
 
         def load_passed_info(self):
+            """function is called when populating the configuration edit top window to load an image. This process has
+            some additional checks, when related to external references with a filepath. If no passed information is
+            available (new theme image definition) then no further action is taken. If an image path is passed, the
+            validity of that path (both the path structure and if that iamge exists at the given path) is checked.
+            If an image was not able to be found at the given path, then a status of FALSE is returned. Additionally,
+            in the event that the image was not found (at the passed path) users are also prompted to nvaigate to where
+            the image is located.
+            
+            :returns: status if image was loaded or file exists
+            :rtype: `bool` - True if image was loaded or exists
+            """
             img_loaded = False      #return var if image was loaded or exists
 
             if self.passed_img is not None:                 #if was passed information, then check if exists
@@ -728,10 +853,20 @@ class wndw_Imgs(tk.Toplevel):
                     img_loaded = True
                 else:
                     self.msg_invalid_img(img_path)          #no new image selected or could not find existing
-                    pass
             return img_loaded
         
         def img_prompt_new(self, img_path):
+            """function is called when users are prompted to re-select the image filepath (likely because it was unable
+            to be found at the previous path). Users are however first prompted if they would like to try and find the image.
+            If they do not, the passed image path falls back to its default value of `None` and the calling function is 
+            notified via the return value that no new path was chosen. If users select a new image, the passed image path
+            for the configuration editor is updated and the calling function is notified that a new value was chosen.
+            
+            :param img_path: the filepath where an image was attempted to be found
+            :type img_path: `string`
+            :returns: new image selected status
+            :rtype: `bool` - true if a new image filepathpath was selected
+            """
             new_image = False       #return var if new image was chosen
             browse_result = messagebox.askokcancel("Warning", f"Unable to find file at {img_path}\nDo you want to browse for it?")
             if browse_result:
@@ -744,6 +879,13 @@ class wndw_Imgs(tk.Toplevel):
             return new_image
 
         def img_browse(self, img_refname=None):
+            """function displays the file browser dialog to select an image
+            
+            :param img_refname: (optional) the defined name of the image - used to decorate the file chooser dialoge
+            :type img_refname: `string`
+            :returns: image filepath
+            :rtype: `string`
+            """
             if img_refname is None: title_str = f'Select Image Path'
             else: title_str = f'Select Image Path for {img_refname}'
 
@@ -754,10 +896,25 @@ class wndw_Imgs(tk.Toplevel):
             return new_imgpath
         
         def img_chk_path(self, img_path):
+            """function checks to see if the file exists at a given path
+            
+            :param img_path: the filepath where an image was attempted to be found
+            :type img_path: `string`
+            :returns: file exists at passed path
+            :rtype: `bool` - true if the file was able to be found
+            """
             if os.path.isfile(img_path): return True
             else: return False
 
         def msg_invalid_img(self, img_path):
+            """function handles the cases when an image was not able to be found at the specified path. After
+            notifying the user, the configuration editor window is closed. Note that this is the "last step" in
+            multiple prompts for users to select a new path or update the definition and truly is the case where
+            they just wish to delete the definition.
+            
+            :param img_path: the filepath where an image was attempted to be found
+            :type img_path: `string`
+            """
             messagebox.showwarning("Warning", f"Please either delete image in editor or restore image at \n{img_path}.")
             self.on_close()
 
@@ -1343,7 +1500,7 @@ class wndw_Pages(tk.Toplevel):
                     any additional reference objects so its kind of a "meh" update to do there'''
                 upd_page = None                             #temp ref for page result
                 if self.passed_page is None:                #if creating a new page
-                    upd_page = Page(**pg_kwargs)                        #create new page config
+                    upd_page = dash_page(**pg_kwargs)                        #create new page config
                     upd_page.master_ref = self.master_ref               #set the master reference for in-class functions
                     upd_page.buildPages_canv()                          #create a new canvas obj
                     self.result = {pg_kwargs.get('name') : upd_page}    #set result
@@ -2433,6 +2590,7 @@ class wndw_About(tk.Toplevel):
         self.wait_window()              #stay in this window until updated/closed
 
     def config_window(self):
+        """function loads the various elements of the help pop-up window"""
         tk.Label(self, text="PyDash Desktop Configurator", font=font_hdr1).grid(row=0, column=0, padx=20, pady=(10,0))
         ttk.Separator(self, orient=tk.HORIZONTAL).grid(row=1, column=0, padx=10, sticky=tk.EW)
         tk.Label(self, text=help_versionText, font=font_norm2).grid(row=2, column=0, padx=10, sticky=tk.W)
@@ -2454,7 +2612,15 @@ class wndw_About(tk.Toplevel):
         tk.Button(self,text="  OK  ", command=self.on_close).grid(row=9, column=0, padx=10, pady=(0,10))
 
     def open_Weblink(self, link, event):
+        """function handles opening a URL at the passed path
+        
+        :param link: the web URL to navigate to
+        :type link: `string`
+        :param evnt: (not used) the event information about the triggering event.
+        :type evnt: `Event` tkinter object
+        """
         wb.open_new_tab(link)
 
     def on_close(self):
+        """function is called when the close or exit buttons are selected. No action is taken."""
         self.destroy()

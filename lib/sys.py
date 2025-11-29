@@ -1,3 +1,10 @@
+"""
+File:       sys.py
+Function:   This file handles any common "system wide" (hence the name "sys") common definitions or includes
+            that are used in nearly all files. Good examples of this include common font definitions for
+            the application, verision information, constants used, any any other (for lack of a better term)
+            "global" information that's common to the application.
+"""
 import tkinter as tk
 from tkinter import messagebox, colorchooser, ttk, filedialog
 from tkinter import font as tkFont
@@ -49,6 +56,9 @@ click_delay = 50            #delay in miliseconds to check if left-mouse is stil
 sys_wrap_len = 400          #custom warning box width
 sys_CAN_base_PID = '0x9A'   #base CAN PID default
 
-#---some temp crap that will eventually go away
+#---DEBUG: temp values for helping show frame borders and other boundaries easily
 dbg_brdr = 2                    #debug/building border thickness for panes
 dbg_brdr_offset = dbg_brdr*2    #offset for dimentions of panes to account for the debug border
+dbg_brdr_clr_rd = 'red'         #debug/building border color
+dbg_brdr_clr_bk = 'black'       #debug/building border color
+dbg_brdr_clr_bl = 'blue'        #debug/building border color

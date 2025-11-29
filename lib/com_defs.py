@@ -1,3 +1,13 @@
+"""
+File:       com_defs.py
+Function:   This file handles any "common" function and class definitions (hence the name) that are
+            used in multiple files. Additionally, any common library dicts are included here.
+
+            NOTE: this is different than any system (application) constants which are contained in the
+            sys.py file. An example of the difference is that any application constants are contained in
+            this file, like the "dash element types" (DashEle_types) dict.
+"""
+
 from .sys import *
 
 #-----------------------------common definitions-----------------------------
@@ -1702,7 +1712,7 @@ class Indicator_Bar:
 
         return tmp_err_list
 
-#---------------------misc common classes---------------------
+#---------------------additional common classes---------------------
 class wndw_notify(tk.Toplevel):
     '''custom notification window class. Fixed size window that wraps text and can handle longer messages.
     Based on passed kwargs can be one of several types. Meant to cover instances where the built-in tk 

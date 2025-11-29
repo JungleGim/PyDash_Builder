@@ -1,3 +1,10 @@
+"""
+File:       editor_control.py
+Function:   This file handles any of the primary dash editor window control definitions. If able, 
+            any classes or functions that deal with common editor functions like binding actions,
+            interactions with the editor pane, making new dash elements and placing them, etc. should
+            be contained in this file.
+"""
 from .sys import *
 
 from datetime import datetime, timedelta
