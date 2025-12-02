@@ -518,7 +518,15 @@ class wndw_Fonts(tk.Toplevel):
                 messagebox.showwarning("Warning", msg_str)
 
     def font_modify(self, sel_font):
-        """function calls the config modification toplevel window"""
+        """function opens the configuration editor window for editing definitions. After the config
+        has been modified in another window, it also updates the core definitions and also updates 
+        any instanced elements that reference the definition. For example, if an existing color is
+        modified, the elements in the dash editor that reference (the modified color def) will be
+        updated to display the new color.
+        
+        :param sel_font: a passed font definition to update
+        :type sel_font: `dash_font` definition
+        """
         new_font = self.font_props(self, sel_font)
         self.grab_set() #force re-focus on current window  
         if(new_font.result is not None):                        #if a record was added or modified
@@ -940,6 +948,7 @@ class wndw_Core(tk.Toplevel):
         self.wait_window()              #stay in this window until updated/closed
 
     def config_window(self):
+        """function loads the various elements of the configuration pop-up window"""
         self.frm_main = tk.Frame(self, highlightthickness=0)
         self.frm_main.grid(row=0, column=0)
 
@@ -976,12 +985,14 @@ class wndw_Core(tk.Toplevel):
         btn_cancel.grid(row=0, column=1, padx=10, pady=(0,10))
 
     def load_settings(self):
+        """function loads the currently defined information into the editor window"""
         self.resX.set(self.core_ref.Res_x or dash_xSz)
         self.resY.set(self.core_ref.Res_y or dash_ySz)
         self.PWM.set(self.core_ref.Baklite or 100)
         self.refrsh.set(self.core_ref.Refresh or refrsh_rt)
 
     def on_save(self):
+        """function sets the alert colors in the theme definition on save."""
         if self.missing_req_fields() :                      #missing required fields, show warning
             messagebox.showwarning("Warning", "Required fields are missing, cannot save.")
         else:                                               #otherwise update config
@@ -992,9 +1003,15 @@ class wndw_Core(tk.Toplevel):
             self.destroy()
 
     def on_close(self): #make no changes
+        """function is called when the close or exit buttons are selected. No configuraiton is saved."""
         self.destroy()
 
     def missing_req_fields(self):
+        """function checks to ensure that all required fields for the configuration defintion are populated.
+            
+        :returns: required fields are missing status
+        :rtype: `bool` - true if required fields are missing
+        """
         #--create tuple of required fields
         req_fields = (self.PWM.get() or None,)
 
@@ -1021,6 +1038,7 @@ class wndw_CANcore(tk.Toplevel):
         self.wait_window()              #stay in this window until updated/closed
 
     def config_window(self):
+        """function loads the various elements of the configuration pop-up window"""
         self.frm_main = tk.Frame(self, highlightthickness=0)
         self.frm_main.grid(row=0, column=0)
 
@@ -1043,10 +1061,12 @@ class wndw_CANcore(tk.Toplevel):
         btn_cancel.grid(row=0, column=1, padx=10, pady=(0,10))
 
     def load_settings(self):
+        """function loads the currently defined information into the editor window"""
         self.PID_var.set(self.CAN_ref.base_PID or sys_CAN_base_PID)
         self.rxFilter_var.set(self.CAN_ref.rx_filter or False)
 
     def on_save(self):
+        """function sets the alert colors in the theme definition on save."""
         if self.missing_req_fields() :                      #missing required fields, show warning
             messagebox.showwarning("Warning", "Required fields are missing, cannot save.")
         else:                                               #otherwise update config
@@ -1055,9 +1075,15 @@ class wndw_CANcore(tk.Toplevel):
             self.destroy()
 
     def on_close(self):
+        """function is called when the close or exit buttons are selected. No configuraiton is saved."""
         self.destroy()
 
     def missing_req_fields(self):
+        """function checks to ensure that all required fields for the configuration defintion are populated.
+            
+        :returns: required fields are missing status
+        :rtype: `bool` - true if required fields are missing
+        """
         #--create tuple of required fields
         req_fields = (self.PID_var.get() or None,)
 
@@ -1080,6 +1106,7 @@ class wndw_CANch(tk.Toplevel):
         self.wait_window()              #stay in this window until updated/closed
 
     def config_window(self):
+        """function loads the various elements of the configuration pop-up window"""
         self.frm_main = tk.Frame(self, highlightthickness=0)
         self.frm_alt = tk.Frame(self, highlightthickness=0)
         self.frm_main.grid(row=0, column=0, sticky=tk.EW)
@@ -1097,15 +1124,17 @@ class wndw_CANch(tk.Toplevel):
         btn_chDel.grid(row=2, column=0, padx=10, pady=10)
 
     def lstbx_ch_upd(self):
+        """function populates the listbox of available config definitions based on the current theme values"""
         self.lstbx_ch.delete(0,tk.END)                          #clear any existing entries
         for key, val in self.CAN_ref.data_ch.items():
             self.lstbx_ch.insert(tk.END, f"{key}:{val.PID}")    #populate with current list
 
     def ch_add(self):
+        """function calls the config modification window for a new entry."""
         self.ch_modify(None)
-        pass
 
     def ch_edit(self):
+        """function calls the config modification window for an existing entry."""
         if(len(self.lstbx_ch.curselection()) == 0):
             messagebox.showwarning("Warning", "No CAN channel Selected. Please select a channel to edit.")
         else:
@@ -1114,6 +1143,10 @@ class wndw_CANch(tk.Toplevel):
             self.ch_modify(self.CAN_ref.data_ch.get(sel_ch))            #selected channel
 
     def ch_del(self):
+        """function removes the configuration definition. Additionally, before removing, the external
+        references of the configuration to be removed are checked. If an editor element references
+        the configuration, a warning is displayed and it is not removed."""
+
         if(len(self.lstbx_ch.curselection()) == 0):
             messagebox.showwarning("Warning", "No channel Selected. Please select a channel to delete.")
         else:
@@ -1129,6 +1162,15 @@ class wndw_CANch(tk.Toplevel):
                 messagebox.showwarning("Warning", msg_str)
 
     def ch_modify(self, sel_ch):
+        """function opens the configuration editor window for editing definitions. After the config
+        has been modified in another window, it also updates the core definitions and also updates 
+        any instanced elements that reference the definition. For example, if an existing color is
+        modified, the elements in the dash editor that reference (the modified color def) will be
+        updated to display the new color.
+        
+        :param sel_ch: a passed can channel definition to update
+        :type sel_ch: `CAN_ch` definition
+        """
         new_CANch = self.CANch_props(self, sel_ch)
         self.grab_set() #force re-focus on current window
             
@@ -1137,6 +1179,9 @@ class wndw_CANch(tk.Toplevel):
             self.lstbx_ch_upd()                                 #update listbox
 
     class CANch_props(tk.Toplevel):
+        """toplevel window for modifing CAN channel configuration definitions. When instancing, if no configuration
+        information is passed, all fields are left blank. If a configuration is passed, the available entry fields
+        are populated with the passed values for modification."""
         def __init__(self, master, passed_ch):
             super().__init__(master)
             self.grab_set()                     #force focus
@@ -1242,12 +1287,21 @@ class wndw_CANch(tk.Toplevel):
             self.wait_window()  #wait in this window until destroyed
 
         def RTR_en(self):
+            """function handles auxiliary field setting when the RTR (remote request) field is enabled or disabled.
+            If RTR is disabled, any related fields should be disabled and set to blank. If RTR is enabled, it should
+            enable related fields."""
+
             if self.RTR_var.get():      #RTR is enabled: allow entry to fields
                 self.entry_RTRfreq.config(state='normal')
             else:                       #RTR is disabled: don't allow field entry, clear any entries
                 self.entry_RTRfreq.config(state='disabled'); self.RTRfreq_var.set('')
 
         def on_save(self):
+            """function is called when the configuration is saved, to set the result dictionary used
+            to update the configuraiton definition. Additionally, when saving, required fields for the
+            definition are checked to ensure they are populated/valid. If they are invalid, then a warning
+            is displayed and the configuration is not allowed to be saved."""
+
             if self.missing_req_fields() :
                 messagebox.showwarning("Warning", "Required fields are missing, cannot save.")
             else:
@@ -1266,9 +1320,15 @@ class wndw_CANch(tk.Toplevel):
                 self.destroy()
 
         def on_close(self): #make no changes
+            """function is called when the close or exit buttons are selected. No configuraiton is saved."""
             self.destroy()
 
         def missing_req_fields(self):
+            """function checks to ensure that all required fields for the configuration defintion are populated.
+            
+            :returns: required fields are missing status
+            :rtype: `bool` - true if required fields are missing
+            """
             #--create tuple of required fields
             req_fields = (self.name_var.get() or None,)
             req_fields += (self.PID_var.get() or None,)
@@ -1282,6 +1342,7 @@ class wndw_CANch(tk.Toplevel):
             else: return False
 
 class wndw_Pages(tk.Toplevel):
+    """editor window for dash pages"""
     def __init__(self, master):
         super().__init__(master)
         self.grab_set()                 #force focus
@@ -1297,6 +1358,7 @@ class wndw_Pages(tk.Toplevel):
         self.wait_window()              #stay in this window until updated/closed
 
     def config_window(self):
+        """function loads the various elements of the configuration pop-up window"""
         self.frm_main = tk.Frame(self, highlightthickness=0)
         self.frm_alt = tk.Frame(self, highlightthickness=0)
         self.frm_main.grid(row=0, column=0)
@@ -1320,14 +1382,17 @@ class wndw_Pages(tk.Toplevel):
         btn_pgDel.grid(row=4, column=0, padx=10, pady=(10,20))
 
     def lstbx_pages_upd(self):
+        """function populates the listbox of available config definitions based on the current theme values"""
         self.lstbx_pages.delete(0,tk.END)               #clear any existing entries
         for key in self.pages_ref.keys():
             self.lstbx_pages.insert(tk.END, f"{key}")   #populate with current list
     
     def page_add(self):
+        """function calls the config modification window for a new entry."""
         self.page_modify(None)
 
     def page_edit(self):
+        """function calls the config modification window for an existing entry."""
         if(len(self.lstbx_pages.curselection()) == 0):
             messagebox.showwarning("Warning", "No Page Selected. Please select a page to edit.")
         else:
@@ -1336,6 +1401,16 @@ class wndw_Pages(tk.Toplevel):
             self.page_modify(self.pages_ref.get(sel_pg))
 
     def page_modify(self, sel_page):
+        """function opens the configuration editor window for editing definitions. After the config
+        has been modified in another window, it also updates the core definitions and also updates 
+        any instanced elements that reference the definition. For example, if an existing color is
+        modified, the elements in the dash editor that reference (the modified color def) will be
+        updated to display the new color.
+        
+        :param sel_page: a passed dash page definition to update
+        :type sel_page: `dash_page` definition
+        """
+
         new_pg = self.page_props(self, sel_page)
         self.grab_set() #force re-focus on current window
             
@@ -1345,6 +1420,10 @@ class wndw_Pages(tk.Toplevel):
         self.master_ref.editr_cntl.cboFrames_upd()  #refresh the main pages combo box as well
 
     def page_del(self):
+        """function removes the configuration definition. Additionally, before removing, the external
+        references of the configuration to be removed are checked. If an editor element references
+        the configuration, a warning is displayed and it is not removed."""
+
         if(len(self.lstbx_pages.curselection()) == 0):
             messagebox.showwarning("Warning", "No Page Selected. Please select a page to delete.")
         else:
@@ -1359,19 +1438,30 @@ class wndw_Pages(tk.Toplevel):
                 self.master_ref.editr_cntl.cboFrames_upd()          #refresh the main pages combo box as well
 
     def page_orderUp(self):
+        """function handles the re-odering of pages in the list box. The currently select page is moved up in
+        the order."""
         if(len(self.lstbx_pages.curselection()) == 0):
             messagebox.showwarning("Warning", "No Page Selected. Please select a page to change order.")
         else:
             self.re_order_pages(Move_Page['UP'])
 
     def page_orderDn(self):
+        """function handles the re-odering of pages in the list box. The currently select page is moved down in
+        the order."""
         if(len(self.lstbx_pages.curselection()) == 0):
             messagebox.showwarning("Warning", "No Page Selected. Please select a page to change order.")
         else:
             self.re_order_pages(Move_Page['DN'])
     
     def re_order_pages(self, move_dir):
-        """function re-orders the defined configuration pages"""
+        """function re-orders the defined configuration pages based on the passed direction. If the direction passed
+        to move the selected page is "up" and it is already first in order, no move is performed. Similarly if the 
+        direction passed to move the selected page is "down" and it is already last in order, no move is performed.
+        
+        :param move_dir: the direction to move the currently selected page
+        :type move_dir: `Move_Page` dict definition
+        """
+
         current_pages = list(self.pages_ref.keys())         #list of the pages
         sel_page_index = self.lstbx_pages.curselection()[0] #selected value, tupple
         num_pages = len(current_pages)                      #get total number of pages
@@ -1393,6 +1483,9 @@ class wndw_Pages(tk.Toplevel):
             self.master_ref.editr_cntl.cboFrames_upd()          #refresh the main pages combo box as well
 
     class page_props(tk.Toplevel):
+        """toplevel window for modifing dash page configuration definitions. When instancing, if no configuration
+        information is passed, all fields are left blank. If a configuration is passed, the available entry fields
+        are populated with the passed values for modification."""
         def __init__(self, prnt, passed_page):
             super().__init__(prnt)
             self.grab_set()                     #force focus
@@ -1480,6 +1573,11 @@ class wndw_Pages(tk.Toplevel):
             self.wait_window()  #wait in this window until destroyed
         
         def on_save(self):
+            """function is called when the configuration is saved, to set the result dictionary used
+            to update the configuraiton definition. Additionally, when saving, required fields for the
+            definition are checked to ensure they are populated/valid. If they are invalid, then a warning
+            is displayed and the configuration is not allowed to be saved."""
+
             if self.missing_req_fields():
                 messagebox.showwarning("Warning", "Required fields are missing, cannot save.")
             else:
@@ -1509,10 +1607,16 @@ class wndw_Pages(tk.Toplevel):
 
                 self.destroy()
 
-        def on_close(self): #make no changes
+        def on_close(self):
+            """function is called when the close or exit buttons are selected. No configuraiton is saved."""
             self.destroy()
 
         def missing_req_fields(self):
+            """function checks to ensure that all required fields for the configuration defintion are populated.
+            
+            :returns: required fields are missing status
+            :rtype: `bool` - true if required fields are missing
+            """
             #--create tuple of required fields
             req_fields = (self.pg_name.get() or None,)
             req_fields += (self.bgClr.get() or None,)
@@ -1522,7 +1626,8 @@ class wndw_Pages(tk.Toplevel):
             else: return False
 
 class wndw_newWidget(tk.Toplevel):
-    '''New window to add new widget'''
+    '''toplevel window to add new widget. When instanced, the generated fiels are based on the passed element type
+    as defined by the `DashEle_types` dict value passed.'''
     def __init__(self, master, ele_typ):
         super().__init__(master)
         self.grab_set()                 #force focus
@@ -1548,6 +1653,7 @@ class wndw_newWidget(tk.Toplevel):
             self.wait_window()              #stay in this window until updated/closed
 
     def config_window(self):
+        """function loads the various elements of the configuration pop-up window"""
         self.frm_main = tk.Frame(self, highlightthickness=0)
         self.frm_main.grid(row=0, column=0, sticky=tk.EW)
         
@@ -1566,13 +1672,19 @@ class wndw_newWidget(tk.Toplevel):
         btn_cancel.grid(row=0, column=1, padx=10, pady=(0,10))
 
     def on_create(self):
+        """function handles the action for creating a new element. Additionally, when creating, the
+        required fields for the new element definition are checked to ensure they are populated/valid. 
+        If they are invalid, then a warning is displayed and the new element is not allowed to be created.
+        """
+
         if self.missing_req_fields():
             messagebox.showwarning("Warning", "Required fields are missing, cannot save.")
         else:
             self.create_element()               #create element widget object
             self.destroy()                      #done creating widget, cloe toplevel window
 
-    def on_cancel(self): #make no changes
+    def on_cancel(self):
+        """function is called when the close or exit buttons are selected. No configuraiton is saved."""
         self.destroy()
 
     '''----build the input elements
@@ -1583,6 +1695,8 @@ class wndw_newWidget(tk.Toplevel):
         #remember that ALL element types need a reference name
     '''
     def config_eles_lbl_stat(self):
+        """function creates the required fields for a static label. Additionally creates the required variables
+        and field requirement values to support element generation."""
         #--reference name
         ref_lbl = tk.Label(self.frm_main, text="Reference Name", font=font_hdr2)
         ref_lbl.grid(row=0, column=0, padx=10, pady=10)
@@ -1634,6 +1748,8 @@ class wndw_newWidget(tk.Toplevel):
         txt_entry.reqd = True #set as a required widget field
 
     def config_eles_lbl_dat(self):
+        """function creates the required fields for a data label. Additionally creates the required variables
+        and field requirement values to support element generation."""
         #--reference name
         ref_lbl = tk.Label(self.frm_main, text="Reference Name", font=font_hdr2)
         ref_lbl.grid(row=0, column=0, padx=10, pady=10)
@@ -1730,6 +1846,8 @@ class wndw_newWidget(tk.Toplevel):
         dngrHI_entry.reqd = False #set as a NR widget field
 
     def config_eles_ind_blt(self):
+        """function creates the required fields for a bullet indicator. Additionally creates the required variables
+        and field requirement values to support element generation."""
         #--reference name
         ref_lbl = tk.Label(self.frm_main, text="Reference Name", font=font_hdr2)
         ref_lbl.grid(row=0, column=0, padx=10, pady=(10,0))
@@ -1825,7 +1943,9 @@ class wndw_newWidget(tk.Toplevel):
         dngrHI_entry.grid(row=11, column=1, padx=10, pady=10)
         dngrHI_entry.reqd = False #set as a NR widget field
 
-    def config_eles_ind_bar(self):        
+    def config_eles_ind_bar(self):
+        """function creates the required fields for a bar indicator. Additionally creates the required variables
+        and field requirement values to support element generation."""
         #--reference name
         ref_lbl = tk.Label(self.frm_main, text="Reference Name", font=font_hdr2)
         ref_lbl.grid(row=0, column=0, padx=10, pady=10)
@@ -1930,6 +2050,10 @@ class wndw_newWidget(tk.Toplevel):
         dngrHI_entry.reqd = False #set as a required widget field
 
     def limits_en(self):
+        """function handles auxiliary field setting when the "warning enable" field is enabled or disabled.
+        If limits are disabled, any related fields should be disabled and set to blank. If limits are enabled, it should
+        enable related fields."""
+
         if self.chk_warn.value.get():   #warn/danger is enabled: allow entry to fields and mark as required fields
             self.dngrLO_entry.config(state='normal'); self.dngrLO_entry.reqd = True
             self.warnLO_entry.config(state='normal'); self.warnLO_entry.reqd = True
@@ -1945,6 +2069,10 @@ class wndw_newWidget(tk.Toplevel):
             self.warnHI_entry.reqd = False; self.dngrHI_entry.reqd = False
 
     def pad_en(self):
+        """function handles auxiliary field setting when the "background pad" field is enabled or disabled.
+        If padding is disabled, any related fields should be disabled and set to blank. If padding is enabled, it should
+        enable related fields."""
+
         if self.chk_pad.value.get():            #background pad is enabled
             self.cbo_bg.config(state='normal')      #allow selection of a color
             self.cbo_bg.reqd = True                 #set BG color to a required field
@@ -1955,7 +2083,11 @@ class wndw_newWidget(tk.Toplevel):
             self.cbo_bg.value.set('')               #and clear out the current value
 
     def missing_req_fields(self):
-        '''function to check if all required entry widgets have an appropriate value'''
+        """function checks to ensure that all required fields for the configuration defintion are populated.
+        
+        :returns: required fields are missing status
+        :rtype: `bool` - true if required fields are missing
+        """
         req_fields = () #temp tupple for required fields
         for widg in self.frm_main.winfo_children():         #cycle through the entry frame widgets
             if getattr(widg, 'reqd',False):                 #if frame widget has a 'requried' attached AND its TRUE, then it's a required element
@@ -1967,7 +2099,10 @@ class wndw_newWidget(tk.Toplevel):
         else: return False
     
     def create_element(self):
-        '''function to cycle through all entry widgets and build the widget kwarg dict'''
+        """function cycles through all user entry widgets and builds the widget kwarg dict required
+        to create a new dash element.
+        """
+
         for widg in self.frm_main.winfo_children():     #cycle through the entry frame widgets
             if getattr(widg, 'value',False):            #if frame widget has a 'value' attached, then it's an element config input widget
                 self.result_ele_kwargs.update({widg.name: widg.value.get()})    #then add to kwarg dictionary with the name as the key
@@ -1979,6 +2114,9 @@ class vw_EditorWidget_props:
         self.master_ref = master
 
     def get_master_state(self):
+        """function gets the current state of the dash configuration. This is mainly to set local
+        references to the primary dash builder definitions"""
+
         self.current_canv = self.master_ref.editr_cntl.current_canv     #current editing/working canvas
         self.prop_frame = self.master_ref.frm_properties                #editor frame to update 
         self.master_fonts = self.master_ref.cfg_theme.fonts
@@ -1986,20 +2124,29 @@ class vw_EditorWidget_props:
         self.master_CANch = self.master_ref.cfg_CAN.data_ch
 
     def clicked_wgt(self, passed_cfg):
-        """function to update the current wigt config"""
+        """function updates the reference to the clicked dash element. This information is used when
+        populating and updating user inputs in the properties view
+        
+        :param passed_cfg: a passed element configuration
+        :type passed_cfg: an element class instance - like a `Label_Static` class instance
+        """
         self.current_wigtCfg = passed_cfg   #update the current working cfg to the one of the newly clicked widget
         self.get_master_state()             #get the current refs
         self.vw_clearFrame()                #clear and set up new property frame
         self.vw_update()                    #update the view
 
     def vw_clearFrame(self):
-        """clear out the properties frame. chose this method over a sub-frame as this doesn't "flicker" when
-        clearing/loading new values."""
+        """function clears out the properties frame. This method of refreshing was chosen over creating the
+        elements in a sub-frame and then replacing the primary view, as this method doesn't "flicker" 
+        when clearing/loading new values."""
+
         for child in self.prop_frame.winfo_children():
             child.destroy()
 
     def vw_update(self):
-        """function to update the editor view"""
+        """function calls the correct method to update the editor view, based on the currently selected dashe element.
+        The various called functions modify the displayed fields, specific to the dash element type."""
+
         match self.current_wigtCfg:
             case Label_Static(): self.vwPop_lblStat()
             case Label_Data(): self.vwPop_lblDat()
@@ -2007,7 +2154,13 @@ class vw_EditorWidget_props:
             case Indicator_Bar(): self.vwPop_indBar()
         
     def newProps_updWdgt(self, var_name, indx, mode):
-        '''function called when widget props are updated/changed in the properties window'''
+        """function updates a dash element's defitinion when its properties are updated via user input
+        in the properties window.
+        
+        :param var_name: (not used) - variable trace related value
+        :param indx: (not used) - variable trace related value
+        :param mode: (not used) - variable trace related value
+        """
         updKWARGS = {}                                      #temp kwarg dict to build values in
         for widg in self.prop_frame.winfo_children():       #cycle through the frame widgets
             if getattr(widg, 'value',False):                    #if frame widget has a 'value' attached, then it's an element config input widget
@@ -2016,6 +2169,8 @@ class vw_EditorWidget_props:
         self.current_wigtCfg.editor_upd_config(updKWARGS)           #update object config and the editor object
     
     def vwPop_lblStat(self):
+        """function updates the properties pane with the input fields for a static label. Additionally creates
+        the required variables and sets traces for the user inputs to trigger configuration updates."""
         #cfg.name > label name
         lbl_refname = tk.Label(self.prop_frame, text="Reference Name", font=font_hdr2)                  #entry label
         lbl_refname.grid(row=0, column=0, padx=10, pady=(10,0))                                             #place
@@ -2097,6 +2252,8 @@ class vw_EditorWidget_props:
         self.pad_load()     #set the background pad on load
 
     def vwPop_lblDat(self):
+        """function updates the properties pane with the input fields for a data label. Additionally creates
+        the required variables and sets traces for the user inputs to trigger configuration updates."""
         #cfg.name > label name
         lbl_refname = tk.Label(self.prop_frame, text="Reference Name", font=font_hdr2)                  #entry label
         lbl_refname.grid(row=0, column=0, padx=10, pady=(10,0))                                             #place
@@ -2237,6 +2394,8 @@ class vw_EditorWidget_props:
         self.limits_load()  #set the limits fields on load
 
     def vwPop_indBlt(self):
+        """function updates the properties pane with the input fields for a bullet indicator. Additionally creates
+        the required variables and sets traces for the user inputs to trigger configuration updates."""
         #cfg.name > label name
         lbl_refname = tk.Label(self.prop_frame, text="Reference Name", font=font_hdr2)                  #entry label
         lbl_refname.grid(row=0, column=0, padx=10, pady=(10,0))                                             #place
@@ -2378,6 +2537,8 @@ class vw_EditorWidget_props:
         self.limits_load()  #set the limits fields on load
         
     def vwPop_indBar(self):
+        """function updates the properties pane with the input fields for a bar indicator. Additionally creates
+        the required variables and sets traces for the user inputs to trigger configuration updates."""
         #cfg.name > label name
         lbl_refname = tk.Label(self.prop_frame, text="Reference Name", font=font_hdr2)                  #entry label
         lbl_refname.grid(row=0, column=0, padx=10, pady=(10,0))                                             #place
@@ -2539,7 +2700,9 @@ class vw_EditorWidget_props:
         self.limits_load()  #set the limits fields on load
 
     def pad_tog(self):
-        """function handles the enable/disable of the background (pad) color"""
+        """function handles auxiliary field setting when the "background pad" field is enabled or disabled.
+        If padding is disabled, any related fields should be disabled and set to blank. If padding is enabled, it should
+        enable related fields."""
         self.pad_load()                         #load function handles widget state
         if self.chk_pad.value.get():            #background pad is enabled
             self.cbo_bg.value.set("Select Color")   #set a default value of the combobox
@@ -2547,6 +2710,9 @@ class vw_EditorWidget_props:
             self.cbo_bg.value.set('')               #and clear out the current value
     
     def pad_load(self):
+        """function handles auxiliary field setting when the "background pad" field is enabled or disabled.
+        specifically called on first populating the configuration view, this function only enables or disables
+        associated fields."""
         if self.chk_pad.value.get():            #background pad is enabled
             self.cbo_bg.config(state='normal')      #allow selection of a color
             self.cbo_bg.reqd = True                 #set BG color to a required field
@@ -2555,6 +2721,9 @@ class vw_EditorWidget_props:
             self.cbo_bg.reqd = False                #set BG color to a NR field
 
     def limits_tog(self):
+        """function handles auxiliary field setting when the "warning enable" field is enabled or disabled.
+        If limits are disabled, any related fields should be disabled and set to blank. If limits are enabled, it should
+        enable related fields."""
         self.limits_load()              #load function handles widget state
         if self.chk_warn.value.get():   #warn/danger is enabled: allow entry to fields and mark as required fields
             pass
@@ -2565,6 +2734,9 @@ class vw_EditorWidget_props:
             self.entry_DngrHi.value.set('')
 
     def limits_load(self):
+        """function handles auxiliary field setting when the "warning enable" field is enabled or disabled.
+        specifically called on first populating the configuration view, this function only enables or disables
+        associated fields."""
         if self.chk_warn.value.get():   #warn/danger is enabled: allow entry to fields and mark as required fields
             self.entry_DngrLo.config(state='normal'); self.entry_DngrLo.reqd = True
             self.entry_WarnLo.config(state='normal'); self.entry_WarnLo.reqd = True
