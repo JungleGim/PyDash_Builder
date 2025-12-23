@@ -41,8 +41,8 @@ class wndw_Main(tk.Tk):
         menu_file.add_command(label="Save", command=lambda: self.config_save(False))    #save current config XML
         menu_file.add_command(label="Save As", command=lambda: self.config_save(True))  #save current config XML as another name
         menu_file.add_separator()
-        menu_file.add_command(label="Check Config", command=self.gen_dashCFG_check)         #check config for errors before generating dash XML
-        menu_file.add_command(label="Generate Dash Config", command=self.gen_dashCFG)       #generate dash XML file (and also export images)
+        menu_file.add_command(label="Check Config", command=self.cfg_check)             #check config for errors before generating dash XML
+        menu_file.add_command(label="Generate Dash Config", command=self.gen_dashCFG)   #generate dash XML file (and also export images)
         menu_file.add_separator()
         menu_file.add_command(label="Exit", command=self.destroy)
         self.menubar.add_cascade(label="File", menu=menu_file)
@@ -199,6 +199,10 @@ class wndw_Main(tk.Tk):
         self.cfg_CAN.clear(); self.cfg_theme.clear()    #clear out config information
         self.editr_cntl.ResetEditor()                   #and reset the editor window
     
+    def cfg_check(self):
+        if self.gen_dashCFG_check:
+            messagebox.showinfo("Success", "No errors detected!")
+
     def config_load(self):
         """function loads a saved dash config XML file. If a current config is loaded, users are wanred before being
         prompted to browse to the saved dash config file"""
@@ -216,11 +220,13 @@ class wndw_Main(tk.Tk):
             self.editr_cntl.configFile_dir = filedict['dir']
             self.editr_cntl.configFile_name = filedict['name']                                  #update the latest config file name and path
             xmlFile = XML_open(self.editr_cntl.configFile_dir, self.editr_cntl.configFile_name) #open a file at the saved path, return XML element tree obj
-            parseXML(self, xmlFile)                                                             #parse the XML file and load data structs
-            messagebox.showinfo("Success", "Loaded dash config successfully!")                  #let the user know it was loaded
-            self.editr_cntl.buildAllPages()                                                     #build all the pages in the loaded config
-            self.editr_cntl.cboFrames_upd()                                                     #update frame select combo box    
-            self.editr_cntl.gotoEditorCanv(next(iter(self.cfg_pages)))                          #load first page in config into the editor
+            if xmlFile is not None:
+                parseXML(self, xmlFile)                                                             #parse the XML file and load data structs
+                messagebox.showinfo("Success", "Loaded dash config successfully!")                  #let the user know it was loaded
+                self.editr_cntl.buildAllPages()                                                     #build all the pages in the loaded config
+                self.editr_cntl.cboFrames_upd()                                                     #update frame select combo box    
+                self.editr_cntl.gotoEditorCanv(next(iter(self.cfg_pages)))                          #load first page in config into the editor
+            #open error messages handled in XML_open
 
     def config_save(self, saveas=False):
         """function saves the current dash parameters to a config file for later use.
@@ -241,8 +247,8 @@ class wndw_Main(tk.Tk):
             ok_to_save = True   #so it's ok to save the file
 
         if ok_to_save:          #if file save conditions have been met/set 
-            xmlGen = editorXML_gen(self)                                                        #generate editor XML config file
-            XML_save(self.editr_cntl.configFile_dir, self.editr_cntl.configFile_name, xmlGen)   #save editor XML config file
+            editr_xmlGen = editorXML_gen(self,XMLgen_mode['EDTR'])                                  #generate editor XML config file
+            XML_save(self.editr_cntl.configFile_dir, self.editr_cntl.configFile_name, editr_xmlGen) #save editor XML config file
         elif skip_message: pass #if user was previosuly warned, then skip second message
         else: messagebox.showinfo("FYI", "Unable to save dash config.")
         
@@ -255,12 +261,15 @@ class wndw_Main(tk.Tk):
 
         if delete_result or not cfg_exists: self.cfg_clear()            #if no cfg exists or user said it was OK, then clear
         else: messagebox.showinfo("FYI", "Dash config was not cleared") #otherwise do nothing, but give them a reminder
-
+    
     def gen_dashCFG(self):
         """function generates the output files to save a dash configuration"""
         if self.gen_dashCFG_check():                    #if no errors were found, make a download package
             if self.create_dash_definition_package():   #creation of the download package was successful
                 messagebox.showinfo("Success", "Successfully created download package!")
+            else:
+                messagebox.showinfo("FYI", "Configuration package was not created")
+        #error check message handled in gen_dashCFG_check
 
     def gen_dashCFG_check(self):
         """function checks the current dash configuration for potential errors. Any identified errors may cause an issue when
@@ -295,11 +304,11 @@ class wndw_Main(tk.Tk):
         :returns: output package status
         :rtype: `bool` - True if a download package was successfully created
         """
-
-        #TODO: ask user where they would like to save the output configuration
-        #TODO: generate XML for the dash configuration
-        #TODO: generate total package for dash config (including images)
-        return True
+        cfg_save_dir = genDashCFG_fileLoc(self)+'/'     #ask user where they would like to save the output configuration
+        if cfg_save_dir is not None:                    #if its a valid file location, proceed with generation
+            genXML_DashCFG(self, cfg_save_dir)          #generate the output package
+            return True                                 #package was created successfully, return true
+        else: return False                              #if unsuccessful, return false
 
 #-----------------------------main loop
 if __name__ == "__main__":

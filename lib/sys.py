@@ -56,6 +56,11 @@ click_delay = 50            #delay in miliseconds to check if left-mouse is stil
 sys_wrap_len = 400          #custom warning box width
 sys_CAN_base_PID = '0x9A'   #base CAN PID default
 
+#---configuration output constants
+dashCFG_PKGname = 'PyDash_Config'       #zip file name of the output package
+dashCFG_CFGname = 'PyDash_Config.xml'   #xml config file name
+dashCFG_imgDir = 'images'               #output image directory
+
 #---DEBUG: temp values for helping show frame borders and other boundaries easily
 dbg_brdr = 2                    #debug/building border thickness for panes
 dbg_brdr_offset = dbg_brdr*2    #offset for dimentions of panes to account for the debug border

@@ -35,7 +35,11 @@ Popup_types = {'INFO':1,     #generic notification window
                 'WARN':2,     #warning window - same as information with a different symbol
                 'ERROR':3,    #error window - same as information with a differen symbol
                 'YESNO':4,    #notification with a yes/no option
-                'OKCNCL':5}   #notification with a ok/cancel   
+                'OKCNCL':5}   #notification with a ok/cancel
+
+#---xml generation mode
+XMLgen_mode = { 'EDTR': 1,   #editor XML file type
+                'DASH': 2}   #dash configuration file type
 
 #-----------------------------common functions-----------------------------
 def bool_str(val):
@@ -158,7 +162,7 @@ def instance_widget(ele_type, prnt_canv, widg_kwargs):
     widget has a "background pad" rectangle it will also return the ref ID of the background object.
 
     :param ele_type: the dash element type being created
-    :type ele_type: Dict DashEle_types
+    :type ele_type: Dict `DashEle_types`
     :param prnt_canv: parent canvas to make object on
     :type prnt_canv: `Tk.Canvas` class
     :param widg_kwargs: widget creation KWARGs - Will be converted here based on the named objects (for font, color, etc.)
@@ -320,6 +324,66 @@ def del_definition_refs(master_ref, obj_name):
     """
     master_ref.cfg_theme.del_ext_refs(obj_name)
     master_ref.cfg_CAN.del_ext_refs(obj_name)
+
+def file_save_dialogue(file_dialoge_kwargs):
+    """function opens the file picker dialogue to prompt the user for a place to save 
+    a file. Dialogue is configurable based on the passed kwargs. Function takes a dict 
+    of kwargs for the tkinter `save as` dialogue
+    
+    :param file_dialoge_kwargs: dict of kwargs for saveas dialogue
+    :type file_dialoge_kwargs: `kwargs` for `filedialog.asksaveasfile`
+    :returns: two strings with file directory and name
+    :rtype: file_directory_full_path, file_name
+    """
+    
+    filepath = filedialog.asksaveasfile(**file_dialoge_kwargs)  #prompt to get the location and name
+    
+    if filepath:
+        dir = os.path.dirname(filepath.name) + '/'              #get file directory
+        name = os.path.basename(filepath.name)                  #get file name
+        return dir, name                                        #return result
+    else:
+        return None, None
+
+def file_open_dialogue(file_dialoge_kwargs):
+    """function opens the file picker dialogue to prompt the user for a file to
+    open. Dialogue is configurable based on the passed kwargs. Function takes a dict 
+    of kwargs for the tkinter `ask open` dialogue
+    
+    :param file_dialoge_kwargs: dict of kwargs for oepn file dialogue
+    :type file_dialoge_kwargs: `kwargs` for `filedialog.askopenfilename`
+    :returns: two strings with file directory and name
+    :rtype: file_directory_full_path, file_name
+    """
+    
+    filepath = filedialog.askopenfilename(**file_dialoge_kwargs)    #prompt to get the location and name
+    
+    if filepath:
+        dir = os.path.dirname(filepath) + '/'                       #get file directory
+        name = os.path.basename(filepath)                           #get file name
+        return dir, name                                            #return result
+    else:
+        return None, None
+
+def file_dir_dialogue(file_dialoge_kwargs):
+    """function opens the file picker dialogue to prompt the user to select a directory.
+    Dialogue is configurable based on the passed kwargs. Function takes a dict of kwargs 
+    for the tkinter `ask directory` dialogue.
+    
+    :param file_dialoge_kwargs: dict of kwargs for saveas dialogue
+    :type file_dialoge_kwargs: `kwargs` for `filedialog.asksaveasfile`
+    :returns: two strings with file directory and name
+    :rtype: file_directory_full_path, file_name
+    """
+    
+    filepath = filedialog.askdirectory(**file_dialoge_kwargs)   #prompt to get the location and name
+    
+    if filepath:
+        dir = os.path.dirname(filepath) + '/'                   #get file directory
+        name = os.path.basename(filepath)                       #get file name
+        return dir, name                                        #return result
+    else:
+        return None, None
 
 #---------------------configuration classes used in multiple files---------------------
 class dash_config:
@@ -826,8 +890,10 @@ class dash_page:
         self.type = kwargs.get('TYPE', 'GAGUE')             #frame type
         self.bg_clr = kwargs.get('BG_CLR', None)            #named color for background (see theme class)
         self.bg_img = kwargs.get('BG_IMG', None)            #named image for background (see theme class)
-        self.width = kwargs.get('WIDTH', None)
-        self.height = kwargs.get('HEIGHT', None)
+        self.width = kwargs.get('WIDTH', dash_xSz)
+        self.height = kwargs.get('HEIGHT', dash_ySz)
+        if self.width is None: self.width = dash_xSz
+        if self.height is None: self.height = dash_ySz
 
         self.Lbl_stc = {}   #dict of static labels. Format is {'Name' : Label_Static_Class}
         self.Lbl_dat = {}   #dict of data labels. Format is {'Name' : Label_Data_Class}

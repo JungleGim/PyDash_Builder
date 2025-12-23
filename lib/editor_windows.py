@@ -19,6 +19,7 @@ from .com_defs import tup_str               #needed for deletion error messages
 from .com_defs import elePad_create         #needed for danger/warning color window
 from tkinter import Text, Scrollbar         #needed for help file
 from .com_defs import Label_Static, Label_Data, Indicator_Bullet, Indicator_Bar     #needed for handling properties
+from .com_defs import file_open_dialogue
 
 class wndw_Colors(tk.Toplevel):
     '''Editor window for theme colors'''
@@ -897,11 +898,14 @@ class wndw_Imgs(tk.Toplevel):
             if img_refname is None: title_str = f'Select Image Path'
             else: title_str = f'Select Image Path for {img_refname}'
 
-            new_imgpath = filedialog.askopenfilename(defaultextension='.png',
-                                                            initialdir=self.master_ref.editr_cntl.configFile_dir,
-                                                            filetypes=[('PNG','*.png'), ('All Files','*.*')],
-                                                            title=title_str)#prompt to get the location and name
-            return new_imgpath
+            dialogue_opts = { 'defaultextension':'.png',
+                              'initialdir':self.master_ref.editr_cntl.configFile_dir,
+                              'filetypes':[('PNG','*.png'), ('All Files','*.*')],
+                              'title':title_str
+                            }                                       #set the dialogue options
+            file_dir, file_name = file_open_dialogue(dialogue_opts) #get the location and file to open
+            
+            return file_dir+file_name
         
         def img_chk_path(self, img_path):
             """function checks to see if the file exists at a given path
