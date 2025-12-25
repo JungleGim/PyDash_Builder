@@ -6,9 +6,7 @@ Version: 0.0
 Build Date: 11/17/2025
 
 # Global TODO list
-* Make a companion "font installer" method
-    - need to handle HTML links in the custom message pop-up.
-    - I mean, don't NEED to, but in order to nicely put some inline links it would be ideal
+(none)
 						
 # Finalization
 * When all done with first rev

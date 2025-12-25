@@ -63,10 +63,11 @@ dashCFG_imgDir = 'images'               #output image directory
 """These are the fonts that are used in the PyDash. These should be the only fonts used in defining a theme"""
 PyDash_fonts = ['Liberation Sans', 'Liberation Serif', 'Liberation Mono',
                 'Anton', 'Archivo Narrow', 'Lemon', 'Sui Generis',
-			    'Microgramma D Extended', 'dummy font test']
+			    'Microgramma D Extended']
 
 help_fontZip_GITlink = 'https://github.com/JungleGim/PyDash_Builder/blob/2ec372851c0428101ded503dc9f5104ef4e3e72c/Documentation/PyDash_Fonts.zip'
 help_MS_fontInstall_link = 'https://www.microsoft.com/en-us/windows/learning-center/how-to-install-fonts-on-your-pc'
+font_msg_wrap_len = 200         #font warning wrap width
 
 #---DEBUG: temp values for helping show frame borders and other boundaries easily
 dbg_brdr = 2                    #debug/building border thickness for panes

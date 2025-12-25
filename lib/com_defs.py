@@ -1895,34 +1895,121 @@ class wndw_notify(tk.Toplevel):
         #default result is None, so no need to set here
         self.destroy()
 
-def sysCheck_fonts(master_ref):
-    """function checks the current system fonts and informs the user if any required fonts for the
-    PyDash builder to operate are missing"""
-
-    avail_sys_fonts = list(tkFont.families())   #populate list of system fonts
-    missing_fonts = []                          #temp list of missing fonts
-    rslt_msg = None                             #result message
-    msg_dict = {}                               #result message dict to pass to pop-up
+class font_notify(tk.Toplevel):
+    '''custom notification window class, specifically for the font check. is a re-purpose of the
+    "wndw_notify" pop-up. Specifically, so that the inline links to the font archive and how-to
+    webpages could be easily inserted. This is a one-trick pony, that's all.
     
-    for PyDash_font in PyDash_fonts:            #loop through all required fonts
-        if PyDash_font not in avail_sys_fonts: missing_fonts.append(PyDash_font)    #and add to list if they are not installed on the system
+    Maybe could figure out how to modify the existing custom notification but like....eh this was
+    less work.'''
+    def __init__(self, parent, missing_fonts):
+        super().__init__(parent)                #init as a sub-window of the parent
+       
+        #---local vars for window elements
+        self.txt_title = tk.StringVar()         #title bar text
+        self.txt_msg = tk.StringVar()           #message text
 
-    if len(missing_fonts) > 0:                  #if there are any missing fonts, display a message
+        #---build window
+        self.init_common()                      #load common elements
+        #-display message based on if fonts are missing or not
+        if len(missing_fonts) >0: self.init_missingFonts(missing_fonts)
+        else: self.init_ok()
+        self.title(self.txt_title.get())        #update title bar
+        self.bell()                             #add popup/wanring notification sound
+        self.wait_window()                      #wait in this window until destroyed
+
+    def init_missingFonts(self, missing_fonts):
+        """function builds the required messages and additional links/interfaces for when
+        fonts are missing
+        
+        :param missing_fonts: list of missing fonts
+        :type missing_fonts: [font_name, (n_font_name)]
+        """
         rslt_msg = "Required fonts were not found. Please install the following fonts to ensure proper opration of the PyDash Editor:\n\n"
         for indx, f in enumerate(missing_fonts):
             rslt_msg += '['+ f + ']'   #build error message string - add fonts
             if indx != len(missing_fonts)-1: rslt_msg += ', '
+        rslt_msg += '\n'
 
-        rslt_msg += '\n\n'
-        rslt_msg += 'An archive of the required fonts for PyDash can be found HERE\n'
-        rslt_msg += 'Additional information on how to install fonts on a Windows OS can be found HERE'
+        archive_msg = 'An archive of the required fonts for PyDash can be found at the adjacent link'
+        self.archive_text = tk.Label(self.frm_text, text=archive_msg, wraplen=font_msg_wrap_len)
+        self.archive_text.grid(row=1,column=0)
+        archive_link = tk.Label(self.frm_text, text='Required Font Archive', font=font_norm1_hyper, fg='blue', cursor="hand2")
+        archive_link.grid(row=1, column=1, sticky=tk.W)
+        archive_link.bind('<Button-1>', lambda event: self.open_Weblink(help_fontZip_GITlink, event))
 
-        #TODO: add link to help_fontZip_GITlink
-        #TODO: add link to help_MS_fontInstall_link
-        msg_dict = {'type':Popup_types['ERROR'],'title':'Missing Fonts','message':rslt_msg} #build message dict
-    else:
+        MS_install_msg = 'Additional information on how to install fonts on a Windows OS can be found at the adjacent link'
+        self.MS_install_text = tk.Label(self.frm_text, text=MS_install_msg, wraplen=font_msg_wrap_len)
+        self.MS_install_text.grid(row=2,column=0)
+        MS_install_link = tk.Label(self.frm_text, text='MS how-to install fonts', font=font_norm1_hyper, fg='blue', cursor="hand2")
+        MS_install_link.grid(row=2, column=1, sticky=tk.W)
+        MS_install_link.bind('<Button-1>', lambda event: self.open_Weblink(help_MS_fontInstall_link, event))
+
+        self.txt_msg.set(rslt_msg)              #update stringvar for message
+        self.txt_title.set("Missing Fonts")     #update stringvar for window title
+
+    def init_ok(self):
+        """function builds the required messages and additional links/interfaces for when
+        all fonts are found
+        """
         rslt_msg = "Success! All fonts are installed!"
-        msg_dict = {'type':Popup_types['INFO'],'title':'Success','message':rslt_msg} #build message dict
 
-    err_notif_wndw = wndw_notify(master_ref, msg_dict)  #display result message
+        self.txt_msg.set(rslt_msg)              #update stringvar for message
+        self.txt_title.set("Success")           #update stringvar for window title
+
+    def init_common(self):
+        """function loads and displays the common message elements"""
+        #---core window options
+        self.grab_set()                 #force focus on this window
+        self.resizable(False,False)     #not resizable
+
+        #---frames for grouping widgets
+        self.frm_icon = tk.Frame(self); self.frm_icon.grid(row=0, column=0, padx=(20,10))               #frame space for icon
+        self.frm_text = tk.Frame(self); self.frm_text.grid(row=0, column=1, padx=(0,20), pady=(20,0))   #frame space for the user text
+        self.frm_ctl = tk.Frame(self); self.frm_ctl.grid(row=1, column=0, columnspan=2, pady=(10,20))   #frame space for control buttons
+        self.grid_columnconfigure(1, weight=1)  #assign the extra weight to column 1 (message text space)
+
+        #-display icon
+        self.ico = tk.Label(self.frm_icon)
+        self.ico.grid(row=0, column=0, sticky=tk.NSEW)
+        self.ico.config(image="::tk::icons::information")   #information icon
+        #-dispaly text
+        self.message_text = tk.Label(self.frm_text, textvariable=self.txt_msg, wraplength=sys_wrap_len)
+        self.message_text.grid(row=0,column=0, columnspan=2)
+
+        #-user interface options
+        btn_ok = tk.Button(self.frm_ctl, text="OK", command=self.on_close)  #populate the OK window
+        btn_ok.grid(row=0,column=0)
+        self.protocol("WM_DELETE_WINDOW", self.on_close)                    # Handle window close button
+
+    def on_close(self):
+        """function is called when the close or exit buttons are selected. No action is taken."""
+        self.destroy()
+    
+    def open_Weblink(self, link, event):
+        """function handles opening a URL at the passed path
+        
+        :param link: the web URL to navigate to
+        :type link: `string`
+        :param evnt: (not used) the event information about the triggering event.
+        :type evnt: `Event` tkinter object
+        """
+        wb.open_new_tab(link)
+
+def sysCheck_fonts(master_ref):
+    """function checks the current system fonts and informs the user if any required fonts for the
+    PyDash builder to operate are missing
+    
+    :param master_ref: reference back to the main/master window
+    :type master_ref: `tk.window` ref
+    """
+
+    avail_sys_fonts = list(tkFont.families())           #populate list of system fonts
+    missing_fonts = []                                  #temp list of missing fonts
+    
+    for PyDash_font in PyDash_fonts:                    #loop through all required fonts
+        if PyDash_font not in avail_sys_fonts:          #if they are not installed on the system
+            missing_fonts.append(PyDash_font)           #add to list
+
+    font_msg = font_notify(master_ref, missing_fonts)   #display appropriate message
         
