@@ -32,26 +32,31 @@ Additional details on the design considerations, required packages, and key feat
 
 # Project Status
 ## Revlog
-- Rev 0
-	- Build date: TBD
-	- Initial issue for use with PyDash Rev2.0
+- Rev 0.a
+	- Build date: 12/25/2025
+    - Alpha testing initial release
+	- Intended for use with PyDash App Rev2.0
+    - See Project_Tracker.md for current working notes/issues that are WIP
 	
 ## Future Development
 The below is a list of wants/needs for future revisions, listed in no order of importance
 
-* Dash Editor Window - Focus Shift
-		- Implement a mechanic in the element editor window so that if focus is shifted (like clicked away from the current field) and a required value isn't set, a warning/error should be displayed
+* Documentation: App documentation
+    - make a full user guide word file / PDF and upload to github
+    - should explain all the views, fields, and various functions of the application
+* QoL: Dash Editor Window - Focus shift, field validity check
+    - Implement a mechanic in the element editor window so that if focus is shifted (like clicked away from the current field) and a required value isn't set, a warning/error should be displayed
     - For example, if editing a dash element and the "background pad" option is checked and then no color is specified, but the user clicks away to another widget, it should say "hey....you uh...need to specify <thing>"
     - Another example would be that a text value for the the "static text" element shouldn't be allowed to be blank. If a user updated/cleared that value and then attempted to navigate away, a warning/error should be displayed
-* Updated background pad generation
+* Improvement: Updated background pad generation
     - Currently, the "BBox" function is used to generate the dimentions for the label/value background padding. The issues is that the background pad shape can be kinda odd based on the linespace of some fonts. This does appear to be VERY font dependent.
     - For example, the bbox return for "Cascadia Mono" is very large above the text; much larger than the actual font letters. Some other typeface have asymetric above/below line spacing (like cascadia mono). At the same time, the default windows font (Segoe UI Variable Text) has a VERY tight BBOX return (which is great!)
     - See if there's a better way to draw that so that the pad distance around the text is just around the text letters, not the font linespace. Unsure if this is really possible or not.
         + alternatively, since the fonts used in the dash files are going to be limited, maybe make a test "pad preview" program to see which fonts are better/easier/tighter than others. Could use this to find appropriate font families with apprioriate spacing/fitting. Those will ultimately be the fonts chosen to have in the final PyDash load.
-* General code cleanup
+* Improvement: General code cleanup
     - there's more than a few spots where code is a little kledugy and could be improved.
     - For example, I'm not sure that the class <FrmEdit_bind_widget_control> is needed. This was originally used because it's a function common to all dash elements.
-				+ However, for example, when a static or data label has its pad background changed, the chosen method was to delete and then re-create to make it "Easier" for managing the pad. The issue is then that the existing ref to the pad object (in that class instance) doesn't update, so the new "upd_refs" function was added to handle that. Is this really the best way to handle that? Or can I do better?
+        + However, for example, when a static or data label has its pad background changed, the chosen method was to delete and then re-create to make it "Easier" for managing the pad. The issue is then that the existing ref to the pad object (in that class instance) doesn't update, so the new "upd_refs" function was added to handle that. Is this really the best way to handle that? Or can I do better?
         + It just feels like there's maybe a better way to handle that and/or streamline/modularize the code more. 
     - Another example of code cleanup is that in the "page" class, there really doesn't need to be a dict for each element type.
         + In theory, having the separate dicts allows for different elements with the same ref name but like...that's not really a concern in practice. I think chaning to a single "elements" dict would be fine and would arguably streamline a few of the places in the code. Each element would have its own unique key anyway and then the various values (element type class) don't care.
@@ -65,58 +70,93 @@ The below is a list of wants/needs for future revisions, listed in no order of i
     - variable and function naming clarity
         + some of the function/method names are a little convoluted and/or unclear and/or repeated. Make it better
             * for example, "buildPages" in com_defs is just establisting the page base canvas object. Casual reading makes it seem much more than that. Can be better about this.
-* Fixes: editor control class
+* Improvement: editor control class
     - Should try to move as many of the "common" functions here as makes sense
     - ALSO look out for any lengthy functions in the "main window" class that should be here
         + for example, all the gibberish under the "new_element" function in the MainWindow class could/should be in the editor control class. Or at least it feels more appropriate to have it in the editor control class
     - Doing the above will also likely help consolidate code and prevent reppetition
-* Fixes: XML integration
+* Feature Request: XML integration
     - build an "error check" function to validate the XML file being opened.
-				+ the potential concern is that users may have edited the dash configuration save file outside of the program and made typos/errors.
-				+ The intentin of this function would be to validate an XML file being opened for things like:
-						* valid XML file (all tags are closed?)
-						* check to make sure the required major secitons for a dash config are there
-						* make sure the values/required values make sense (like the current "check config" function before saving)
-						* etc.
+        + the potential concern is that users may have edited the dash configuration save file outside of the program and made typos/errors.
+        + The intentin of this function would be to validate an XML file being opened for things like:
+            * valid XML file (all tags are closed?)
+            * check to make sure the required major secitons for a dash config are there
+            * make sure the values/required values make sense (like the current "check config" function before saving)
+            * etc.
         + When complete, report results to user. Should perform this check before opening XML files
-* Fixes: Editor Button Enable/Disable State Handling
+* Improvement: Editor Button Enable/Disable State Handling
     - Editor First Open / Allowed functions / Add element buttons
-        + currently, the "add element" buttons are enabled all the time, but do have a check if there's a page currently defined (so a new element can be added). A more user friendly way to do this would be to have some kind of "lockout" for when the editor doesn't have a valid page selected.
+        + currently, the "add element" buttons are enabled all the time, but do have a check if there's a page currently defined (so a new element can be added).
+        + A more user friendly way to do this would be to have some kind of "lockout" for when the editor doesn't have a valid page selected.
         + The desired fucntionality would be that the "add element" buttons are disabled if there's not a valid page to add them to.
-        + really should click "new" to create a new config first which would "unlock" all the addition of the objects, etc. Its not really a problem except there's no page to add them to.
-        + another good thing maybe would be to add a "check pages" function in the editor_control class so that if there's no currently defined pages, the "add element" buttons are disabled.
+        + another good thing maybe would be to add a "check pages" function in the editor_control class so that if there's no currently defined pages, the "add element" buttons are disabled (even after creating a "new" config)
     - Wiget delete button
         + do something similar to the above for the "delete element" button where it will only be enabled if there's a dash page element selected.
-* Improve custom notification window class
+* Improvement: custom notification window class size/functionality
     - currently works but needs some tweaking to be better
     - make the window vertically resizable up to a certain size, at which point if more space is needed (because of long text) a vertical scroll bar should appear
-* Feature requests
-	- Add a new "analog gauge" dash element
-		+ not 100% sure how this would work yet, but some ideas:
-			* treat as a square (circle) and use a "size" param similar to the existing bullet indicator to scale the gauge
-			* "default" would be a solid background color with the foreground color for the markings
-			* standard shape would be just a circle, but can also provide a "sweep" parameter. Default needle "Sweep" would be like 300* with a 60* wedge centered at the bottom for the gauge display name
-			* Otional gauge background image - should figure out how to "fill" a round object with the image or maybe restrict it to an image format for the gauges? latter would be much easier to implement but onus is on the user then to make their own backgrounds
-			* Optional needle color (default use same as foreground color)
-			* Needle is maybe just a long/thin rectangle?
-			* much like the current "indicator_bar" class, the min/max values would set the bounds of the "sweep" and then the needle position would be relative to the defined min/max values.
-			* would also need "major" and "minor" divisions for the definition to provide gauge tic-marks
-			* would need a new function to handle the drawing of the text
-		+ since all of this is relatively complex (lots of elements) potentially the easiest way to handle this in the editor would be to use a sub-canvas for each analog gauge.
-			* That would keep everything inside of it relative as well and so any "move" commands with click/drag or position updates would just move the chanvas and handling all the individiual gauge element moves wouldn't be needed.
-			* Also may handle the "gauge shape" easier with a mask or something (via PIL library)? Would make the gauge face just a similar background color/object like pages are now. Then chosing a "shape" in the gauge drop-down would change how it's masked. Then users would just need to keep the image as a "square" and keep relative positioning for any like, gauge colors or self-imposed text/labels in mind.
-		+ When done, so much of the above is just "static" w.r.t. the actual dash. The dash editor will need to keep these dynamic for user changes in the editor but the dash doesn't (and shouldn't) need to make it programatically.
-			* A good solution for this in the "gauge definition" would then to make each of those user defined "digital gauges" just static images. The dash then could use the "place image" function similar to any other image to put them on screen
-			* This is already possible with the PIL library using the "ImageGrab" function and would make the downstream dash implemtentation SO much easier.
-			* The additional args in the "gauge" element then would be something like the data channel name, "min/max" values, and "sweep angle min/max" limits to draw the needle where it's supposed to be in the dash. Then all the "update" function for this in the dash would need to be is calculate the "needle" angle based on the current data channel value, min/max value, and min/max sweep limits.
+* Feature request: Add a new "analog gauge" dash element
+    - not 100% sure how this would work yet, but some ideas:
+        + treat as a square (circle) and use a "size" param similar to the existing bullet indicator to scale the gauge
+        + "default" would be a solid background color with the foreground color for the markings
+        + standard shape would be just a circle, but can also provide a "sweep" parameter. Default needle "Sweep" would be like 300* with a 60* wedge centered at the bottom for the gauge display name
+        + Otional gauge background image - should figure out how to "fill" a round object with the image or maybe restrict it to an image format for the gauges? latter would be much easier to implement but onus is on the user then to make their own backgrounds
+        + Optional needle color (default use same as foreground color)
+        + Needle is maybe just a long/thin rectangle?
+        + much like the current "indicator_bar" class, the min/max values would set the bounds of the "sweep" and then the needle position would be relative to the defined min/max values.
+        + would also need "major" and "minor" divisions for the definition to provide gauge tic-marks
+        + would need a new function to handle the drawing of the text
+    - since all of this is relatively complex (lots of elements) potentially the easiest way to handle this in the editor would be to use a sub-canvas for each analog gauge.
+        + That would keep everything inside of it relative as well and so any "move" commands with click/drag or position updates would just move the chanvas and handling all the individiual gauge element moves wouldn't be needed.
+        + Also may handle the "gauge shape" easier with a mask or something (via PIL library)? Would make the gauge face just a similar background color/object like pages are now. Then chosing a "shape" in the gauge drop-down would change how it's masked. Then users would just need to keep the image as a "square" and keep relative positioning for any like, gauge colors or self-imposed text/labels in mind.
+    - When done, so much of the above is just "static" w.r.t. the actual dash. The dash editor will need to keep these dynamic for user changes in the editor but the dash doesn't (and shouldn't) need to make it programatically.
+        + A good solution for this in the "gauge definition" would then to make each of those user defined "digital gauges" just static images. The dash then could use the "place image" function similar to any other image to put them on screen
+        + This is already possible with the PIL library using the "ImageGrab" function and would make the downstream dash implemtentation SO much easier.
+        + The additional args in the "gauge" element then would be something like the data channel name, "min/max" values, and "sweep angle min/max" limits to draw the needle where it's supposed to be in the dash. Then all the "update" function for this in the dash would need to be is calculate the "needle" angle based on the current data channel value, min/max value, and min/max sweep limits.
+* QoL: Make a "copy font" button in the "theme - fonts" menu font definition view
+    - The idea is that a user likes everything about the current font but maybe just wants to change the color, size, or family
+    - Copying an existing font and then updating the desired fields would be much easier than re-defining a whole new font
+* Improvement: In the "font editor" view, update the "preview text" so that it has a wrap width.
+    - This will make the "font preview" a much more fixed width
+    - Maybe do a fixed height too? Would be great to keep this from auto-sizing
+* QOL: Make a "copy element" button for the main editor view
+    - place next to "delete element"
+    - would copy the currently selected element, and display a message like "element <name> copied!
+    - After copying, update text and function to "paste element"
+    - When "pasting", first prompt for a new reference name and then after the user clicks "OK" use the same "element place" type routine like what's used when creating a new element.
+        + should actually be able to juse re-use the "new element" routine or parts from it to make thigns easy.
+- QOL: Add a right-click "context menu" for the main editor view
+    - this would be helpful for several functions with editing. Some ideas:
+        + top of the menu would be "local elements". This would be great if like, one element is stacked (or near) another and the user wants to specify the EXACT element to pick/update
+        + add a separator
+        + Then include some common editing things like the copy/paste/delete options
+* QOL: More editor keyboard shortcuts
+    - Escape Key
+        + should de-select whatever currently selected element is in the editor
+    - Ctl+C
+        + Bind to "copy element"
+    - Ctl+V
+        + Bind to "paste element"
+    - Arrow keys (upd, down, left, right)
+        + make a new "bump" function to move the currently selected element up/down/left/right by 1 pixel
+        + also press/hold then moves continually
+    - Delete key
+        + bind to "delete element"
 
 ## Repository Directory Map
 The following information describes the folders found in the root directory of this repository
-- (folder) App
-	- This is the main application folder
-- (folder) Dev-Testing
-	- This folder contains some of the WIP or simplified applications used to develop the app. Usually the intent is to create smaller, focused elements that can be integrated into the main program later.
+* (Builder_Application) lib
+	- This is the main application folder and contains everything required for the application to function
+* (folder) Dev-Testing
+	- This folder contains any WIP or simplified applications used to develop the app.
+    - Usually the intent is to create smaller, focused elements that can be integrated into the main program later.
 	- This has no direct link to the main application, however is a repository for some of the WIP items
+* (folder) Documentation
+    - Contains any user documentation like the quick-start guide and user guide
+    - (folder) dash_editor_templates
+        + contains some test and example templates
+    - (file) PyDash_Fonts.zip
+        + archive of the required fonts for the application to function correctly
 
 # Requirements
 ## Build Environment

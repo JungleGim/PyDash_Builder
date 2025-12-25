@@ -35,10 +35,10 @@
       </FONT>
     </FONTS>
     <IMAGES>
-      <IMG NAME="IMG_BG">C:/Users/jlang/Desktop/PyDash_Builder/images/Background.png</IMG>
-      <IMG NAME="IMG_BG_RPM">C:/Users/jlang/Desktop/PyDash_Builder/images/Background_RPM.png</IMG>
-      <IMG NAME="IMG_LOBM">C:/Users/jlang/Desktop/PyDash_Builder/images/Headlight_lo.png</IMG>
-      <IMG NAME="IMG_HIBM">C:/Users/jlang/Desktop/PyDash_Builder/images/Headlight_hi.png</IMG>
+      <IMG NAME="IMG_BG">C:/Users/jlang/Desktop/PyDash_Builder/Documentation/example_images/Background.png</IMG>
+      <IMG NAME="IMG_BG_RPM">C:/Users/jlang/Desktop/PyDash_Builder/Documentation/example_images/Background_RPM.png</IMG>
+      <IMG NAME="IMG_LOBM">C:/Users/jlang/Desktop/PyDash_Builder/Documentation/example_images/Headlight_lo.png</IMG>
+      <IMG NAME="IMG_HIBM">C:/Users/jlang/Desktop/PyDash_Builder/Documentation/example_images/Headlight_hi.png</IMG>
     </IMAGES>
     <ALERT_COLORS>
       <ALERT_FG>ALERT_FG</ALERT_FG>

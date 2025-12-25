@@ -77,7 +77,7 @@ class wndw_Main(tk.Tk):
         #--help menu
         menu_help = tk.Menu(self.menubar, tearoff=0)
         menu_help.add_command(label="About", command=lambda: self.new_toplvl(wndw_About))       #about software version information
-        menu_theme.add_separator()
+        menu_help.add_separator()
         menu_help.add_command(label="Check Fonts", command=lambda: sysCheck_fonts(self))        #checks installed fonts for any missing PyDash fonts
         self.menubar.add_cascade(label="Help", menu=menu_help)
 
