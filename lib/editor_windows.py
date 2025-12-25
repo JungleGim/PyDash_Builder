@@ -570,7 +570,7 @@ class wndw_Fonts(tk.Toplevel):
             entry_font_name.grid(row=0, column=1, padx=10, pady=(10,0))
             entry_font_sz = tk.Entry(self, width=30, textvariable=self.font_sz)
             entry_font_sz.grid(row=1, column=1, padx=10, pady=(10,0))
-            cbo_sysFont = ttk.Combobox(self, textvariable=self.font_type ,values=sys_fonts, font=font_hdr2)
+            cbo_sysFont = ttk.Combobox(self, textvariable=self.font_type ,values=PyDash_fonts, font=font_hdr2)
             cbo_sysFont.set("Select Font")
             cbo_sysFont.grid(row=2, column=1, padx=10, pady=10, sticky=tk.EW)
             chk_bold = tk.Checkbutton(self, text="Bolded", font=font_hdr2, variable=self.bold_var, onvalue=True, offvalue=False)

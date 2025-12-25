@@ -34,8 +34,6 @@ font_hdr2 = ("Arial", 12)
 font_norm1 = ("Arial", 10)
 font_norm2 = ("Arial", 8)
 font_norm1_hyper = ('Arial', 10, 'underline')
-sys_fonts = ['Cascadia Mono', 'Lucida Sans','MS Serif']
-PyDash_fonts = {'Cascadia Mono':'Liberation Mono', 'Lucida Sans':'Liberation Sans', 'MS Serif':'Liberation Serif'}
 
 text_example =  'ABCDEFGHIJKLMN\n' \
                 'OPQRSTUVWXYZ\n' \
@@ -60,6 +58,15 @@ sys_CAN_base_PID = '0x9A'   #base CAN PID default
 dashCFG_PKGname = 'PyDash_Config'       #zip file name of the output package
 dashCFG_CFGname = 'PyDash_Config.xml'   #xml config file name
 dashCFG_imgDir = 'images'               #output image directory
+
+#---Fonts
+"""These are the fonts that are used in the PyDash. These should be the only fonts used in defining a theme"""
+PyDash_fonts = ['Liberation Sans', 'Liberation Serif', 'Liberation Mono',
+                'Anton', 'Archivo Narrow', 'Lemon', 'Sui Generis',
+			    'Microgramma D Extended', 'dummy font test']
+
+help_fontZip_GITlink = 'https://github.com/JungleGim/PyDash_Builder/blob/2ec372851c0428101ded503dc9f5104ef4e3e72c/Documentation/PyDash_Fonts.zip'
+help_MS_fontInstall_link = 'https://www.microsoft.com/en-us/windows/learning-center/how-to-install-fonts-on-your-pc'
 
 #---DEBUG: temp values for helping show frame borders and other boundaries easily
 dbg_brdr = 2                    #debug/building border thickness for panes

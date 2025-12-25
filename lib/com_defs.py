@@ -394,6 +394,13 @@ class dash_config:
         self.Res_y = None       #window y-resolution
         self.Refresh = None     #refresh rate - default of approx 15Hz in ms
         self.Baklite = None     #backlight brightness - default full bright
+    
+    def set_dflt_cfg(self):
+        """function sets the default values for the editor config"""
+        self.Res_x = int_str(dash_xSz)
+        self.Res_y = int_str(dash_ySz)
+        self.Refresh = int_str(refrsh_rt)
+        self.Baklite = int_str(deflt_backlite)
 
     def len(self):
         """function counts the number of set attributes and returns how many are set. Intended to emulate
@@ -415,26 +422,18 @@ class dash_config:
         for attr in self.__dict__.keys():   #loop through defined attributes
             setattr(self, attr, None)       #and set to None
 
-    def set_core(self, **kwargs):
+    def upd_cfg(self, **kwargs):
         """ function sets attributes based on the passed KWARGs. All KWARGs have default values
-        for typical display values.
+        for typical display values. If kwarg is not passed, the value is not updated
 
         :param kwargs: dict of class inputs
         :type kwargs: any type that can be typecast to string
         """
         kwargs = {k.upper(): v for k, v in kwargs.items()}  #convert kwarg names to uppercase. Allows for use with XML and editor attributes
-        self.Res_x = int_str(kwargs.get('RES_X', dash_xSz))
-        self.Res_y = int_str(kwargs.get('RES_Y', dash_ySz))
-        self.Refresh = int_str(kwargs.get('REFRESH', refrsh_rt))
-        self.Baklite = int_str(kwargs.get('BAKLITE', deflt_backlite))
-
-    def backlt_upd(self, PWM):
-        """function updates the backlight PWM value
-        
-        :param PWM: 0-100 PWM duty cycle for backlight brightness
-        :type PWM: `int`
-        """
-        self.Baklite = PWM   #update PWM percentage to passed value
+        if 'RES_X' in kwargs: self.Res_x = int_str(kwargs.get('RES_X'))
+        if 'RES_Y' in kwargs: self.Res_y = int_str(kwargs.get('RES_Y'))
+        if 'REFRESH' in kwargs: self.Refresh = int_str(kwargs.get('REFRESH'))
+        if 'BAKLITE' in kwargs: self.Baklite = int_str(kwargs.get('BAKLITE'))
     
     def XML_dashCFG_checkErrs(self):
         """function checks the required class attributes to see if they are set and if the set value is
@@ -469,6 +468,15 @@ class dash_theme:
         self.fonts_ext_ref = {}
         self.colors_ext_ref = {}
         self.images_ext_ref = {}
+
+    def set_dflt_cfg(self):
+        """function sets the default values for the editor config"""
+        dflt_alert_clrs = {'Alert_FG':'#000000',
+                           'Alert_Warn':'#FFFF00',
+                           'Alert_Dngr':'#FF0000'}    #define default alert colors
+        self.set_colors(dflt_alert_clrs)                #add default alert colors to theme
+        alrt_clrs_cfg = {key: key for key in dflt_alert_clrs.keys()}    #convert color defs to names for use in config
+        self.set_alert_colors(alrt_clrs_cfg)                            #set the config values for the colors
 
     def len(self):
         """function counts the number of set attributes and returns how many are set. Intended to emulate
@@ -522,7 +530,7 @@ class dash_theme:
         also updates external color refs for the assigned colors.
         
         :param passed_colors: dict of color key values to update
-        :type passed_colors: `dictionary` {color_name:#HEX_VAL}
+        :type passed_colors: `dictionary` {alert_kwarg : theme_color_name}
         """
         #--convert passed color names to uppercase. Allows for use with XML and editor attributes
         passed_colors = {k.upper(): v for k, v in passed_colors.items()}
@@ -725,16 +733,29 @@ class CAN_core:
             RX'd CAN messages
         :type CAN_rxNotifier: `CAN_core` class method
         """
-        kwargs = {k.upper(): v for k, v in kwargs.items()}          #convert kwarg names to uppercase. Allows for use with XML and editor attributes
-        self.base_PID = kwargs.get('BASE_PID', sys_CAN_base_PID)    #CAN PID of the dash itself
-        self.rx_filter = bool_str(kwargs.get('RX_FILTER', False))   #enable RX CAN filter based on defined CAN channels
-
-        #-----local Vars
-        self.data_ch = {}               #dictionary for display chan channels. Format is {ch_NAME : [CAN_ch]}
+        self.base_PID = None    #CAN PID of the dash itself
+        self.rx_filter = None   #enable RX CAN filter based on defined CAN channels
+        self.data_ch = {}       #dictionary for display chan channels. Format is {ch_NAME : class[CAN_ch]}
 
         #-----external reference dicts: contains where/which named elements that reference CAN channel objects
         self.CAN_CH_ext_ref = {}
     
+    def set_dflt_cfg(self):
+        """function sets the default values for the editor config"""
+        self.base_PID = sys_CAN_base_PID
+        self.rx_filter = False
+
+    def upd_cfg(self, **kwargs):
+        """ function sets attributes based on the passed KWARGs. All KWARGs have default values
+        for typical display values. If kwarg is not passed, the value is not updated
+
+        :param kwargs: dict of class inputs
+        :type kwargs: any type that can be typecast to string
+        """
+        kwargs = {k.upper(): v for k, v in kwargs.items()}  #convert kwarg names to uppercase. Allows for use with XML and editor attributes
+        if 'BASE_PID' in kwargs: self.base_PID = kwargs.get('BASE_PID')
+        if 'RX_FILTER' in kwargs: self.rx_filter = bool_str(kwargs.get('RX_FILTER'))
+
     def len(self):
         """function counts the number of set attributes and returns how many are set. Intended to emulate
         other python len() functions like len(my_dict) or len(my_tuple). An attribute is considered "set"
@@ -1873,3 +1894,35 @@ class wndw_notify(tk.Toplevel):
         """function for any of the non-return responses like OK; just an acknowledge"""
         #default result is None, so no need to set here
         self.destroy()
+
+def sysCheck_fonts(master_ref):
+    """function checks the current system fonts and informs the user if any required fonts for the
+    PyDash builder to operate are missing"""
+
+    avail_sys_fonts = list(tkFont.families())   #populate list of system fonts
+    missing_fonts = []                          #temp list of missing fonts
+    rslt_msg = None                             #result message
+    msg_dict = {}                               #result message dict to pass to pop-up
+    
+    for PyDash_font in PyDash_fonts:            #loop through all required fonts
+        if PyDash_font not in avail_sys_fonts: missing_fonts.append(PyDash_font)    #and add to list if they are not installed on the system
+
+    if len(missing_fonts) > 0:                  #if there are any missing fonts, display a message
+        rslt_msg = "Required fonts were not found. Please install the following fonts to ensure proper opration of the PyDash Editor:\n\n"
+        for indx, f in enumerate(missing_fonts):
+            rslt_msg += '['+ f + ']'   #build error message string - add fonts
+            if indx != len(missing_fonts)-1: rslt_msg += ', '
+
+        rslt_msg += '\n\n'
+        rslt_msg += 'An archive of the required fonts for PyDash can be found HERE\n'
+        rslt_msg += 'Additional information on how to install fonts on a Windows OS can be found HERE'
+
+        #TODO: add link to help_fontZip_GITlink
+        #TODO: add link to help_MS_fontInstall_link
+        msg_dict = {'type':Popup_types['ERROR'],'title':'Missing Fonts','message':rslt_msg} #build message dict
+    else:
+        rslt_msg = "Success! All fonts are installed!"
+        msg_dict = {'type':Popup_types['INFO'],'title':'Success','message':rslt_msg} #build message dict
+
+    err_notif_wndw = wndw_notify(master_ref, msg_dict)  #display result message
+        

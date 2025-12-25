@@ -12,9 +12,9 @@ class wndw_Main(tk.Tk):
         
         #----high-level variables that store the loaded configuration
         self.cfg_pages = {}                 #dict of dash pages defined for the display. Format is {name: FrameClass}
+        self.cfg_core = dash_config()       #dict of the primary dash config values. format is {property_name: value}
+        self.cfg_theme = dash_theme()       #reference for dash theme information. Format is class:theme
         self.cfg_CAN = CAN_core()           #reference for the CAN information. Format is class:CAN_core
-        self.cfg_core = dash_config()            #dict of the primary dash config values. format is {property_name: value}
-        self.cfg_theme = dash_theme()            #reference for dash theme information. Format is class:theme
 
         self.editr_cntl = editrCntl(self)                   #instance editor control class
         self.init_window()                                  #intialize editor window
@@ -29,23 +29,25 @@ class wndw_Main(tk.Tk):
         self.init_eles()                    #intialize editor elements
         self.init_shortcuts()               #initalize keyboard shortcuts
 
+        self.editr_cntl.upd_ctl(False)      #intialize application with user controls locked
+
     def init_menubar(self):
         """function defines the menubar options"""
         #----define menu bar
         self.menubar = tk.Menu(self)                #create menu object
         
         #--file menu
-        menu_file = tk.Menu(self.menubar, tearoff=0)
-        menu_file.add_command(label="New", command=self.config_new)                     #create new config
-        menu_file.add_command(label="Open", command=self.config_load)                   #open existing config XML
-        menu_file.add_command(label="Save", command=lambda: self.config_save(False))    #save current config XML
-        menu_file.add_command(label="Save As", command=lambda: self.config_save(True))  #save current config XML as another name
-        menu_file.add_separator()
-        menu_file.add_command(label="Check Config", command=self.cfg_check)             #check config for errors before generating dash XML
-        menu_file.add_command(label="Generate Dash Config", command=self.gen_dashCFG)   #generate dash XML file (and also export images)
-        menu_file.add_separator()
-        menu_file.add_command(label="Exit", command=self.destroy)
-        self.menubar.add_cascade(label="File", menu=menu_file)
+        self.menu_file = tk.Menu(self.menubar, tearoff=0)
+        self.menu_file.add_command(label="New", command=self.config_new)                     #create new config
+        self.menu_file.add_command(label="Open", command=self.config_load)                   #open existing config XML
+        self.menu_file.add_command(label="Save", command=lambda: self.config_save(False))    #save current config XML
+        self.menu_file.add_command(label="Save As", command=lambda: self.config_save(True))  #save current config XML as another name
+        self.menu_file.add_separator()
+        self.menu_file.add_command(label="Check Config", command=self.cfg_check)             #check config for errors before generating dash XML
+        self.menu_file.add_command(label="Generate Dash Config", command=self.gen_dashCFG)   #generate dash XML file (and also export images)
+        self.menu_file.add_separator()
+        self.menu_file.add_command(label="Exit", command=self.destroy)
+        self.menubar.add_cascade(label="File", menu=self.menu_file)
 
         #--Theme menu
         menu_theme = tk.Menu(self.menubar, tearoff=0)
@@ -74,7 +76,9 @@ class wndw_Main(tk.Tk):
 
         #--help menu
         menu_help = tk.Menu(self.menubar, tearoff=0)
-        menu_help.add_command(label="About", command=lambda: self.new_toplvl(wndw_About))        #about software version information
+        menu_help.add_command(label="About", command=lambda: self.new_toplvl(wndw_About))       #about software version information
+        menu_theme.add_separator()
+        menu_help.add_command(label="Check Fonts", command=lambda: sysCheck_fonts(self))        #checks installed fonts for any missing PyDash fonts
         self.menubar.add_cascade(label="Help", menu=menu_help)
 
         #--set menubar
@@ -117,14 +121,14 @@ class wndw_Main(tk.Tk):
         #-add elements buttons
         sep1 = ttk.Separator(self.frm_hdr, orient=tk.VERTICAL)
         sep1.grid(row=0, column=2, padx=10, pady=10, sticky=tk.NS)
-        btn_sLabel=tk.Button(self.frm_hdr,text="Add Static Label", font=font_hdr2, command= lambda: self.new_element(DashEle_types['LBL_STAT']))
-        btn_sLabel.grid(row=0, column=3, padx=10, pady=10)
-        btn_dLabel=tk.Button(self.frm_hdr,text="Add Data Label", font=font_hdr2, command= lambda: self.new_element(DashEle_types['LBL_DAT']))
-        btn_dLabel.grid(row=0, column=4, padx=10, pady=10)
-        btn_bltInd=tk.Button(self.frm_hdr,text="Add Bullet Ind", font=font_hdr2, command= lambda: self.new_element(DashEle_types['IND_BLT']))
-        btn_bltInd.grid(row=0, column=5, padx=10, pady=10)
-        btn_barInd=tk.Button(self.frm_hdr,text="Add Bar Ind", font=font_hdr2, command= lambda: self.new_element(DashEle_types['IND_BAR']))
-        btn_barInd.grid(row=0, column=6, padx=10, pady=10)
+        self.btn_sLabel=tk.Button(self.frm_hdr,text="Add Static Label", font=font_hdr2, command= lambda: self.new_element(DashEle_types['LBL_STAT']))
+        self.btn_sLabel.grid(row=0, column=3, padx=10, pady=10)
+        self.btn_dLabel=tk.Button(self.frm_hdr,text="Add Data Label", font=font_hdr2, command= lambda: self.new_element(DashEle_types['LBL_DAT']))
+        self.btn_dLabel.grid(row=0, column=4, padx=10, pady=10)
+        self.btn_bltInd=tk.Button(self.frm_hdr,text="Add Bullet Ind", font=font_hdr2, command= lambda: self.new_element(DashEle_types['IND_BLT']))
+        self.btn_bltInd.grid(row=0, column=5, padx=10, pady=10)
+        self.btn_barInd=tk.Button(self.frm_hdr,text="Add Bar Ind", font=font_hdr2, command= lambda: self.new_element(DashEle_types['IND_BAR']))
+        self.btn_barInd.grid(row=0, column=6, padx=10, pady=10)
 
         #-delete element
         sep2 = ttk.Separator(self.frm_hdr, orient=tk.VERTICAL)
@@ -146,6 +150,11 @@ class wndw_Main(tk.Tk):
         """function binds common keyboard shortcuts to various menu functions"""
         self.bind("<Control-s>", lambda e: self.config_save(False))
         self.bind("<Control-Shift-S>", lambda e: self.config_save(True))
+
+    def init_cfg_defaults(self):
+        self.cfg_core.set_dflt_cfg()    #set default core config values
+        self.cfg_theme.set_dflt_cfg()   #set default theme values
+        self.cfg_CAN.set_dflt_cfg()     #set default CAN values
 
     def new_element(self, type):
         """function creates a new element, binds required editor controls, and also places it on the current dash page being viewed
@@ -200,7 +209,7 @@ class wndw_Main(tk.Tk):
         self.editr_cntl.ResetEditor()                   #and reset the editor window
     
     def cfg_check(self):
-        if self.gen_dashCFG_check:
+        if self.gen_dashCFG_check():
             messagebox.showinfo("Success", "No errors detected!")
 
     def config_load(self):
@@ -226,6 +235,7 @@ class wndw_Main(tk.Tk):
                 self.editr_cntl.buildAllPages()                                                     #build all the pages in the loaded config
                 self.editr_cntl.cboFrames_upd()                                                     #update frame select combo box    
                 self.editr_cntl.gotoEditorCanv(next(iter(self.cfg_pages)))                          #load first page in config into the editor
+                self.editr_cntl.upd_ctl(True)                                                       #enable the user controls
             #open error messages handled in XML_open
 
     def config_save(self, saveas=False):
@@ -259,8 +269,11 @@ class wndw_Main(tk.Tk):
             delete_result = messagebox.askokcancel("Warning", "This will delete all items in the current configuration (Colors, themes, pages, etc) and cannot be undone. Do you want to proceed?")
         else: delete_result = False
 
-        if delete_result or not cfg_exists: self.cfg_clear()            #if no cfg exists or user said it was OK, then clear
-        else: messagebox.showinfo("FYI", "Dash config was not cleared") #otherwise do nothing, but give them a reminder
+        if delete_result or not cfg_exists:
+            self.cfg_clear()                    #if no cfg exists or user said it was OK, then clear any config
+            self.editr_cntl.upd_ctl(True)       #enable the user controls
+            self.init_cfg_defaults()            #intialize all the "default" options for the config dicts
+        else: messagebox.showinfo("FYI", "Existing dash config was not cleared, user canceled creating new config.") #otherwise do nothing, but give them a reminder
     
     def gen_dashCFG(self):
         """function generates the output files to save a dash configuration"""

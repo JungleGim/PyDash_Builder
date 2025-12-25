@@ -111,10 +111,9 @@ def parseXML_CORE(block):
     tmp_config = dash_config()                           #temp core config opt instance
     read_DISPconfig = {}                            #temp dict for read values
     
-    for disp in block.findall('DISP'):
-        for cfg in disp:
-            read_DISPconfig.update({cfg.tag : cfg.text})    #append to temp dict
-    tmp_config.set_core(**read_DISPconfig)                  #update core dash display values
+    for cfg in block:
+        read_DISPconfig.update({cfg.tag : cfg.text})    #append to temp dict
+    tmp_config.upd_cfg(**read_DISPconfig)                   #update core dash display values
 
     return tmp_config
 
@@ -126,13 +125,13 @@ def parseXML_THEME(block):
     :returns: temp editor configuration - specific to the read config class, IE the "theme" config or the "CAN" config
     :rtype: XML ET.parse() object result
     """
-    tmp_theme = dash_theme()                             #temp dash theme instance
-    for clrs in block.findall('COLORS'):        #read all colors
+    tmp_theme = dash_theme()                        #temp dash theme instance
+    for clrs in block.findall('COLORS'):            #read all colors
         read_colors = {}                            #temp colors dict for read values
         for clr in clrs.findall('COLOR'):           #cycle through all parsed colors
             read_colors.update({clr.attrib.get('NAME') : clr.text})   #append color to temp dict
         tmp_theme.set_colors(read_colors)           #set theme colors
-    for fnts in block.findall('FONTS'):         #read all fonts
+    for fnts in block.findall('FONTS'):             #read all fonts
         read_fnts = []                              #temp fonts array for read values
         read_fnts_data = {}                         #temp fonts property dict for read values
         for fnt in fnts.findall('FONT'):
@@ -161,12 +160,13 @@ def parseXML_CAN(block):
     :returns: temp editor configuration - specific to the read config class, IE the "theme" config or the "CAN" config
     :rtype: XML ET.parse() object result
     """
+    tmp_CAN = CAN_core()                                #temp dash CAN config isntance
     #--get core config values
     CAN_coreCFG = {}                                    #temp dict for CAN core CFG values 
     for canCFG in block.findall('CORE'):
         for cfg in canCFG:
             CAN_coreCFG.update({cfg.tag : cfg.text})    #append to temp dict
-    tmp_CAN = CAN_core(**CAN_coreCFG)                   #temp CAN instance
+    tmp_CAN.upd_cfg(**CAN_coreCFG)                      #set core CAN config
     
     #--get CAN data channels
     for chs in block.findall('CHANNELS'):
@@ -459,6 +459,14 @@ def XML_dashCFG_checkErrs(master_ref):
     return tmp_err_str
 
 def genXML_DashCFG(master, tmp_assy_dir):
+    """function serves as the primary point for calling the various class functions that
+    generate the output configuration zip package
+    
+    :param master: reference back to the main/master window
+    :type master: `tk.window` ref
+    :param tmp_assy_dir: filepath to the chosen save location
+    :type tmp_assy_dir: `string`
+    """
     cfg_save_dir = tmp_assy_dir + 'tmp_cfg_dir/'        #append a temp directory to the chosen location for making the download package
     tgt_archive_name = tmp_assy_dir + dashCFG_PKGname   #final archive name
 

@@ -6,33 +6,9 @@ Version: 0.0
 Build Date: 11/17/2025
 
 # Global TODO list
-* Initial Conditions / Load
-	- Currently when the program loads, there are some default values being applied. This kind of results in a messy first "open" dialoge where nothing has been entered but the "Existing configuration" check thinks so.
-	- Update the initial open conditions to ensure it's blank slate and that way the first time someone clicks "open" there's not an annoying error message.
-	- The default values really should only be added if "new" is clicked.
-	- Fixing the above would be a great time to also incorporate the basics of the "enable buttons if new config started" TODO item as well. it'll all basically fall into the same thing where the program opening should default to things disabled and then once a "new" config is created it'll enable buttons (and menu items).
-	
-* System Fonts
-	- Find and implement a list of the available fonts for the builder to use with widgets
-	- List of potential fonts googling around
-		+ Liberation Sans
-		+ Liberation Serif
-		+ Liberation Mono
-		+ Others
-			* Anton
-			* Archivo Narrow
-			* Lemon
-			* Sui Generis (MoTec Font)
-			* Migrogramma D Bold Extended
-			* (some sort of vintage looking automotive font like Hundell)
-		+ These are also some fonts considered but just not different enough
-			* Public Sans / IBM Plex Sans / Fira Sans
-			* DM Sans / Roboto / Ubutu / Overpass
-			* Futura
-			* EB Garamond / Gentrium / Open Baskerville
-			* Libre Baskerville / Alegreya / Cormorant
-			* Gelasio
-			* IBM Plex Mono / Fira Mono
+* Make a companion "font installer" method
+    - need to handle HTML links in the custom message pop-up.
+    - I mean, don't NEED to, but in order to nicely put some inline links it would be ideal
 						
 # Finalization
 * When all done with first rev

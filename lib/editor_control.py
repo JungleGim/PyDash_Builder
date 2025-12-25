@@ -20,6 +20,7 @@ class editrCntl:
     file names, and other significant references that are passed to many functions when updating elements"""
     def __init__(self, master):
         self.master_ref = master            #master window ref
+        self.enable_cntl = False            #enable control of user entry items
         self.current_canv_name = None       #name of the current canvas
         self.current_canv = None            #current editing/working canvas
         self.current_page = None            #current editing/working page
@@ -164,6 +165,32 @@ class editrCntl:
     def clicked_wgt(self, passed_cfg):
         """function to update the reference in the editor control class for the currently clicked widget."""
         self.current_wigtCfg = passed_cfg   #update the current working cfg to the one of the newly clicked widget
+
+    def upd_ctl(self, enable):
+        """funciton updates the control state of various user inputs, typically for controlling the application
+        start-up."""
+        self.enable_cntl = enable
+        
+        if enable == True: upd_state = "normal"
+        else: upd_state = "disabled"
+
+        #--update menus used as input
+        self.master_ref.menubar.entryconfig("Theme", state=upd_state)
+        self.master_ref.menubar.entryconfig("Core", state=upd_state)
+        self.master_ref.menubar.entryconfig("CAN", state=upd_state)
+        self.master_ref.menubar.entryconfig("Dash Pages", state=upd_state)
+        self.master_ref.menu_file.entryconfig("Save", state=upd_state)
+        self.master_ref.menu_file.entryconfig("Save As", state=upd_state)
+        self.master_ref.menu_file.entryconfig("Check Config", state=upd_state)
+        self.master_ref.menu_file.entryconfig("Generate Dash Config", state=upd_state)
+
+        #--update editor controls
+        self.master_ref.cbo_frame.config(state=upd_state)
+        self.master_ref.btn_sLabel.config(state=upd_state)
+        self.master_ref.btn_dLabel.config(state=upd_state)
+        self.master_ref.btn_bltInd.config(state=upd_state)
+        self.master_ref.btn_barInd.config(state=upd_state)
+        self.master_ref.btn_delEle.config(state=upd_state)
 
 #------------widget moving class
 class FrmEdit_bind_widget_control:
