@@ -186,10 +186,10 @@ def instance_widget(ele_type, prnt_canv, widg_kwargs):
         wigt_ref = prnt_canv.create_oval(widg_kwargs.pop('x0'), widg_kwargs.pop('y0'),widg_kwargs.pop('x1'), widg_kwargs.pop('y1'),**widg_kwargs)       #set result as oval
     elif ele_type == DashEle_types['IND_BAR']:
         wigt_ref = prnt_canv.create_rectangle(widg_kwargs.pop('x0'), widg_kwargs.pop('y0'),widg_kwargs.pop('x1'), widg_kwargs.pop('y1'),**widg_kwargs)  #set result as rectangle
-    
-    if pad == True: pad_ref = elePad_create(prnt_canv, wigt_ref, clr_bg)   #if widget has background padding, then make it
 
-    if pad == True: return wigt_ref, pad_ref    #if padded, return created widget reference and pad object reference
+    if pad == True:                     #if widget has background padding, then make it
+        pad_ref = elePad_create(prnt_canv, wigt_ref, clr_bg)   
+        return wigt_ref, pad_ref        #and return created widget reference and pad object reference
     else: return wigt_ref, None         #otherwise, only return created widget reference
 
 def elePad_create(prnt_canv, prnt_wgt, pad_clr):
@@ -198,8 +198,8 @@ def elePad_create(prnt_canv, prnt_wgt, pad_clr):
 
     :param prnt_canv: parent canvas to make object on
     :type prnt_canv: `Tk.Canvas` class
-    :param prnt_wgt: parent object the background pad is placed behind
-    :type prnt_wgt: `tk.canvas` reference
+    :param prnt_wgt: parent object ID the background pad is placed behind
+    :type prnt_wgt: dash element class reference
     :param pad_clr: fill color
     :type pad_clr: HEX string color value
     :returns: tuple of reference ID of the created object
@@ -239,19 +239,6 @@ def xmlGen_str(obj):
     if obj is not None: rtn_str = str(obj)
 
     return rtn_str
-
-def buildPages(master_ref, passed_pages):
-    """Function loops through the passed page(s) and runs the "buildPages" function to create the
-    individual page and the elements on the page. This is typically used when loading saved configurations.
-    
-    :param master_ref: reference back to the main/master window
-    :type master_ref: `tk.window` ref
-    :param passed_pages: dictionary of pages
-    :type passed_pages: `dict` of 'Page` class type
-    """
-    for v in passed_pages.values():
-        v.master_ref = master_ref   #set master ref for in-class functions
-        v.buildPages_canv()         #loop through all pages and make the canvas object
 
 def updPages(master_ref):
     """Function loops through the page(s) in the instanced page dict in the master window. This dict contains the
@@ -1149,7 +1136,6 @@ class Label_Static:
         dx = xn - self.x0; dy = yn - self.y0                        #calculate ammount moved
         self.upd_config(passed_args)                                #update class configuration data
         self.upd_editor_obj(dx, dy)                                 #update editor canvas object
-        self.upd_pad_obj()                                          #update background pad object
         self.upd_ele_def_refs()                                     #update core references (like fonts, colors, etc)
     
     def upd_editor_obj(self, dx=0, dy=0):
@@ -1166,6 +1152,7 @@ class Label_Static:
         temp_kwargs.pop('x0'); temp_kwargs.pop('y0')                #coords handled separately - pop off
         self.editor_canvObj.itemconfigure(self.objID, temp_kwargs)  #update canvas object props
         self.editor_canvObj.move(self.objID, dx, dy)                #update primary element position
+        self.upd_pad_obj()                                          #update background pad object AFTER any primary object updates
 
     def upd_pad_obj(self):
         """function updates the background pad object, if set. This includes moving the position when a dash
@@ -1254,7 +1241,7 @@ class Label_Static:
 
         for attr, val in self.__dict__.items():
             if attr in self.fields_dashCFG:
-                if ((attr != 'pad') or (attr != 'fill') or (attr != 'font') or (attr != 'clr_bg')):
+                if ((attr == 'text') or (attr == 'x0') or (attr == 'y0')):
                     if (val is None) or val == '':
                         tmp_err_list.update({pg_name +'-'+ self.name +'-'+ attr:'Required value for page static label is undefined'})
                 elif attr == 'font':
@@ -1267,7 +1254,7 @@ class Label_Static:
                     if (val is None) or val == '':
                         tmp_err_list.update({pg_name +'-'+ self.name +'-'+ attr:'Required value for page static label is undefined'})
                     if val == True and not self.master_ref.cfg_theme.chk_exist_colors(self.clr_bg):
-                        tmp_err_list.update({pg_name +'-'+ self.name +'-pad_color':'Named color "' + self.clr_bg + '" not defined in theme'}) 
+                        tmp_err_list.update({pg_name +'-'+ self.name +'-pad_color':'Named color "' + self.clr_bg + '" not defined in theme'})
 
         return tmp_err_list
 
@@ -1332,7 +1319,6 @@ class Label_Data:
         dx = xn - self.x0; dy = yn - self.y0                        #calculate ammount moved
         self.upd_config(passed_args)                                #update class configuration data
         self.upd_editor_obj(dx, dy)                                 #update editor canvas object
-        self.upd_pad_obj()                                          #update background pad object
         self.upd_ele_def_refs()                                     #update core references (like fonts, colors, etc)
     
     def upd_editor_obj(self, dx=0, dy=0):
@@ -1349,6 +1335,7 @@ class Label_Data:
         temp_kwargs.pop('x0'); temp_kwargs.pop('y0')                #coords handled separately - pop off
         self.editor_canvObj.itemconfigure(self.objID, temp_kwargs)  #update canvas object props
         self.editor_canvObj.move(self.objID, dx, dy)                #update primary element position
+        self.upd_pad_obj()                                          #update background pad object AFTER any primary object updates
 
     def upd_pad_obj(self):
         """function updates the background pad object, if set. This includes moving the position when a dash
@@ -1694,6 +1681,10 @@ class Indicator_Bar:
         x=passed_args.get('x0'); y=passed_args.get('y0')
         if x=='' or x==None: passed_args.update({'x0':0})
         if y=='' or y==None: passed_args.update({'y0':0})
+
+        w=passed_args.get('width'); h=passed_args.get('height')
+        if w=='' or w==None: passed_args.update({'width':0})
+        if h=='' or h==None: passed_args.update({'height':0})
 
         self.upd_config(passed_args)                #update configuration data
         self.upd_editor_obj()                       #update editor canvas object

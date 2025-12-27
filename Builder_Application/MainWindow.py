@@ -177,6 +177,8 @@ class wndw_Main(tk.Tk):
             ele_cfg.editor_canvObj = self.editr_cntl.current_canv                   #4.b) set editor canvas reference for later update/use
             ele_cfg.wgtCtl=FrmEdit_bind_widget_control(self, self.editr_cntl.current_canv, ele_cfg)#5) bind widget control triggers to canvas item
             ele_cfg.upd_ele_def_refs()                                              #6) update external references for new element
+            self.editr_wgtProps.clicked_wgt(ele_cfg)                                #7.a)update the properties view
+            self.editr_cntl.clicked_wgt(ele_cfg)                                    #7.b)update the current clicked widget in the control class
 
         self.grab_set()                         #re-focus to parent window once popup is closed
     
@@ -209,7 +211,7 @@ class wndw_Main(tk.Tk):
         self.editr_cntl.ResetEditor()                   #and reset the editor window
     
     def cfg_check(self):
-        if self.gen_dashCFG_check():
+        if self.dashCFG_check():
             messagebox.showinfo("Success", "No errors detected!")
 
     def config_load(self):
@@ -230,12 +232,14 @@ class wndw_Main(tk.Tk):
             self.editr_cntl.configFile_name = filedict['name']                                  #update the latest config file name and path
             xmlFile = XML_open(self.editr_cntl.configFile_dir, self.editr_cntl.configFile_name) #open a file at the saved path, return XML element tree obj
             if xmlFile is not None:
-                parseXML(self, xmlFile)                                                             #parse the XML file and load data structs
-                messagebox.showinfo("Success", "Loaded dash config successfully!")                  #let the user know it was loaded
-                self.editr_cntl.buildAllPages()                                                     #build all the pages in the loaded config
-                self.editr_cntl.cboFrames_upd()                                                     #update frame select combo box    
-                self.editr_cntl.gotoEditorCanv(next(iter(self.cfg_pages)))                          #load first page in config into the editor
-                self.editr_cntl.upd_ctl(True)                                                       #enable the user controls
+                parseXML(self, xmlFile)                                                         #parse the XML file and load data structs
+                if self.dashCFG_check() == True:                                                #check config validity, If OK, then build page
+                    messagebox.showinfo("Success", "Loaded dash config successfully!")              #let the user know it was loaded
+                    self.editr_cntl.buildAllPages()                                                 #build all the pages with elements in the loaded config
+                    self.editr_cntl.cboFrames_upd()                                                 #update frame select combo box    
+                    self.editr_cntl.gotoEditorCanv(next(iter(self.cfg_pages)))                      #load first page in config into the editor
+                    self.editr_cntl.upd_ctl(True)                                                   #enable the user controls
+                #config error message handled in dashCFG_check
             #open error messages handled in XML_open
 
     def config_save(self, saveas=False):
@@ -277,14 +281,14 @@ class wndw_Main(tk.Tk):
     
     def gen_dashCFG(self):
         """function generates the output files to save a dash configuration"""
-        if self.gen_dashCFG_check():                    #if no errors were found, make a download package
+        if self.dashCFG_check():                        #if no errors were found, make a download package
             if self.create_dash_definition_package():   #creation of the download package was successful
                 messagebox.showinfo("Success", "Successfully created download package!")
             else:
                 messagebox.showinfo("FYI", "Configuration package was not created")
-        #error check message handled in gen_dashCFG_check
+        #error check message handled in dashCFG_check
 
-    def gen_dashCFG_check(self):
+    def dashCFG_check(self):
         """function checks the current dash configuration for potential errors. Any identified errors may cause an issue when
         saving the dash editor file for later use, but is primarily intended for identifying errors that would not create a valid
         dash config file to save to the PyDash.
@@ -295,7 +299,7 @@ class wndw_Main(tk.Tk):
         """
         errors_list = self.gen_dashCFG_VV()     #check for potential errors
         if len(errors_list) != 0:               #error result is not blank, so there are errors
-            err_msg = "Error detected in configuration. Please fix the following issues before a dash config can be saved:\n\n"
+            err_msg = "Error detected in configuration. Please fix the following issues in the config:\n\n"
             for k,v in errors_list.items(): err_msg += k + ': ' + v +'\n'   #build error message string
             err_notif_wndw = wndw_notify(self, {'type':Popup_types['ERROR'],
                                                 'title':'CONFIG ERROR',

@@ -94,11 +94,10 @@ def parseXML(master, config_tree):
     config_root = config_tree.getroot()             #get root element
 
     #--parse XML file blocks for various dash config options
-    master.cfg_core = parseXML_CORE(config_root.find('DISP'))       #cycle through DISPLAY (core) config
-    master.cfg_theme = parseXML_THEME(config_root.find('THEME'))    #cycle through THEME config
-    master.cfg_CAN = parseXML_CAN(config_root.find('CAN'))          #cycle through CAN channels config
-    master.cfg_pages = parseXML_PAGES(config_root.find('FRAMES'))   #cycle through page definitions
-    buildPages(master, master.cfg_pages)                            #build canvas items for the pages
+    master.cfg_core = parseXML_CORE(config_root.find('DISP'))               #cycle through DISPLAY (core) config
+    master.cfg_theme = parseXML_THEME(config_root.find('THEME'))            #cycle through THEME config
+    master.cfg_CAN = parseXML_CAN(config_root.find('CAN'))                  #cycle through CAN channels config
+    master.cfg_pages = parseXML_PAGES(config_root.find('FRAMES'), master)   #cycle through page definitions
 
 def parseXML_CORE(block):
     """function parses the core config information for a PyDash editor file
@@ -182,7 +181,7 @@ def parseXML_CAN(block):
 
     return tmp_CAN
 
-def parseXML_PAGES(block):
+def parseXML_PAGES(block, master_ref):
     """function parses the page config information for a PyDash editor file.
     
     :param block: XML element tree specific to the read config class, IE the "theme" block or the "CAN" block
@@ -209,30 +208,39 @@ def parseXML_PAGES(block):
                     read_lbl.update({'NAME' : lbl.attrib.get('NAME')})
                     for atributes in lbl:
                         read_lbl.update({atributes.tag : atributes.text})
-                    read_elm.update({lbl.attrib.get('NAME') : Label_Static(**read_lbl)}) #append static label to read elements
+                    tmp_stat_ele = Label_Static(**read_lbl)                     #instance element
+                    tmp_stat_ele.master_ref = master_ref                        #set reference to main window
+                    read_elm.update({lbl.attrib.get('NAME') : tmp_stat_ele})    #append static label to read elements
             read_lbl.clear()                    #clear temp dict
             for lbl_data in elmnts.findall('LBL_DATA'):
                 for lbl in lbl_data:
                     read_lbl.update({'NAME' : lbl.attrib.get('NAME')})
                     for atributes in lbl:
                         read_lbl.update({atributes.tag : atributes.text})
-                    read_elm.update({lbl.attrib.get('NAME') : Label_Data(**read_lbl)})  #append data labels to read elements
+                    tmp_dat_ele = Label_Data(**read_lbl)                        #instance element
+                    tmp_dat_ele.master_ref = master_ref                         #set reference to main window
+                    read_elm.update({lbl.attrib.get('NAME') : tmp_dat_ele})     #append data labels to read elements
             read_lbl.clear() #clear temp dict
             for lbl_data in elmnts.findall('IND_BLT'):
                 for lbl in lbl_data:
                     read_lbl.update({'NAME' : lbl.attrib.get('NAME')})
                     for atributes in lbl:
                         read_lbl.update({atributes.tag : atributes.text})
-                    read_elm.update({lbl.attrib.get('NAME') : Indicator_Bullet(**read_lbl)})  #append data labels to read elements
+                    tmp_blt_ele = Indicator_Bullet(**read_lbl)                  #instance element
+                    tmp_blt_ele.master_ref = master_ref                         #set reference to main window
+                    read_elm.update({lbl.attrib.get('NAME') : tmp_blt_ele})     #append data labels to read elements
             read_lbl.clear() #clear temp dict
             for lbl_data in elmnts.findall('IND_BAR'):
                 for lbl in lbl_data:
                     read_lbl.update({'NAME' : lbl.attrib.get('NAME')})
                     for atributes in lbl:
                         read_lbl.update({atributes.tag : atributes.text})
-                    read_elm.update({lbl.attrib.get('NAME') : Indicator_Bar(**read_lbl)})  #append data labels to read elements
+                    tmp_bar_ele = Indicator_Bar(**read_lbl)                     #instance element
+                    tmp_bar_ele.master_ref = master_ref                         #set reference to main window
+                    read_elm.update({lbl.attrib.get('NAME') : tmp_bar_ele})     #append data labels to read elements
             read_lbl.clear() #clear temp dict
 
+        read_frame.master_ref = master_ref      #set reference back to main window
         read_frame.update_eleCfg(read_elm)      #add frame elements
         read_elm.clear()                        #clear temp dict
         tmp_cfg_pages.update({read_frame.name : read_frame})    #add or update frame to config dict

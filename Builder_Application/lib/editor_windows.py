@@ -214,7 +214,7 @@ class wndw_Colors(tk.Toplevel):
             """
             #--create tuple of required fields
             req_fields = (self.color_name.get() or None,)
-            req_fields += (self.RGB.get(),)
+            req_fields += (self.RGB.get() or None,)
 
             if None in req_fields: return True  #if at least one required field is missing, return true
             else: return False
@@ -1823,28 +1823,28 @@ class wndw_newWidget(tk.Toplevel):
         #--warning/danger limits
         dngrLO_lbl = tk.Label(self.frm_main, text="Low Danger Limit", font=font_hdr2)
         dngrLO_lbl.grid(row=8, column=0, padx=10, pady=10)
-        dngrLO_entry = self.dngrLO_entry = tk.Entry(self.frm_main, width=15, state='disabled'); dngrLO_entry.name='dngr_lo'
+        dngrLO_entry = self.dngrLO_entry = tk.Entry(self.frm_main, width=15, state='disabled'); dngrLO_entry.name='lim_dngrlo'
         dngrLO_entry.value = tk.StringVar(); dngrLO_entry.config(textvariable=dngrLO_entry.value) #create value attrb var and assign
         dngrLO_entry.grid(row=8, column=1, padx=10, pady=(10,0))
         dngrLO_entry.reqd = False #set as a NR widget field
-
+        
         warnLO_lbl = tk.Label(self.frm_main, text="Low Warning Limit", font=font_hdr2)
         warnLO_lbl.grid(row=9, column=0, padx=10, pady=10)
-        warnLO_entry = self.warnLO_entry = tk.Entry(self.frm_main, width=15, state='disabled'); warnLO_entry.name='warn_lo'
+        warnLO_entry = self.warnLO_entry = tk.Entry(self.frm_main, width=15, state='disabled'); warnLO_entry.name='lim_warnlo'
         warnLO_entry.value = tk.StringVar(); warnLO_entry.config(textvariable=warnLO_entry.value) #create value attrb var and assign
         warnLO_entry.grid(row=9, column=1, padx=10, pady=(10,0))
         warnLO_entry.reqd = False #set as a NR widget field
 
         warnHI_lbl = tk.Label(self.frm_main, text="High Warning Limit", font=font_hdr2)
         warnHI_lbl.grid(row=10, column=0, padx=10, pady=10)
-        warnHI_entry = self.warnHI_entry = tk.Entry(self.frm_main, width=15, state='disabled'); warnHI_entry.name='warn_hi'
+        warnHI_entry = self.warnHI_entry = tk.Entry(self.frm_main, width=15, state='disabled'); warnHI_entry.name='lim_warnhi'
         warnHI_entry.value = tk.StringVar(); warnHI_entry.config(textvariable=warnHI_entry.value) #create value attrb var and assign
         warnHI_entry.grid(row=10, column=1, padx=10, pady=(10,0))
         warnHI_entry.reqd = False #set as a NR widget field
 
         dngrHI_lbl = tk.Label(self.frm_main, text="High Danger Limit", font=font_hdr2)
         dngrHI_lbl.grid(row=11, column=0, padx=10, pady=10)
-        dngrHI_entry = self.dngrHI_entry = tk.Entry(self.frm_main, width=15, state='disabled'); dngrHI_entry.name='dngr_hi'
+        dngrHI_entry = self.dngrHI_entry = tk.Entry(self.frm_main, width=15, state='disabled'); dngrHI_entry.name='lim_dngrhi'
         dngrHI_entry.value = tk.StringVar(); dngrHI_entry.config(textvariable=dngrHI_entry.value) #create value attrb var and assign
         dngrHI_entry.grid(row=11, column=1, padx=10, pady=10)
         dngrHI_entry.reqd = False #set as a NR widget field
@@ -1921,28 +1921,28 @@ class wndw_newWidget(tk.Toplevel):
         #--warning/danger limits
         dngrLO_lbl = tk.Label(self.frm_main, text="Low Danger Limit", font=font_hdr2)
         dngrLO_lbl.grid(row=8, column=0, padx=10, pady=(10,0))
-        dngrLO_entry = self.dngrLO_entry = tk.Entry(self.frm_main, width=15, state='disabled'); dngrLO_entry.name='dngr_lo'
+        dngrLO_entry = self.dngrLO_entry = tk.Entry(self.frm_main, width=15, state='disabled'); dngrLO_entry.name='lim_dngrlo'
         dngrLO_entry.value = tk.StringVar(); dngrLO_entry.config(textvariable=dngrLO_entry.value) #create value attrb var and assign
         dngrLO_entry.grid(row=8, column=1, padx=10, pady=(10,0))
         dngrLO_entry.reqd = False #set as a NR widget field
 
         warnLO_lbl = tk.Label(self.frm_main, text="Low Warning Limit", font=font_hdr2)
         warnLO_lbl.grid(row=9, column=0, padx=10, pady=(10,0))
-        warnLO_entry = self.warnLO_entry = tk.Entry(self.frm_main, width=15, state='disabled'); warnLO_entry.name='warn_lo'
+        warnLO_entry = self.warnLO_entry = tk.Entry(self.frm_main, width=15, state='disabled'); warnLO_entry.name='lim_warnlo'
         warnLO_entry.value = tk.StringVar(); warnLO_entry.config(textvariable=warnLO_entry.value) #create value attrb var and assign
         warnLO_entry.grid(row=9, column=1, padx=10, pady=(10,0))
         warnLO_entry.reqd = False #set as a NR widget field
 
         warnHI_lbl = tk.Label(self.frm_main, text="High Warning Limit", font=font_hdr2)
         warnHI_lbl.grid(row=10, column=0, padx=10, pady=(10,0))
-        warnHI_entry = self.warnHI_entry = tk.Entry(self.frm_main, width=15, state='disabled'); warnHI_entry.name='warn_hi'
+        warnHI_entry = self.warnHI_entry = tk.Entry(self.frm_main, width=15, state='disabled'); warnHI_entry.name='lim_warnhi'
         warnHI_entry.value = tk.StringVar(); warnHI_entry.config(textvariable=warnHI_entry.value) #create value attrb var and assign
         warnHI_entry.grid(row=10, column=1, padx=10, pady=(10,0))
         warnHI_entry.reqd = False #set as a NR widget field
 
         dngrHI_lbl = tk.Label(self.frm_main, text="High Danger Limit", font=font_hdr2)
         dngrHI_lbl.grid(row=11, column=0, padx=10, pady=10)
-        dngrHI_entry = self.dngrHI_entry = tk.Entry(self.frm_main, width=15, state='disabled'); dngrHI_entry.name='dngr_hi'
+        dngrHI_entry = self.dngrHI_entry = tk.Entry(self.frm_main, width=15, state='disabled'); dngrHI_entry.name='lim_dngrhi'
         dngrHI_entry.value = tk.StringVar(); dngrHI_entry.config(textvariable=dngrHI_entry.value) #create value attrb var and assign
         dngrHI_entry.grid(row=11, column=1, padx=10, pady=10)
         dngrHI_entry.reqd = False #set as a NR widget field
@@ -2027,28 +2027,28 @@ class wndw_newWidget(tk.Toplevel):
         #--warning/danger limits
         dngrLO_lbl = tk.Label(self.frm_main, text="Low Danger Limit", font=font_hdr2)
         dngrLO_lbl.grid(row=9, column=0, padx=10, pady=(10,0))
-        dngrLO_entry = self.dngrLO_entry = tk.Entry(self.frm_main, width=15, state='disabled'); dngrLO_entry.name='dngr_lo'
+        dngrLO_entry = self.dngrLO_entry = tk.Entry(self.frm_main, width=15, state='disabled'); dngrLO_entry.name='lim_dngrlo'
         dngrLO_entry.value = tk.StringVar(); dngrLO_entry.config(textvariable=dngrLO_entry.value) #create value attrb var and assign
         dngrLO_entry.grid(row=9, column=1, padx=10, pady=(10,0))
         dngrLO_entry.reqd = False #set as a required widget field
 
         warnLO_lbl = tk.Label(self.frm_main, text="Low Warning Limit", font=font_hdr2)
         warnLO_lbl.grid(row=10, column=0, padx=10, pady=(10,0))
-        warnLO_entry = self.warnLO_entry = tk.Entry(self.frm_main, width=15, state='disabled'); warnLO_entry.name='warn_lo'
+        warnLO_entry = self.warnLO_entry = tk.Entry(self.frm_main, width=15, state='disabled'); warnLO_entry.name='lim_warnlo'
         warnLO_entry.value = tk.StringVar(); warnLO_entry.config(textvariable=warnLO_entry.value) #create value attrb var and assign
         warnLO_entry.grid(row=10, column=1, padx=10, pady=(10,0))
         warnLO_entry.reqd = False #set as a required widget field
 
         warnHI_lbl = tk.Label(self.frm_main, text="High Warning Limit", font=font_hdr2)
         warnHI_lbl.grid(row=11, column=0, padx=10, pady=(10,0))
-        warnHI_entry = self.warnHI_entry = tk.Entry(self.frm_main, width=15, state='disabled'); warnHI_entry.name='warn_hi'
+        warnHI_entry = self.warnHI_entry = tk.Entry(self.frm_main, width=15, state='disabled'); warnHI_entry.name='lim_warnhi'
         warnHI_entry.value = tk.StringVar(); warnHI_entry.config(textvariable=warnHI_entry.value) #create value attrb var and assign
         warnHI_entry.grid(row=11, column=1, padx=10, pady=(10,0))
         warnHI_entry.reqd = False #set as a required widget field
 
         dngrHI_lbl = tk.Label(self.frm_main, text="High Danger Limit", font=font_hdr2)
         dngrHI_lbl.grid(row=12, column=0, padx=10, pady=10)
-        dngrHI_entry = self.dngrHI_entry = tk.Entry(self.frm_main, width=15, state='disabled'); dngrHI_entry.name='dngr_hi'
+        dngrHI_entry = self.dngrHI_entry = tk.Entry(self.frm_main, width=15, state='disabled'); dngrHI_entry.name='lim_dngrhi'
         dngrHI_entry.value = tk.StringVar(); dngrHI_entry.config(textvariable=dngrHI_entry.value) #create value attrb var and assign
         dngrHI_entry.grid(row=12, column=1, padx=10, pady=10)
         dngrHI_entry.reqd = False #set as a required widget field
@@ -2148,7 +2148,7 @@ class vw_EditorWidget_props:
             child.destroy()
 
     def vw_update(self):
-        """function calls the correct method to update the editor view, based on the currently selected dashe element.
+        """function calls the correct method to update the editor view, based on the currently selected dash element.
         The various called functions modify the displayed fields, specific to the dash element type."""
 
         match self.current_wigtCfg:

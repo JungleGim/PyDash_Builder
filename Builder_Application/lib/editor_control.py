@@ -81,8 +81,9 @@ class editrCntl:
         """function cycles through all the defined pages in the instanced `pages` dict and builds how
         it should be displated. This means adding defined elements, etc. A full update of the visual state
         of the dash page based on its current config."""
-        for page in self.master_ref.cfg_pages.values():         #loop through all pages in config
-            self.buildPage(page)
+        for page in self.master_ref.cfg_pages.values(): #loop through all pages in config
+            page.buildPages_canv()                          #make canvas object
+            self.buildPage(page)                            #add all the various dash elements
 
     def buildPage(self, psd_page):
         """function builds the passed page, including all visual elements like the page background color

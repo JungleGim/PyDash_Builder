@@ -125,9 +125,10 @@ The below is a list of wants/needs for future revisions, listed in no order of i
     - After copying, update text and function to "paste element"
     - When "pasting", first prompt for a new reference name and then after the user clicks "OK" use the same "element place" type routine like what's used when creating a new element.
         + should actually be able to juse re-use the "new element" routine or parts from it to make thigns easy.
-- QOL: Add a right-click "context menu" for the main editor view
+* QOL: Add a right-click "context menu" for the main editor view
     - this would be helpful for several functions with editing. Some ideas:
         + top of the menu would be "local elements". This would be great if like, one element is stacked (or near) another and the user wants to specify the EXACT element to pick/update
+            * this should easily be done using the "find_closest" canvas method and include the `halo` argument with some radius
         + add a separator
         + Then include some common editing things like the copy/paste/delete options
 * QOL: More editor keyboard shortcuts

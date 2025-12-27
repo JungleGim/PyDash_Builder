@@ -34,11 +34,9 @@ font_hdr2 = ("Arial", 12)
 font_norm1 = ("Arial", 10)
 font_norm2 = ("Arial", 8)
 font_norm1_hyper = ('Arial', 10, 'underline')
-
 text_example =  'ABCDEFGHIJKLMN\n' \
                 'OPQRSTUVWXYZ\n' \
                 '1234567890.#%'
-
 brdr_accent = 2                     #accent border to show where certain frames/elements are when they're blank
 brdr_accent_offset = brdr_accent*2  #offset for dimentions of panes to account for the debug border
 
