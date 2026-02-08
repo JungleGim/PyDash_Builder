@@ -143,6 +143,34 @@ The below is a list of wants/needs for future revisions, listed in no order of i
         + also press/hold then moves continually
     - Delete key
         + bind to "delete element"
+* Improvement: Improved background padding
+    - The background padding shape and "extra space" around various fonts is really fucking bothering me
+    - Tried doing some testing with various methods (see archive `tkinter_padBox_testing`)
+        + used BBOX with different justifications
+        + also used "manual" box placement based on a font-point to DPI conversion
+        + Tried using a canvas "window" and just....yeah. all the things
+        + Some worked better with some fonts and then just broke completely with other fonts
+    - Potential solution
+        + from all the testing, it looks like probably won't be able to just make a "fixed" bacgkround pad based on the passed font, since literally all of the fonts are different and have different kerning.
+        + solution: allow for configuration of the background pad
+            * initial pad size can still be handled by the BBOX() method on generation
+            * include additional factors for "pad_x_offset", "pad_y_offset", "pad_x_size_adj", and "pad_y_size_adj"
+            * the additional factors will let users configure the individual pad for each label
+            * allows for the same pad objects and handling currently in the code but then just integrate the above additional factors to change the size and position of the created pad object. IE, the "offset" moves the x/y position by some ammount and the "size adjust" can be some pixel factor to adjust the x/y size of the box.
+            * using "relative" sizes for these tweaks then allows for an easy [x_ofst = widget_class.get('pad_x_offset',0)] type approach where if the box tweaks aren't defined then just a '0' value (so no tweak) is used
+        + I think because each font is different and then each text label is different (due to potential upper + lower case mixes) this has to be applied at the individual label level, not at the like, overall font level where the same shift would be applied to ALL entries.
+* Feature Request: Updated RTR frequency
+    - Updates to support "missed message" handling in the dash
+    - Update the RTR frequency for CAN channels for ALL entries (RTR or not) to be required
+    - If RTR is not enabled, the label should say "expected frequency"
+    - XML field outputs for both the dash config and editor save can remain the same
+    - Update the error check and required field checks in various views to ensure that the RTR freq field is populated
+* Improvement: Updated CAN frame definition
+    - Don't use "frames" anymore, change how CAN data is defined for use in the dash
+    - Update to "start bit", "number of bits", and "Endian"
+    - Endian will ensure the RX'd message is reconstructed correctly
+    - "start bit" and "number of bits" will help simplify things and allow like, single big status messages to be used
+    - Grayhill keypad and others use single bits so its worth updating
 
 ## Repository Directory Map
 The following information describes the folders found in the root directory of this repository
@@ -259,3 +287,4 @@ The information included is provided "as is", without warranty of any kind, expr
 
 # Note from the "Developer"
 While I am an engineer by trade, my area of focus is not computer architecture, system engineering, or any computer sciences. Likely, some people have already looked at various aspects of the codebase and just shook their heads. That being said, I'm giving it the good ole college try with this project (and GitHub) and will do my best to keep things up to date.
+
