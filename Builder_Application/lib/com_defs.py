@@ -250,6 +250,7 @@ def updPages(master_ref):
     :param master_ref: reference back to the main/master window
     :type master_ref: `tk.window` ref
     """
+    #TODO: should this be in the "dash_control" class?
     for page in master_ref.cfg_pages.values(): page.update_page()   #cycle through all pages and update
 
 def addImg(canv, image, x=0, y=0):
@@ -409,7 +410,7 @@ class dash_config:
         for attr in self.__dict__.keys():   #loop through defined attributes
             setattr(self, attr, None)       #and set to None
 
-    def upd_cfg(self, **kwargs):
+    def upd_cfg(self, kwargs):
         """ function sets attributes based on the passed KWARGs. All KWARGs have default values
         for typical display values. If kwarg is not passed, the value is not updated
 
@@ -1271,7 +1272,8 @@ class Label_Data:
 
         """configuration args"""
         self.name = kwargs.get('NAME', None)                #label name
-        self.data_ch = kwargs.get('DATA_CH', None)           #Named data channel (see CAN class)
+        self.data_ch = kwargs.get('DATA_CH', None)          #Named data channel (see CAN class)
+        self.sigdig = kwargs.get('SIGDIG', 0)               #number of significant digits
         self.pad = bool_str(kwargs.get('PAD', False))       #text is padded
         self.clr_bg = kwargs.get('CLR_BG', False)           #foreground color
         self.warn_en = bool_str(kwargs.get('WARN_EN', None))#warning is enabled
@@ -1290,10 +1292,10 @@ class Label_Data:
         self.wgtCtl = None          #bindings for editor control
 
         #--create tupple for class attributes used to save editor XML file
-        self.fields_editorCFG = ('x0', 'y0', 'fill', 'font', 'max_val', 'data_ch', 'pad', 'clr_bg', 'warn_en', 'lim_DngrLo', 'lim_WarnLo', 'lim_WarnHi', 'lim_DngrHi')
+        self.fields_editorCFG = ('x0', 'y0', 'fill', 'font', 'max_val', 'data_ch', 'sigdig', 'pad', 'clr_bg', 'warn_en', 'lim_DngrLo', 'lim_WarnLo', 'lim_WarnHi', 'lim_DngrHi')
 
         #--create tupple for class attributes used to generate dash config file
-        self.fields_dashCFG = ('x0', 'y0', 'fill', 'font', 'data_ch', 'pad', 'clr_bg', 'warn_en', 'lim_DngrLo', 'lim_WarnLo', 'lim_WarnHi', 'lim_DngrHi')
+        self.fields_dashCFG = ('x0', 'y0', 'fill', 'font', 'data_ch', 'sigdig', 'pad', 'clr_bg', 'warn_en', 'lim_DngrLo', 'lim_WarnLo', 'lim_WarnHi', 'lim_DngrHi')
     
     def upd_config(self, kwargs):
         """function updates element configuration values based on the passed kwargs. This is
@@ -1429,7 +1431,7 @@ class Label_Data:
 
         for attr, val in self.__dict__.items():
             if attr in self.fields_dashCFG:
-                if (attr == 'x0') or (attr == 'y0'):
+                if (attr == 'x0') or (attr == 'y0') or (attr == 'sigdig'):
                     if (val is None) or val == '':
                         tmp_err_list.update({pg_name +'-'+ self.name +'-'+ attr:'Required value for page data label is undefined'})
                 elif attr == 'font':
@@ -1469,19 +1471,15 @@ class Indicator_Bullet:
         self.x0 = int_str(kwargs.get('X0', 0))                  #position - X0
         self.y0 = int_str(kwargs.get('Y0', 0))                  #position - Y0
         self.size = int_str(kwargs.get('SIZE', None))           #bullet indicator size
-        self.fill = kwargs.get('FILL', None)                    #foreground (fill) color
-        self.outln = kwargs.get('OUTLN', None)                  #named outline color (see theme class)
-
+        self.lim_lo = int_str(kwargs.get('LIM_LO', None))       #lo limit
+        self.lim_hi = int_str(kwargs.get('LIM_HI', None))       #hi limit
+        
         """configuration args"""
         self.name = kwargs.get('NAME', None)                    #label name
         self.data_ch = kwargs.get('DATA_CH', None)              #Named linked CAN channel (see CAN class)
-        self.ind_on = int_str(kwargs.get('IND_ON', None))       #on limit
-        self.ind_off = int_str(kwargs.get('IND_OFF', None))     #off limit
-        self.warn_en = bool_str(kwargs.get('WARN_EN', None))    #warning is enabled
-        self.lim_DngrLo = int_str(kwargs.get('LIM_DNGRLO', None))  #danger low limit
-        self.lim_WarnLo = int_str(kwargs.get('LIM_WARNLO', None))  #warning low limit
-        self.lim_WarnHi = int_str(kwargs.get('LIM_WARNHI', None))  #warning high limit
-        self.lim_DngrHi = int_str(kwargs.get('LIM_DNGRHI', None))  #danger high limit
+        self.clr_lo = kwargs.get('CLR_LO', None)                #foreground (fill) color - lo limit
+        self.clr_hi = kwargs.get('CLR_HI', None)                #foreground (fill) color - hi limit
+        self.outln = kwargs.get('OUTLN', None)                  #named outline color (see theme class)
 
         #-----ref vars
         self.master_ref = None      #reference back to the master window > needed for theme and font transformations
@@ -1492,7 +1490,7 @@ class Indicator_Bullet:
         self.wgtCtl = None          #bindings for editor control
 
         #--create tupple for class attributes used to save editor XML file
-        self.fields_editorCFG = ('x0', 'y0', 'fill', 'size', 'data_ch', 'outln', 'ind_on', 'ind_off', 'warn_en', 'lim_DngrLo', 'lim_WarnLo', 'lim_WarnHi', 'lim_DngrHi')
+        self.fields_editorCFG = ('x0', 'y0', 'size', 'data_ch', 'lim_lo', 'lim_hi', 'clr_lo', 'clr_hi', 'outln')
 
         #--create tupple for class attributes used to generate dash config file
         self.fields_dashCFG = self.fields_editorCFG
@@ -1557,8 +1555,8 @@ class Indicator_Bullet:
                       'y0': self.y0,
                       'x1': self.x0 + self.size,
                       'y1': self.y0 + self.size,
-                      'fill': thm_clrs[self.fill],          #transform from keyword to color HEX code
-                      'outline': thm_clrs[self.outln]}    #transform from keyword to color HEX code
+                      'fill': thm_clrs[self.clr_lo],    #transform from keyword to color HEX code
+                      'outline': thm_clrs[self.outln]}  #transform from keyword to color HEX code
         
         return out_kwargs   #retun the complete kwarg dict
     
@@ -1569,8 +1567,8 @@ class Indicator_Bullet:
         theme defition would have its `external_refs` dict updated to include the entry for this named element
         against it's used colors.
         """
-        colors = (self.fill, self.outln)    #colors used for element
-        can_chs = (self.data_ch,)           #CAN channels used for element
+        colors = (self.clr_hi, self.clr_lo, self.outln)     #colors used for element
+        can_chs = (self.data_ch,)                           #CAN channels used for element
         ref_dict = {'COLORS':colors,
                     'CAN_CH':can_chs}       #dict of the used references. Format is {'ref_type':(tup of named ref values)}
         upd_definition_refs(self.master_ref, self.name, ref_dict)   #update the core references  
@@ -1591,35 +1589,18 @@ class Indicator_Bullet:
 
         for attr, val in self.__dict__.items():
             if attr in self.fields_dashCFG:
-                if (attr == 'x0') or (attr == 'y0') or (attr == 'size') or (attr =='ind_on') or (attr == 'ind_off'):
+                if (attr == 'x0') or (attr == 'y0') or (attr == 'size') or (attr =='lim_lo') or (attr == 'lim_hi'):
                     if (val is None) or val == '':
                         tmp_err_list.update({pg_name +'-'+ self.name +'-'+ attr:'Required value for page bullet indicator is undefined'})
                 elif attr == 'font':
                     if not self.master_ref.cfg_theme.chk_exist_fonts(val):
                         tmp_err_list.update({pg_name +'-'+ self.name +'-label_font':'Named font "' + val + '" not defined in theme'})
-                elif (attr == 'fill') or (attr == 'outln'):
+                elif (attr == 'clr_lo') or (attr == 'clr_hi') or (attr == 'outln'):
                     if not self.master_ref.cfg_theme.chk_exist_colors(val):
                         tmp_err_list.update({pg_name +'-'+ self.name +'-fill_color':'Named color "' + val + '" not defined in theme'})
                 elif attr == 'data_ch':
                     if not self.master_ref.cfg_CAN.chk_exist_CANch(val):
                         tmp_err_list.update({pg_name +'-'+ self.name +'-CAN_ch':'Named CAN channel "' + val + '" not defined in theme'})
-                elif attr == 'pad':
-                    if (val is None) or val == '':
-                        tmp_err_list.update({pg_name +'-'+ self.name +'-'+ attr:'Required value for page bullet indicator is undefined'})
-                    if val == True and not self.master_ref.cfg_theme.chk_exist_colors(self.clr_bg):
-                        tmp_err_list.update({pg_name +'-'+ self.name +'-pad_color':'Named color "' + self.clr_bg + '" not defined in theme'})
-                elif attr == 'warn_en':
-                    if (val is None) or val == '':
-                        tmp_err_list.update({pg_name +'-'+ self.name +'-'+ attr:'Required value for page bullet indicator is undefined'})
-                    if val == True:
-                        if self.lim_DngrLo is None or self.lim_DngrLo == '':
-                            tmp_err_list.update({pg_name +'-'+ self.name +'-Limit_Danger_Lo':'Warning color changing enabled and limit is not defined'})
-                        if self.lim_WarnLo is None or self.lim_WarnLo == '':
-                            tmp_err_list.update({pg_name +'-'+ self.name +'-Limit_Warn_Lo':'Warning color changing enabled and limit is not defined'})
-                        if self.lim_WarnHi is None or self.lim_WarnHi == '':
-                            tmp_err_list.update({pg_name +'-'+ self.name +'-Limit_Warn_Hi':'Warning color changing enabled and limit is not defined'})
-                        if self.lim_DngrHi is None or self.lim_DngrHi == '':
-                            tmp_err_list.update({pg_name +'-'+ self.name +'-Limit_Danger_Hi':'Warning color changing enabled and limit is not defined'})
 
         return tmp_err_list
 

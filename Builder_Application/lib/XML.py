@@ -107,12 +107,12 @@ def parseXML_CORE(block):
     :returns: temp editor configuration - specific to the read config class, IE the "theme" config or the "CAN" config
     :rtype: XML ET.parse() object result
     """
-    tmp_config = dash_config()                           #temp core config opt instance
+    tmp_config = dash_config()                      #temp core config opt instance
     read_DISPconfig = {}                            #temp dict for read values
     
     for cfg in block:
         read_DISPconfig.update({cfg.tag : cfg.text})    #append to temp dict
-    tmp_config.upd_cfg(**read_DISPconfig)                   #update core dash display values
+    tmp_config.upd_cfg(read_DISPconfig)             #update core dash display values
 
     return tmp_config
 
@@ -342,13 +342,14 @@ def genXML_THEME(root_XML, XMLmode, theme_cfg):
         font.set('NAME', name)                                  #set font name
 
         #--set attribute list based on the save mode
-        if XMLmode == XMLgen_mode['DASH']: atrb_list = dat.fields_dashCFG
-        else: atrb_list = dat.fields_editorCFG #XMLmode == XMLgen_mode['EDTR']
-
-        for atrb, val in dat.__dict__.items():          #cycle through all font dict attributes
-            if atrb in atrb_list:                           #if the attribute is flagged for saving in the config
-                sub = ET.SubElement(font, atrb.upper())         #add as a sub-element, using the attribute name
-                sub.text = xmlGen_str(val)                      #and set its value
+        if XMLmode == XMLgen_mode['DASH']:              #if dash output
+            font.text = xmlGen_str(dat.fnt_tup)             #set XML output value to the font tupple
+        else: #XMLmode == XMLgen_mode['EDTR']           #else its an editor output
+            atrb_list = dat.fields_editorCFG
+            for atrb, val in dat.__dict__.items():          #cycle through all font dict attributes
+                if atrb in atrb_list:                           #if the attribute is flagged for saving in the config
+                    sub = ET.SubElement(font, atrb.upper())         #add as a sub-element, using the attribute name
+                    sub.text = xmlGen_str(val)                      #and set its value
 
     theme_images = ET.SubElement(cfg_theme,'IMAGES')    #add theme images subelement to root
     for name, dat in theme_cfg.images.items():              #cycle through all images in dict

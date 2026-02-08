@@ -1813,40 +1813,48 @@ class wndw_newWidget(tk.Toplevel):
         cbo_canCH.grid(row=6, column=1, padx=10, pady=(10,0))
         cbo_canCH.reqd = True #set as a required widget field
 
+        #--number of significant digits
+        lbl_sigdig = tk.Label(self.frm_main, text="Significant Digits", font=font_hdr2)
+        lbl_sigdig.grid(row=7, column=0, padx=10, pady=(10,0))
+        entry_sigdig = tk.Entry(self.frm_main, width=15); entry_sigdig.name='sigdig'
+        entry_sigdig.value = tk.IntVar(); entry_sigdig.config(textvariable=entry_sigdig.value)
+        entry_sigdig.grid(row=7, column=1, padx=10, pady=(10,0))
+        entry_sigdig.reqd = True #set as a required widget field
+
         #--Change Color
         chk_warn=self.chk_warn=tk.Checkbutton(self.frm_main, text="Change Color", font=font_hdr2, onvalue=True, offvalue=False, command=self.limits_en)
         chk_warn.name='warn_en'
         chk_warn.value = tk.BooleanVar(); chk_warn.config(variable=chk_warn.value) #create value attrb var and assign
-        chk_warn.grid(row=7, column=0 ,columnspan=2, padx=10, pady=(10,0), sticky=tk.W)
+        chk_warn.grid(row=8, column=0 ,columnspan=2, padx=10, pady=(10,0), sticky=tk.W)
         chk_warn.reqd = True #set as a required widget field
 
         #--warning/danger limits
         dngrLO_lbl = tk.Label(self.frm_main, text="Low Danger Limit", font=font_hdr2)
-        dngrLO_lbl.grid(row=8, column=0, padx=10, pady=10)
+        dngrLO_lbl.grid(row=9, column=0, padx=10, pady=10)
         dngrLO_entry = self.dngrLO_entry = tk.Entry(self.frm_main, width=15, state='disabled'); dngrLO_entry.name='lim_dngrlo'
         dngrLO_entry.value = tk.StringVar(); dngrLO_entry.config(textvariable=dngrLO_entry.value) #create value attrb var and assign
-        dngrLO_entry.grid(row=8, column=1, padx=10, pady=(10,0))
+        dngrLO_entry.grid(row=9, column=1, padx=10, pady=(10,0))
         dngrLO_entry.reqd = False #set as a NR widget field
         
         warnLO_lbl = tk.Label(self.frm_main, text="Low Warning Limit", font=font_hdr2)
-        warnLO_lbl.grid(row=9, column=0, padx=10, pady=10)
+        warnLO_lbl.grid(row=10, column=0, padx=10, pady=10)
         warnLO_entry = self.warnLO_entry = tk.Entry(self.frm_main, width=15, state='disabled'); warnLO_entry.name='lim_warnlo'
         warnLO_entry.value = tk.StringVar(); warnLO_entry.config(textvariable=warnLO_entry.value) #create value attrb var and assign
-        warnLO_entry.grid(row=9, column=1, padx=10, pady=(10,0))
+        warnLO_entry.grid(row=10, column=1, padx=10, pady=(10,0))
         warnLO_entry.reqd = False #set as a NR widget field
 
         warnHI_lbl = tk.Label(self.frm_main, text="High Warning Limit", font=font_hdr2)
-        warnHI_lbl.grid(row=10, column=0, padx=10, pady=10)
+        warnHI_lbl.grid(row=11, column=0, padx=10, pady=10)
         warnHI_entry = self.warnHI_entry = tk.Entry(self.frm_main, width=15, state='disabled'); warnHI_entry.name='lim_warnhi'
         warnHI_entry.value = tk.StringVar(); warnHI_entry.config(textvariable=warnHI_entry.value) #create value attrb var and assign
-        warnHI_entry.grid(row=10, column=1, padx=10, pady=(10,0))
+        warnHI_entry.grid(row=11, column=1, padx=10, pady=(10,0))
         warnHI_entry.reqd = False #set as a NR widget field
 
         dngrHI_lbl = tk.Label(self.frm_main, text="High Danger Limit", font=font_hdr2)
-        dngrHI_lbl.grid(row=11, column=0, padx=10, pady=10)
+        dngrHI_lbl.grid(row=12, column=0, padx=10, pady=10)
         dngrHI_entry = self.dngrHI_entry = tk.Entry(self.frm_main, width=15, state='disabled'); dngrHI_entry.name='lim_dngrhi'
         dngrHI_entry.value = tk.StringVar(); dngrHI_entry.config(textvariable=dngrHI_entry.value) #create value attrb var and assign
-        dngrHI_entry.grid(row=11, column=1, padx=10, pady=10)
+        dngrHI_entry.grid(row=12, column=1, padx=10, pady=10)
         dngrHI_entry.reqd = False #set as a NR widget field
 
     def config_eles_ind_blt(self):
@@ -1860,92 +1868,65 @@ class wndw_newWidget(tk.Toplevel):
         ref_entry.grid(row=0, column=1, padx=10, pady=(10,0))
         ref_entry.reqd = True #set as a required widget field
 
-        #--fill color
-        fill_lbl = tk.Label(self.frm_main, text="Fill Color", font=font_hdr2)
-        fill_lbl.grid(row=1, column=0, padx=10, pady=(10,0))
-        cbo_fill = ttk.Combobox(self.frm_main, values=list(self.master_colors.keys())); cbo_fill.name='fill'
-        cbo_fill.set("Select Color")
-        cbo_fill.value = tk.StringVar(); cbo_fill.config(textvariable=cbo_fill.value) #create value attrb var and assign
-        cbo_fill.grid(row=1, column=1, padx=10, pady=(10,0))
-        cbo_fill.reqd = True #set as a required widget field
-
-        #--outline color
-        otln_lbl = tk.Label(self.frm_main, text="Outline Color", font=font_hdr2)
-        otln_lbl.grid(row=2, column=0, padx=10, pady=(10,0))
-        cbo_otln = ttk.Combobox(self.frm_main, values=list(self.master_colors.keys())); cbo_otln.name='outln'
-        cbo_otln.set("Select Color")
-        cbo_otln.value = tk.StringVar(); cbo_otln.config(textvariable=cbo_otln.value) #create value attrb var and assign
-        cbo_otln.grid(row=2, column=1, padx=10, pady=(10,0))
-        cbo_otln.reqd = True #set as a required widget field
-
         #--size
         sz_lbl = tk.Label(self.frm_main, text="Indicator Size", font=font_hdr2)
-        sz_lbl.grid(row=3, column=0, padx=10, pady=(10,0))
+        sz_lbl.grid(row=1, column=0, padx=10, pady=(10,0))
         sz_entry = tk.Entry(self.frm_main, width=15); sz_entry.name='size'
         sz_entry.value = tk.IntVar(); sz_entry.config(textvariable=sz_entry.value) #create value attrb var and assign
-        sz_entry.grid(row=3, column=1, padx=10, pady=(10,0))
+        sz_entry.grid(row=1, column=1, padx=10, pady=(10,0))
         sz_entry.reqd = True #set as a required widget field
 
         #--CAN channel
         canCH_lbl = tk.Label(self.frm_main, text="CAN channel", font=font_hdr2)
-        canCH_lbl.grid(row=4, column=0, padx=10, pady=(10,0))
+        canCH_lbl.grid(row=2, column=0, padx=10, pady=(10,0))
         cbo_canCH = ttk.Combobox(self.frm_main, values=list(self.master_CANch.keys())); cbo_canCH.name='data_ch'
         cbo_canCH.set("Select CAN Channel")
         cbo_canCH.value = tk.StringVar(); cbo_canCH.config(textvariable=cbo_canCH.value) #create value attrb var and assign
-        cbo_canCH.grid(row=4, column=1, padx=10, pady=(10,0))
+        cbo_canCH.grid(row=2, column=1, padx=10, pady=(10,0))
         CAN_ch.reqd = True #set as a required widget field
 
-        #--on limit
-        onlim_lbl = tk.Label(self.frm_main, text="On Limit", font=font_hdr2)
-        onlim_lbl.grid(row=5, column=0, padx=10, pady=(10,0))
-        onlim_entry = tk.Entry(self.frm_main, width=15); onlim_entry.name='ind_on'
-        onlim_entry.value = tk.StringVar(); onlim_entry.config(textvariable=onlim_entry.value) #create value attrb var and assign
-        onlim_entry.grid(row=5, column=1, padx=10, pady=(10,0))
-        onlim_entry.reqd = True #set as a required widget field
+        #--low limit
+        lolim_lbl = tk.Label(self.frm_main, text="LO Limit", font=font_hdr2)
+        lolim_lbl.grid(row=3, column=0, padx=10, pady=(10,0))
+        lolim_entry = tk.Entry(self.frm_main, width=15); lolim_entry.name='lim_lo'
+        lolim_entry.value = tk.StringVar(); lolim_entry.config(textvariable=lolim_entry.value) #create value attrb var and assign
+        lolim_entry.grid(row=3, column=1, padx=10, pady=(10,0))
+        lolim_entry.reqd = True #set as a required widget field
 
-        #--off limit
-        offlim_lbl = tk.Label(self.frm_main, text="Off Limit", font=font_hdr2)
-        offlim_lbl.grid(row=6, column=0, padx=10, pady=(10,0))
-        offlim_entry = tk.Entry(self.frm_main, width=15); offlim_entry.name='ind_off'
-        offlim_entry.value = tk.StringVar(); offlim_entry.config(textvariable=offlim_entry.value) #create value attrb var and assign
-        offlim_entry.grid(row=6, column=1, padx=10, pady=(10,0))
-        offlim_entry.reqd = True #set as a required widget field
+        #--High limit
+        hilim_lbl = tk.Label(self.frm_main, text="HI Limit", font=font_hdr2)
+        hilim_lbl.grid(row=4, column=0, padx=10, pady=(10,0))
+        hilim_entry = tk.Entry(self.frm_main, width=15); hilim_entry.name='lim_hi'
+        hilim_entry.value = tk.StringVar(); hilim_entry.config(textvariable=hilim_entry.value) #create value attrb var and assign
+        hilim_entry.grid(row=4, column=1, padx=10, pady=(10,0))
+        hilim_entry.reqd = True #set as a required widget field
 
-        #--Change Color
-        chk_warn=self.chk_warn=tk.Checkbutton(self.frm_main, text="Change Color", font=font_hdr2, onvalue=True, offvalue=False, command=self.limits_en)
-        chk_warn.name='warn_en'
-        chk_warn.value = tk.BooleanVar(); chk_warn.config(variable=chk_warn.value) #create value attrb var and assign
-        chk_warn.grid(row=7, column=0 ,columnspan=2, padx=10, pady=(10,0), sticky=tk.W)
-        chk_warn.reqd = True #set as a required widget field
+        #--lo limit color
+        loclr_lbl = tk.Label(self.frm_main, text="LO Lim Color", font=font_hdr2)
+        loclr_lbl.grid(row=5, column=0, padx=10, pady=(10,0))
+        cbo_loclr = ttk.Combobox(self.frm_main, values=list(self.master_colors.keys())); cbo_loclr.name='clr_lo'
+        cbo_loclr.set("Select Color")
+        cbo_loclr.value = tk.StringVar(); cbo_loclr.config(textvariable=cbo_loclr.value) #create value attrb var and assign
+        cbo_loclr.grid(row=5, column=1, padx=10, pady=(10,0))
+        cbo_loclr.reqd = True #set as a required widget field
 
-        #--warning/danger limits
-        dngrLO_lbl = tk.Label(self.frm_main, text="Low Danger Limit", font=font_hdr2)
-        dngrLO_lbl.grid(row=8, column=0, padx=10, pady=(10,0))
-        dngrLO_entry = self.dngrLO_entry = tk.Entry(self.frm_main, width=15, state='disabled'); dngrLO_entry.name='lim_dngrlo'
-        dngrLO_entry.value = tk.StringVar(); dngrLO_entry.config(textvariable=dngrLO_entry.value) #create value attrb var and assign
-        dngrLO_entry.grid(row=8, column=1, padx=10, pady=(10,0))
-        dngrLO_entry.reqd = False #set as a NR widget field
+        #--hi limit color
+        hiclr_lbl = tk.Label(self.frm_main, text="HI Lim Color", font=font_hdr2)
+        hiclr_lbl.grid(row=6, column=0, padx=10, pady=(10,0))
+        cbo_hiclr = ttk.Combobox(self.frm_main, values=list(self.master_colors.keys())); cbo_hiclr.name='clr_hi'
+        cbo_hiclr.set("Select Color")
+        cbo_hiclr.value = tk.StringVar(); cbo_hiclr.config(textvariable=cbo_hiclr.value) #create value attrb var and assign
+        cbo_hiclr.grid(row=6, column=1, padx=10, pady=(10,0))
+        cbo_hiclr.reqd = True #set as a required widget field
 
-        warnLO_lbl = tk.Label(self.frm_main, text="Low Warning Limit", font=font_hdr2)
-        warnLO_lbl.grid(row=9, column=0, padx=10, pady=(10,0))
-        warnLO_entry = self.warnLO_entry = tk.Entry(self.frm_main, width=15, state='disabled'); warnLO_entry.name='lim_warnlo'
-        warnLO_entry.value = tk.StringVar(); warnLO_entry.config(textvariable=warnLO_entry.value) #create value attrb var and assign
-        warnLO_entry.grid(row=9, column=1, padx=10, pady=(10,0))
-        warnLO_entry.reqd = False #set as a NR widget field
-
-        warnHI_lbl = tk.Label(self.frm_main, text="High Warning Limit", font=font_hdr2)
-        warnHI_lbl.grid(row=10, column=0, padx=10, pady=(10,0))
-        warnHI_entry = self.warnHI_entry = tk.Entry(self.frm_main, width=15, state='disabled'); warnHI_entry.name='lim_warnhi'
-        warnHI_entry.value = tk.StringVar(); warnHI_entry.config(textvariable=warnHI_entry.value) #create value attrb var and assign
-        warnHI_entry.grid(row=10, column=1, padx=10, pady=(10,0))
-        warnHI_entry.reqd = False #set as a NR widget field
-
-        dngrHI_lbl = tk.Label(self.frm_main, text="High Danger Limit", font=font_hdr2)
-        dngrHI_lbl.grid(row=11, column=0, padx=10, pady=10)
-        dngrHI_entry = self.dngrHI_entry = tk.Entry(self.frm_main, width=15, state='disabled'); dngrHI_entry.name='lim_dngrhi'
-        dngrHI_entry.value = tk.StringVar(); dngrHI_entry.config(textvariable=dngrHI_entry.value) #create value attrb var and assign
-        dngrHI_entry.grid(row=11, column=1, padx=10, pady=10)
-        dngrHI_entry.reqd = False #set as a NR widget field
+        #--outline color
+        otln_lbl = tk.Label(self.frm_main, text="Outline Color", font=font_hdr2)
+        otln_lbl.grid(row=7, column=0, padx=10, pady=(10,0))
+        cbo_otln = ttk.Combobox(self.frm_main, values=list(self.master_colors.keys())); cbo_otln.name='outln'
+        cbo_otln.set("Select Color")
+        cbo_otln.value = tk.StringVar(); cbo_otln.config(textvariable=cbo_otln.value) #create value attrb var and assign
+        cbo_otln.grid(row=7, column=1, padx=10, pady=(10,0))
+        cbo_otln.reqd = True #set as a required widget field
 
     def config_eles_ind_bar(self):
         """function creates the required fields for a bar indicator. Additionally creates the required variables
@@ -2346,53 +2327,63 @@ class vw_EditorWidget_props:
         cbo_CANch.value.trace_add("write", self.newProps_updWdgt)
         cbo_CANch.grid(row=8, column=1, padx=10, pady=(10,0))
 
+        #self.sigdig = kwargs.get('SIGDIG', None)            #number of significant digits
+        lbl_sigdig = tk.Label(self.prop_frame, text="Significant Digits", font=font_hdr2)
+        lbl_sigdig.grid(row=9, column=0, padx=10, pady=(10,0))
+        entry_sigdig = tk.Entry(self.prop_frame, width=15)
+        entry_sigdig.value = tk.IntVar(); entry_sigdig.config(textvariable=entry_sigdig.value)
+        entry_sigdig.value.set(self.current_wigtCfg.sigdig)
+        entry_sigdig.name='sigdig'
+        entry_sigdig.value.trace_add("write", self.newProps_updWdgt)
+        entry_sigdig.grid(row=9, column=1, padx=10, pady=(10,0))
+
         #self.warn_en = bool_str(kwargs.get('WARN_EN', None))#warning is enabled
         self.chk_warn = tk.Checkbutton(self.prop_frame, text="Warn/Danger En", font=font_hdr2, onvalue=True, offvalue=False, command=self.limits_tog)
         self.chk_warn.value = tk.BooleanVar(); self.chk_warn.config(variable=self.chk_warn.value)
         self.chk_warn.value.set(self.current_wigtCfg.warn_en)
         self.chk_warn.name='warn_en'
         #self.chk_warn.value.trace_add("write", self.newProps_updWdgt)
-        self.chk_warn.grid(row=9, column=0 ,columnspan=2, padx=10, pady=(10,0), sticky=tk.W)
+        self.chk_warn.grid(row=10, column=0 ,columnspan=2, padx=10, pady=(10,0), sticky=tk.W)
 
         #self.lim_DngrLo = int_str(kwargs.get('DNGR_LO', None))  #danger low limit
         lbl_DngrLo = tk.Label(self.prop_frame, text="Danger Lo Lim", font=font_hdr2)
-        lbl_DngrLo.grid(row=10, column=0, padx=10, pady=(10,0))
+        lbl_DngrLo.grid(row=11, column=0, padx=10, pady=(10,0))
         self.entry_DngrLo = tk.Entry(self.prop_frame, width=15)
         self.entry_DngrLo.value = tk.StringVar(); self.entry_DngrLo.config(textvariable=self.entry_DngrLo.value)
         self.entry_DngrLo.value.set(strvar_str(self.current_wigtCfg.lim_DngrLo))
         self.entry_DngrLo.name='lim_DngrLo'
         self.entry_DngrLo.value.trace_add("write", self.newProps_updWdgt)
-        self.entry_DngrLo.grid(row=10, column=1, padx=10, pady=(10,0))
+        self.entry_DngrLo.grid(row=11, column=1, padx=10, pady=(10,0))
 
         #self.lim_WarnLo = int_str(kwargs.get('WARN_LO', None))  #warning low limit
         lbl_WarnLo = tk.Label(self.prop_frame, text="Warning Lo Lim", font=font_hdr2)
-        lbl_WarnLo.grid(row=11, column=0, padx=10, pady=(10,0))
+        lbl_WarnLo.grid(row=12, column=0, padx=10, pady=(10,0))
         self.entry_WarnLo = tk.Entry(self.prop_frame, width=15)
         self.entry_WarnLo.value = tk.StringVar(); self.entry_WarnLo.config(textvariable=self.entry_WarnLo.value)
         self.entry_WarnLo.value.set(strvar_str(self.current_wigtCfg.lim_WarnLo))
         self.entry_WarnLo.name='lim_WarnLo'
         self.entry_WarnLo.value.trace_add("write", self.newProps_updWdgt)
-        self.entry_WarnLo.grid(row=11, column=1, padx=10, pady=(10,0))
+        self.entry_WarnLo.grid(row=12, column=1, padx=10, pady=(10,0))
 
         #self.lim_WarnHi = int_str(kwargs.get('WARN_HI', None))  #warning high limit
         lbl_WarnHi = tk.Label(self.prop_frame, text="Warning Hi Lim", font=font_hdr2)
-        lbl_WarnHi.grid(row=12, column=0, padx=10, pady=(10,0))
+        lbl_WarnHi.grid(row=13, column=0, padx=10, pady=(10,0))
         self.entry_WarnHi = tk.Entry(self.prop_frame, width=15)
         self.entry_WarnHi.value = tk.StringVar(); self.entry_WarnHi.config(textvariable=self.entry_WarnHi.value)
         self.entry_WarnHi.value.set(strvar_str(self.current_wigtCfg.lim_WarnHi))
         self.entry_WarnHi.name='lim_WarnHi'
         self.entry_WarnHi.value.trace_add("write", self.newProps_updWdgt)
-        self.entry_WarnHi.grid(row=12, column=1, padx=10, pady=(10,0))
+        self.entry_WarnHi.grid(row=13, column=1, padx=10, pady=(10,0))
         
         #self.lim_DngrHi = int_str(kwargs.get('DNGR_HI', None))  #danger high limit
         lbl_DngrHi = tk.Label(self.prop_frame, text="Danger Lo Lim", font=font_hdr2)
-        lbl_DngrHi.grid(row=13, column=0, padx=10, pady=10)
+        lbl_DngrHi.grid(row=14, column=0, padx=10, pady=10)
         self.entry_DngrHi = tk.Entry(self.prop_frame, width=15)
         self.entry_DngrHi.value = tk.StringVar(); self.entry_DngrHi.config(textvariable=self.entry_DngrHi.value)
         self.entry_DngrHi.value.set(strvar_str(self.current_wigtCfg.lim_DngrHi))
         self.entry_DngrHi.name='lim_DngrHi'
         self.entry_DngrHi.value.trace_add("write", self.newProps_updWdgt)
-        self.entry_DngrHi.grid(row=13, column=1, padx=10, pady=10)
+        self.entry_DngrHi.grid(row=14, column=1, padx=10, pady=10)
 
         self.pad_load()     #set the background pad on load
         self.limits_load()  #set the limits fields on load
@@ -2440,105 +2431,65 @@ class vw_EditorWidget_props:
         entry_sz.value.trace_add("write", self.newProps_updWdgt)
         entry_sz.grid(row=3, column=1, padx=10, pady=(10,0))
 
-        #cfg.fill = kwargs.get('CLR_FG', kwargs.get('FILL', False)) #foreground (fill) color
-        lbl_fill = tk.Label(self.prop_frame, text="Fill Color", font=font_hdr2)
-        lbl_fill.grid(row=4, column=0, padx=10, pady=(10,0))
-        cbo_fill = ttk.Combobox(self.prop_frame, values=list(self.master_colors.keys()))
-        cbo_fill.value = tk.StringVar(); cbo_fill.config(textvariable=cbo_fill.value)
-        cbo_fill.value.set(self.current_wigtCfg.fill)
-        cbo_fill.name = 'fill'
-        cbo_fill.value.trace_add("write", self.newProps_updWdgt)
-        cbo_fill.grid(row=4, column=1, padx=10, pady=(10,0))
-
-        #self.outln = kwargs.get('COLOR', None)            #named outline color (see theme class)
-        lbl_otln = tk.Label(self.prop_frame, text="Outline Color", font=font_hdr2)
-        lbl_otln.grid(row=5, column=0, padx=10, pady=(10,0))
-        cbo_otln = ttk.Combobox(self.prop_frame, values=list(self.master_colors.keys()))
-        cbo_otln.value = tk.StringVar(); cbo_otln.config(textvariable=cbo_otln.value)
-        cbo_otln.value.set(self.current_wigtCfg.outln)
-        cbo_otln.name = 'outln'
-        cbo_otln.value.trace_add("write", self.newProps_updWdgt)
-        cbo_otln.grid(row=5, column=1, padx=10, pady=(10,0))
-
         #self.data_ch = kwargs.get('CH_SRC', None)           #Named data channel (see CAN class)
         lbl_CANch = tk.Label(self.prop_frame, text="CAN channel", font=font_hdr2)
-        lbl_CANch.grid(row=6, column=0, padx=10, pady=(10,0))
+        lbl_CANch.grid(row=4, column=0, padx=10, pady=(10,0))
         cbo_CANch = ttk.Combobox(self.prop_frame, values=list(self.master_CANch.keys()))
         cbo_CANch.value = tk.StringVar(); cbo_CANch.config(textvariable=cbo_CANch.value)
         cbo_CANch.value.set(self.current_wigtCfg.data_ch)
         cbo_CANch.name = 'data_ch'
         cbo_CANch.value.trace_add("write", self.newProps_updWdgt)
-        cbo_CANch.grid(row=6, column=1, padx=10, pady=(10,0))
+        cbo_CANch.grid(row=4, column=1, padx=10, pady=(10,0))
 
-        #self.ind_on = int_str(kwargs.get('IND_ON', None))       #on limit
-        lbl_indOn = tk.Label(self.prop_frame, text="Ind On Limit", font=font_hdr2)
-        lbl_indOn.grid(row=7, column=0, padx=10, pady=(10,0))
-        entry_indOn = tk.Entry(self.prop_frame, width=15)
-        entry_indOn.value = tk.StringVar(); entry_indOn.config(textvariable=entry_indOn.value)
-        entry_indOn.value.set(strvar_str(self.current_wigtCfg.ind_on))
-        entry_indOn.name='ind_on'
-        entry_indOn.value.trace_add("write", self.newProps_updWdgt)
-        entry_indOn.grid(row=7, column=1, padx=10, pady=(10,0))
+        #self.lim_lo = int_str(kwargs.get('LIM_LO', None))       #lo limit
+        lbl_indlo = tk.Label(self.prop_frame, text="Ind LO Limit", font=font_hdr2)
+        lbl_indlo.grid(row=5, column=0, padx=10, pady=(10,0))
+        entry_indlo = tk.Entry(self.prop_frame, width=15)
+        entry_indlo.value = tk.StringVar(); entry_indlo.config(textvariable=entry_indlo.value)
+        entry_indlo.value.set(strvar_str(self.current_wigtCfg.lim_lo))
+        entry_indlo.name='lim_lo'
+        entry_indlo.value.trace_add("write", self.newProps_updWdgt)
+        entry_indlo.grid(row=5, column=1, padx=10, pady=(10,0))
 
-        #self.ind_off = int_str(kwargs.get('IND_OFF', None))     #off limit
-        lbl_indOff = tk.Label(self.prop_frame, text="Ind Off Limit", font=font_hdr2)
-        lbl_indOff.grid(row=8, column=0, padx=10, pady=(10,0))
-        entry_indOff = tk.Entry(self.prop_frame, width=15)
-        entry_indOff.value = tk.StringVar(); entry_indOff.config(textvariable=entry_indOff.value)
-        entry_indOff.value.set(strvar_str(self.current_wigtCfg.ind_off))
-        entry_indOff.name='ind_off'
-        entry_indOff.value.trace_add("write", self.newProps_updWdgt)
-        entry_indOff.grid(row=8, column=1, padx=10, pady=(10,0))
+        #self.lim_hi = int_str(kwargs.get('LIM_HI', None))       #hi limit
+        lbl_indhi = tk.Label(self.prop_frame, text="Ind HI Limit", font=font_hdr2)
+        lbl_indhi.grid(row=6, column=0, padx=10, pady=(10,0))
+        entry_indhi = tk.Entry(self.prop_frame, width=15)
+        entry_indhi.value = tk.StringVar(); entry_indhi.config(textvariable=entry_indhi.value)
+        entry_indhi.value.set(strvar_str(self.current_wigtCfg.lim_hi))
+        entry_indhi.name='lim_hi'
+        entry_indhi.value.trace_add("write", self.newProps_updWdgt)
+        entry_indhi.grid(row=6, column=1, padx=10, pady=(10,0))
 
-        #self.warn_en = bool_str(kwargs.get('WARN_EN', None))#warning is enabled
-        self.chk_warn = tk.Checkbutton(self.prop_frame, text="Warn/Danger En", font=font_hdr2, onvalue=True, offvalue=False, command=self.limits_tog)
-        self.chk_warn.value = tk.BooleanVar(); self.chk_warn.config(variable=self.chk_warn.value)
-        self.chk_warn.value.set(self.current_wigtCfg.warn_en)
-        self.chk_warn.name='warn_en'
-        self.chk_warn.value.trace_add("write", self.newProps_updWdgt)
-        self.chk_warn.grid(row=9, column=0 ,columnspan=2, padx=10, pady=(10,0), sticky=tk.W)
+        #self.clr_lo = kwargs.get('CLR_LO', None)                #foreground (fill) color - lo limit
+        lbl_loclr = tk.Label(self.prop_frame, text="LO Lim Color", font=font_hdr2)
+        lbl_loclr.grid(row=7, column=0, padx=10, pady=(10,0))
+        cbo_loclr = ttk.Combobox(self.prop_frame, values=list(self.master_colors.keys()))
+        cbo_loclr.value = tk.StringVar(); cbo_loclr.config(textvariable=cbo_loclr.value)
+        cbo_loclr.value.set(self.current_wigtCfg.clr_lo)
+        cbo_loclr.name = 'clr_lo'
+        cbo_loclr.value.trace_add("write", self.newProps_updWdgt)
+        cbo_loclr.grid(row=7, column=1, padx=10, pady=(10,0))
 
-        #self.lim_DngrLo = int_str(kwargs.get('DNGR_LO', None))  #danger low limit
-        lbl_DngrLo = tk.Label(self.prop_frame, text="Danger Lo Lim", font=font_hdr2)
-        lbl_DngrLo.grid(row=10, column=0, padx=10, pady=(10,0))
-        self.entry_DngrLo = tk.Entry(self.prop_frame, width=15)
-        self.entry_DngrLo.value = tk.StringVar(); self.entry_DngrLo.config(textvariable=self.entry_DngrLo.value)
-        self.entry_DngrLo.value.set(strvar_str(self.current_wigtCfg.lim_DngrLo))
-        self.entry_DngrLo.name='lim_DngrLo'
-        self.entry_DngrLo.value.trace_add("write", self.newProps_updWdgt)
-        self.entry_DngrLo.grid(row=10, column=1, padx=10, pady=(10,0))
+        #self.clr_hi = kwargs.get('CLR_HI', None)                #foreground (fill) color - hi limit
+        lbl_hiclr = tk.Label(self.prop_frame, text="HI Lim Color", font=font_hdr2)
+        lbl_hiclr.grid(row=8, column=0, padx=10, pady=(10,0))
+        cbo_hiclr = ttk.Combobox(self.prop_frame, values=list(self.master_colors.keys()))
+        cbo_hiclr.value = tk.StringVar(); cbo_hiclr.config(textvariable=cbo_hiclr.value)
+        cbo_hiclr.value.set(self.current_wigtCfg.clr_hi)
+        cbo_hiclr.name = 'clr_hi'
+        cbo_hiclr.value.trace_add("write", self.newProps_updWdgt)
+        cbo_hiclr.grid(row=8, column=1, padx=10, pady=(10,0))
 
-        #self.lim_WarnLo = int_str(kwargs.get('WARN_LO', None))  #warning low limit
-        lbl_WarnLo = tk.Label(self.prop_frame, text="Warning Lo Lim", font=font_hdr2)
-        lbl_WarnLo.grid(row=11, column=0, padx=10, pady=(10,0))
-        self.entry_WarnLo = tk.Entry(self.prop_frame, width=15)
-        self.entry_WarnLo.value = tk.StringVar(); self.entry_WarnLo.config(textvariable=self.entry_WarnLo.value)
-        self.entry_WarnLo.value.set(strvar_str(self.current_wigtCfg.lim_WarnLo))
-        self.entry_WarnLo.name='lim_WarnLo'
-        self.entry_WarnLo.value.trace_add("write", self.newProps_updWdgt)
-        self.entry_WarnLo.grid(row=11, column=1, padx=10, pady=(10,0))
-
-        #self.lim_WarnHi = int_str(kwargs.get('WARN_HI', None))  #warning high limit
-        lbl_WarnHi = tk.Label(self.prop_frame, text="Warning Hi Lim", font=font_hdr2)
-        lbl_WarnHi.grid(row=12, column=0, padx=10, pady=(10,0))
-        self.entry_WarnHi = tk.Entry(self.prop_frame, width=15)
-        self.entry_WarnHi.value = tk.StringVar(); self.entry_WarnHi.config(textvariable=self.entry_WarnHi.value)
-        self.entry_WarnHi.value.set(strvar_str(self.current_wigtCfg.lim_WarnHi))
-        self.entry_WarnHi.name='lim_WarnHi'
-        self.entry_WarnHi.value.trace_add("write", self.newProps_updWdgt)
-        self.entry_WarnHi.grid(row=12, column=1, padx=10, pady=(10,0))
-        
-        #self.lim_DngrHi = int_str(kwargs.get('DNGR_HI', None))  #danger high limit
-        lbl_DngrHi = tk.Label(self.prop_frame, text="Danger Lo Lim", font=font_hdr2)
-        lbl_DngrHi.grid(row=13, column=0, padx=10, pady=10)
-        self.entry_DngrHi = tk.Entry(self.prop_frame, width=15)
-        self.entry_DngrHi.value = tk.StringVar(); self.entry_DngrHi.config(textvariable=self.entry_DngrHi.value)
-        self.entry_DngrHi.value.set(strvar_str(self.current_wigtCfg.lim_DngrHi))
-        self.entry_DngrHi.name='lim_DngrHi'
-        self.entry_DngrHi.value.trace_add("write", self.newProps_updWdgt)
-        self.entry_DngrHi.grid(row=13, column=1, padx=10, pady=10)
-
-        self.limits_load()  #set the limits fields on load
+        #self.outln = kwargs.get('COLOR', None)            #named outline color (see theme class)
+        lbl_otln = tk.Label(self.prop_frame, text="Outline Color", font=font_hdr2)
+        lbl_otln.grid(row=9, column=0, padx=10, pady=(10,0))
+        cbo_otln = ttk.Combobox(self.prop_frame, values=list(self.master_colors.keys()))
+        cbo_otln.value = tk.StringVar(); cbo_otln.config(textvariable=cbo_otln.value)
+        cbo_otln.value.set(self.current_wigtCfg.outln)
+        cbo_otln.name = 'outln'
+        cbo_otln.value.trace_add("write", self.newProps_updWdgt)
+        cbo_otln.grid(row=9, column=1, padx=10, pady=(10,0))
         
     def vwPop_indBar(self):
         """function updates the properties pane with the input fields for a bar indicator. Additionally creates
