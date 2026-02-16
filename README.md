@@ -1,6 +1,6 @@
 # PyDash_Builder - Information
 This readme covers the dash builder portion of the PyDash. For the Dash App, PCB design, Enclosure design, or OS design, see the below repositories:
-- PyDash_PCB
+- [PyDash_PCB](https://github.com/JungleGim/PyDash_PCB)
 - [PyDash_App](https://github.com/JungleGim/PyDash_App)
 - [PyDash_OS](https://github.com/JungleGim/PyDash_OS)
 - PyDash_Enclosure
@@ -294,3 +294,4 @@ The information included is provided "as is", without warranty of any kind, expr
 
 # Note from the "Developer"
 While I am an engineer by trade, my area of focus is not computer architecture, system engineering, or any computer sciences. Likely, some people have already looked at various aspects of the codebase and just shook their heads. That being said, I'm giving it the good ole college try with this project (and GitHub) and will do my best to keep things up to date.
+
