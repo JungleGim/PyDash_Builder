@@ -6,6 +6,10 @@ Version: 0.a - Alpha Testing
 Build Date: 12/25/2025
 
 # WIP Version TODO list
+* CANch scalars
+	- should not allow for a scalar of 0. Should be some non-zero value (even a negative decimal is OK just not zero)
+	- update the default scalar to 1
+	- add a config check to make sure its not zero
 * Final Testing
     - Make a whole new dash configuration from scratch with the builder and then test if it functions with the pydash app. IT HAS TO BE SEAMLESS so make sure its completely working.
 * Update github
