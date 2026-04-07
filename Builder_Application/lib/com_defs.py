@@ -887,6 +887,8 @@ class CAN_ch:
                     tmp_err_list.update({self.name +'-'+ attr:'Required value for CAN data channel is undefined'})
                 elif attr == 'req_freq' and (self.rem_req == True) and ((val is None) or val == ''):
                     tmp_err_list.update({self.name +'-'+ attr:'Remote request is enabled but no frequency is defined'})
+                elif attr == 'scalar' and (self.scalar == 0 or self.scalar == ''):
+                    tmp_err_list.update({self.name +'-'+ attr:'Scalar value is invalid. Cannot be 0 or blank.'})
         return tmp_err_list #return error list
 
 class dash_page:
