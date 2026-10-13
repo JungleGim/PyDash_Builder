@@ -50,7 +50,6 @@
     <CORE>
       <BASE_PID>0x9A</BASE_PID>
       <RX_FILTER>False</RX_FILTER>
-      <CAN_CH_EXT_REF>{'RPM_DATA': ('RPM',), 'ECT_DATA': ('ECT',), 'FAN_IND': ('ECT',), 'RPM_BAR': ('RPM',), 'dat2': ('ECT',), 'blt2': ('WBO2',), 'ball': ('ECT',), 'bar2': ('RPM',)}</CAN_CH_EXT_REF>
     </CORE>
     <CHANNELS>
       <CH NAME="RPM">
@@ -59,7 +58,7 @@
         <DLC>2</DLC>
         <REM_REQ>False</REM_REQ>
         <FRAMES>1,2</FRAMES>
-        <SCALAR>0</SCALAR>
+        <SCALAR>1</SCALAR>
         <OFFSET>0</OFFSET>
       </CH>
       <CH NAME="ECT">
@@ -68,7 +67,7 @@
         <DLC>2</DLC>
         <REM_REQ>False</REM_REQ>
         <FRAMES>1,2</FRAMES>
-        <SCALAR>0</SCALAR>
+        <SCALAR>1</SCALAR>
         <OFFSET>-65</OFFSET>
       </CH>
       <CH NAME="WBO2">
@@ -86,7 +85,7 @@
         <DLC>2</DLC>
         <REM_REQ>False</REM_REQ>
         <FRAMES>1,2</FRAMES>
-        <SCALAR>0</SCALAR>
+        <SCALAR>1</SCALAR>
         <OFFSET>0</OFFSET>
       </CH>
       <CH NAME="MAP">
@@ -104,7 +103,7 @@
         <DLC>1</DLC>
         <REM_REQ>False</REM_REQ>
         <FRAMES>1</FRAMES>
-        <SCALAR>0</SCALAR>
+        <SCALAR>1</SCALAR>
         <OFFSET>0</OFFSET>
       </CH>
       <CH NAME="HIBM">
@@ -113,7 +112,7 @@
         <DLC>1</DLC>
         <REM_REQ>False</REM_REQ>
         <FRAMES>1</FRAMES>
-        <SCALAR>0</SCALAR>
+        <SCALAR>1</SCALAR>
         <OFFSET>0</OFFSET>
       </CH>
     </CHANNELS>
@@ -194,16 +193,12 @@
             <X0>521</X0>
             <Y0>451</Y0>
             <SIZE>40</SIZE>
-            <FILL>FG</FILL>
+						<LIM_LO>210</LIM_LO>
+            <LIM_HI>190</LIM_HI>
+						<DATA_CH>ECT</DATA_CH>            
+						<CLR_LO>BG</CLR_LO>
+            <CLR_HI>FG</CLR_HI>
             <OUTLN>FG</OUTLN>
-            <DATA_CH>ECT</DATA_CH>
-            <IND_ON>200</IND_ON>
-            <IND_OFF>180</IND_OFF>
-            <WARN_EN>False</WARN_EN>
-            <LIM_DNGRLO />
-            <LIM_WARNLO />
-            <LIM_WARNHI />
-            <LIM_DNGRHI />
           </LBL>
         </IND_BLT>
         <IND_BAR>
@@ -346,31 +341,23 @@
             <X0>255</X0>
             <Y0>207</Y0>
             <SIZE>50</SIZE>
-            <FILL>FG</FILL>
+						<LIM_LO>210</LIM_LO>
+            <LIM_HI>190</LIM_HI>
+						<DATA_CH>WBO2</DATA_CH>
+						<CLR_LO>BG</CLR_LO>
+            <CLR_HI>FG</CLR_HI>
             <OUTLN>FG</OUTLN>
-            <DATA_CH>WBO2</DATA_CH>
-            <IND_ON>15</IND_ON>
-            <IND_OFF>14</IND_OFF>
-            <WARN_EN>False</WARN_EN>
-            <LIM_DNGRLO />
-            <LIM_WARNLO />
-            <LIM_WARNHI />
-            <LIM_DNGRHI />
           </LBL>
           <LBL NAME="ball">
             <X0>255</X0>
             <Y0>267</Y0>
             <SIZE>50</SIZE>
-            <FILL>FG</FILL>
+						<LIM_LO>220</LIM_LO>
+            <LIM_HI>215</LIM_HI>
+						<DATA_CH>ECT</DATA_CH>            
+						<CLR_LO>BG</CLR_LO>
+            <CLR_HI>FG</CLR_HI>
             <OUTLN>FG</OUTLN>
-            <DATA_CH>ECT</DATA_CH>
-            <IND_ON>220</IND_ON>
-            <IND_OFF>215</IND_OFF>
-            <WARN_EN>False</WARN_EN>
-            <LIM_DNGRLO />
-            <LIM_WARNLO />
-            <LIM_WARNHI />
-            <LIM_DNGRHI />
           </LBL>
         </IND_BLT>
         <IND_BAR>

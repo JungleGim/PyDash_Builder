@@ -59,7 +59,7 @@
         <DLC>2</DLC>
         <REM_REQ>False</REM_REQ>
         <FRAMES>1,2</FRAMES>
-        <SCALAR>0</SCALAR>
+        <SCALAR>1</SCALAR>
         <OFFSET>0</OFFSET>
       </CH>
       <CH NAME="ECT">
@@ -68,7 +68,7 @@
         <DLC>2</DLC>
         <REM_REQ>False</REM_REQ>
         <FRAMES>1,2</FRAMES>
-        <SCALAR>0</SCALAR>
+        <SCALAR>1</SCALAR>
         <OFFSET>-65</OFFSET>
       </CH>
       <CH NAME="WBO2">
@@ -86,7 +86,7 @@
         <DLC>2</DLC>
         <REM_REQ>False</REM_REQ>
         <FRAMES>1,2</FRAMES>
-        <SCALAR>0</SCALAR>
+        <SCALAR>1</SCALAR>
         <OFFSET>0</OFFSET>
       </CH>
       <CH NAME="MAP">
@@ -104,7 +104,7 @@
         <DLC>1</DLC>
         <REM_REQ>False</REM_REQ>
         <FRAMES>1</FRAMES>
-        <SCALAR>0</SCALAR>
+        <SCALAR>1</SCALAR>
         <OFFSET>0</OFFSET>
       </CH>
       <CH NAME="HIBM">
@@ -113,7 +113,7 @@
         <DLC>1</DLC>
         <REM_REQ>False</REM_REQ>
         <FRAMES>1</FRAMES>
-        <SCALAR>0</SCALAR>
+        <SCALAR>1</SCALAR>
         <OFFSET>0</OFFSET>
       </CH>
     </CHANNELS>

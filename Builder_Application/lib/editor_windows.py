@@ -1311,7 +1311,7 @@ class wndw_CANch(tk.Toplevel):
             else:
                 #--assembly CAN channel kwargs
                 ch_kwargs = {'NAME':self.name_var.get(),
-                             'CAN_PID':self.PID_var.get(),
+                             'PID':self.PID_var.get(),
                              'EXT':self.ext_var.get(),
                              'DLC':self.dlc_var.get(),
                              'REM_REQ':self.RTR_var.get(),
@@ -1589,7 +1589,7 @@ class wndw_Pages(tk.Toplevel):
                 pg_kwargs = {'name':self.pg_name.get(),
                              'type':self.pg_type.get(),
                              'bg_clr':self.bgClr.get(),
-                             'bg_img':self.bgImg.get(),
+                             'bg_img': None if self.bgImg.get() == 'None' else self.bgImg.get(),
                              'width':self.pg_width.get(),
                              'height':self.pg_height.get()}
                 
@@ -1602,7 +1602,7 @@ class wndw_Pages(tk.Toplevel):
                     any additional reference objects so its kind of a "meh" update to do there'''
                 upd_page = None                             #temp ref for page result
                 if self.passed_page is None:                #if creating a new page
-                    upd_page = dash_page(**pg_kwargs)                        #create new page config
+                    upd_page = dash_page(**pg_kwargs)                   #create new page config
                     upd_page.master_ref = self.master_ref               #set the master reference for in-class functions
                     upd_page.buildPages_canv()                          #create a new canvas obj
                     self.result = {pg_kwargs.get('name') : upd_page}    #set result
@@ -1623,8 +1623,9 @@ class wndw_Pages(tk.Toplevel):
             """
             #--create tuple of required fields
             req_fields = (self.pg_name.get() or None,)
-            req_fields += (self.bgClr.get() or None,)
             req_fields += (self.pg_type.get() or None,)
+            if self.bgClr.get() == 'Select Color': req_fields += (None,)    #handle if a default color is not selected
+            else: req_fields += (self.bgClr.get() or None,)
 
             if None in req_fields: return True  #if at least one required field is missing, return true
             else: return False

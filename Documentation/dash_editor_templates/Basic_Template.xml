@@ -68,7 +68,7 @@
 				<EXT>FALSE</EXT>
 				<DLC>2</DLC>
 				<FRAMES>1,2</FRAMES>
-				<SCALAR>0</SCALAR>
+				<SCALAR>1</SCALAR>
 				<OFFSET>0</OFFSET>
 				<REM_REQ>FALSE</REM_REQ>
 				<REQ_FREQ></REQ_FREQ>
@@ -79,7 +79,7 @@
 				<EXT>FALSE</EXT>
 				<DLC>2</DLC>
 				<FRAMES>1,2</FRAMES>
-				<SCALAR>0</SCALAR>
+				<SCALAR>1</SCALAR>
 				<OFFSET>-65</OFFSET>
 				<REM_REQ>FALSE</REM_REQ>
 				<REQ_FREQ></REQ_FREQ>
@@ -99,7 +99,7 @@
 				<EXT>FALSE</EXT>
 				<DLC>2</DLC>
 				<FRAMES>1,2</FRAMES>
-				<SCALAR>0</SCALAR>
+				<SCALAR>1</SCALAR>
 				<OFFSET>0</OFFSET>
 				<REM_REQ>FALSE</REM_REQ>
 				<REQ_FREQ></REQ_FREQ>
@@ -119,7 +119,7 @@
 				<EXT>FALSE</EXT>
 				<DLC>1</DLC>
 				<FRAMES>1</FRAMES>
-				<SCALAR>0</SCALAR>
+				<SCALAR>1</SCALAR>
 				<OFFSET>0</OFFSET>
 				<REM_REQ>FALSE</REM_REQ>
 				<REQ_FREQ></REQ_FREQ>
@@ -129,7 +129,7 @@
 				<EXT>FALSE</EXT>
 				<DLC>1</DLC>
 				<FRAMES>1</FRAMES>
-				<SCALAR>0</SCALAR>
+				<SCALAR>1</SCALAR>
 				<OFFSET>0</OFFSET>
 				<REM_REQ>FALSE</REM_REQ>
 				<REQ_FREQ></REQ_FREQ>
@@ -215,22 +215,15 @@
 				<IND_BLT>
 				<!--bullet indicators-->
 					<LBL NAME="FAN_IND">
-						<DATA_CH>ECT</DATA_CH>
-						<!--data label-->
 						<X0>770</X0>
 						<Y0>500</Y0>
 						<SIZE>40</SIZE>
-						<!--format-->
-						<FILL>FG</FILL>
-						<OUTLN>FG</OUTLN>
-						<IND_ON>200</IND_ON>
-						<IND_OFF>190</IND_OFF>
-						<!--display conditioning info-->
-						<WARN_EN>FALSE</WARN_EN>
-						<LIM_DNGRLO></LIM_DNGRLO>
-						<LIM_WARNLO></LIM_WARNLO>
-						<LIM_WARNHI></LIM_WARNHI>
-						<LIM_DNGRHI></LIM_DNGRHI>
+						<LIM_LO>210</LIM_LO>
+            <LIM_HI>190</LIM_HI>
+						<DATA_CH>ECT</DATA_CH>            
+						<CLR_LO>BG</CLR_LO>
+            <CLR_HI>FG</CLR_HI>
+            <OUTLN>FG</OUTLN>
 					</LBL>
 				</IND_BLT>
 				<IND_BAR>

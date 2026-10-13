@@ -9,7 +9,7 @@
   <THEME>
     <COLORS>
       <COLOR NAME="BG">#636363</COLOR>
-      <COLOR NAME="FG">#00FF00</COLOR>
+      <COLOR NAME="FG">#FFFFFF</COLOR>
       <COLOR NAME="IND_ON">#00FF00</COLOR>
       <COLOR NAME="IND_OFF">#636363</COLOR>
       <COLOR NAME="ALERT_FG">#000000</COLOR>
@@ -46,9 +46,9 @@
       </FONT>
     </FONTS>
     <IMAGES>
-      <IMG NAME="IMG_BG">C:/Users/jlang/Desktop/PyDash_Builder/Documentation/example_images/Background.png</IMG>
-      <IMG NAME="IMG_LOBM">C:/Users/jlang/Desktop/PyDash_Builder/Documentation/example_images/Headlight_lo.png</IMG>
-      <IMG NAME="IMG_HIBM">C:/Users/jlang/Desktop/PyDash_Builder/Documentation/example_images/Headlight_hi.png</IMG>
+      <IMG NAME="IMG_BG">C:/Users/jlang/Desktop/example_images/Background.png</IMG>
+      <IMG NAME="IMG_LOBM">C:/Users/jlang/Desktop/example_images/Headlight_lo.png</IMG>
+      <IMG NAME="IMG_HIBM">C:/Users/jlang/Desktop/example_images/Headlight_hi.png</IMG>
     </IMAGES>
   </THEME>
   <CAN>
@@ -64,7 +64,7 @@
         <REM_REQ>False</REM_REQ>
         <REQ_FREQ />
         <FRAMES>1,2</FRAMES>
-        <SCALAR>0</SCALAR>
+        <SCALAR>1</SCALAR>
         <OFFSET>0</OFFSET>
       </CH>
       <CH NAME="ECT">
@@ -74,7 +74,7 @@
         <REM_REQ>False</REM_REQ>
         <REQ_FREQ />
         <FRAMES>1,2</FRAMES>
-        <SCALAR>0</SCALAR>
+        <SCALAR>1</SCALAR>
         <OFFSET>-65</OFFSET>
       </CH>
       <CH NAME="WBO2">
@@ -94,7 +94,7 @@
         <REM_REQ>False</REM_REQ>
         <REQ_FREQ />
         <FRAMES>1,2</FRAMES>
-        <SCALAR>0</SCALAR>
+        <SCALAR>1</SCALAR>
         <OFFSET>0</OFFSET>
       </CH>
       <CH NAME="MAP">
@@ -114,7 +114,7 @@
         <REM_REQ>False</REM_REQ>
         <REQ_FREQ />
         <FRAMES>1</FRAMES>
-        <SCALAR>0</SCALAR>
+        <SCALAR>1</SCALAR>
         <OFFSET>0</OFFSET>
       </CH>
       <CH NAME="HIBM">
@@ -124,7 +124,7 @@
         <REM_REQ>False</REM_REQ>
         <REQ_FREQ />
         <FRAMES>1</FRAMES>
-        <SCALAR>0</SCALAR>
+        <SCALAR>1</SCALAR>
         <OFFSET>0</OFFSET>
       </CH>
     </CHANNELS>
@@ -198,7 +198,7 @@
             <TEXT>0</TEXT>
             <X0>10</X0>
             <Y0>110</Y0>
-            <FILL>FG_accent2</FILL>
+            <FILL>FG</FILL>
             <FONT>SZ_TNY</FONT>
             <PAD>False</PAD>
             <CLR_BG>None</CLR_BG>
@@ -207,7 +207,7 @@
             <TEXT>2K</TEXT>
             <X0>270</X0>
             <Y0>110</Y0>
-            <FILL>FG_accent2</FILL>
+            <FILL>FG</FILL>
             <FONT>SZ_TNY</FONT>
             <PAD>False</PAD>
             <CLR_BG>None</CLR_BG>
@@ -216,7 +216,7 @@
             <TEXT>4K</TEXT>
             <X0>560</X0>
             <Y0>110</Y0>
-            <FILL>FG_accent2</FILL>
+            <FILL>FG</FILL>
             <FONT>SZ_TNY</FONT>
             <PAD>False</PAD>
             <CLR_BG>None</CLR_BG>
@@ -225,7 +225,7 @@
             <TEXT>6K</TEXT>
             <X0>845</X0>
             <Y0>110</Y0>
-            <FILL>FG_accent2</FILL>
+            <FILL>FG</FILL>
             <FONT>SZ_TNY</FONT>
             <PAD>False</PAD>
             <CLR_BG>None</CLR_BG>
@@ -313,16 +313,12 @@
             <X0>160</X0>
             <Y0>528</Y0>
             <SIZE>40</SIZE>
-            <FILL>FG_accent2</FILL>
+						<LIM_LO>210</LIM_LO>
+            <LIM_HI>190</LIM_HI>
+						<DATA_CH>ECT</DATA_CH>            
+						<CLR_LO>BG</CLR_LO>
+            <CLR_HI>FG_accent2</CLR_HI>
             <OUTLN>FG_accent2</OUTLN>
-            <DATA_CH>ECT</DATA_CH>
-            <IND_ON>210</IND_ON>
-            <IND_OFF>190</IND_OFF>
-            <WARN_EN>False</WARN_EN>
-            <LIM_DNGRLO />
-            <LIM_WARNLO />
-            <LIM_WARNHI />
-            <LIM_DNGRHI />
           </LBL>
         </IND_BLT>
         <IND_BAR>
@@ -331,8 +327,8 @@
             <Y0>9</Y0>
             <WIDTH>1000</WIDTH>
             <HEIGHT>100</HEIGHT>
-            <FILL>FG</FILL>
-            <OUTLN>FG</OUTLN>
+            <FILL>FG_accent2</FILL>
+            <OUTLN>FG_accent2</OUTLN>
             <DATA_CH>RPM</DATA_CH>
             <ORDR>BG</ORDR>
             <SCALE_LO>0</SCALE_LO>
