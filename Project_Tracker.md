@@ -7,9 +7,7 @@ Build Date: 12/25/2025
 
 # WIP Version TODO list
 * Update github
-    - upload the PyDash Builder github
-        + update the github readme including future updates, etc.
-        + do an executable build for windows (see next bullet point)
+    - do an executable build for windows (see next bullet point)
     - Make a release archive and upload
         + use PyInstaller to make a condensed executable archive
             * would be preferred so people can/could just run the whole prog w/o needing python, libraries, etc.
@@ -18,8 +16,8 @@ Build Date: 12/25/2025
                 - look at getting a Mac Mini so can run PyInstaller on MacOS to generate a different standalone support for MacOS
             * Linux support (future)
                 - clone project into Ubuntu VM and run PyInstaller there for Linux support
-        + Include the quickstart
-        + Include the required fonts
+        + Include the quickstart guide
+        + Include the required fonts as a zip
 
 # Future Updates
 Include any items below in the appropriate README.md file section
