@@ -372,8 +372,13 @@ def genXML_CAN(root_XML, XMLmode, can_cfg):
     """
     CANcfg = ET.SubElement(root_XML,'CAN')              #add CANbus config subelement to root
     CANcfg_core = ET.SubElement(CANcfg,'CORE')          #add CANbus core subelement to CAN config
+
+    #--set attribute list based on the save mode
+    if XMLmode == XMLgen_mode['DASH']: core_atrb_list = can_cfg.fields_dashCFG
+    else: core_atrb_list = can_cfg.fields_editorCFG #XMLmode == XMLgen_mode['EDTR']
+
     for atrb, val in can_cfg.__dict__.items():
-        if atrb != 'data_ch' and atrb != 'CAN_CH_ext_ref':  #add all core attributes
+        if atrb in core_atrb_list:                              #if the attribute is flagged for saving in the config
             sub = ET.SubElement(CANcfg_core, atrb.upper())      #add core attribute as subelement
             sub.text = xmlGen_str(val)                          #and add its value
 

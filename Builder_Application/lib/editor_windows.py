@@ -1034,8 +1034,11 @@ class wndw_CANcore(tk.Toplevel):
         self.CAN_ref = master.cfg_CAN   #reference to core CAN object
 
         #---local vars for updating values
-        self.PID_var = tk.StringVar()       #stringvar for base PID value
+        self.AID_var = tk.StringVar()       #stringvar for base AID value
         self.rxFilter_var = tk.BooleanVar() #boolvar for enabling RX filter
+        self.obd2_var = tk.BooleanVar()     #boolvar for enabling OBD2
+        self.ECUtx_var = tk.StringVar()     #stringvar for ECUtx CAN addr
+        self.ECUrx_var = tk.StringVar()     #stringvar for ECUrx CAN addr
 
         self.config_window()
         self.load_settings()            #load current config values
@@ -1046,19 +1049,38 @@ class wndw_CANcore(tk.Toplevel):
         self.frm_main = tk.Frame(self, highlightthickness=0)
         self.frm_main.grid(row=0, column=0)
 
-        #Base PID
-        lbl_PID = tk.Label(self.frm_main, text="Base PID", font=font_hdr2)
-        lbl_PID.grid(row=0, column=0, padx=10, pady=10)
-        entry_PID = tk.Entry(self.frm_main, width=10, textvariable=self.PID_var)
-        entry_PID.grid(row=0, column=1, padx=10, pady=10)
+        #Base AID
+        lbl_AID = tk.Label(self.frm_main, text="Base AID", font=font_hdr2)
+        lbl_AID.grid(row=0, column=0, padx=10, pady=10)
+        entry_AID = tk.Entry(self.frm_main, width=10, textvariable=self.AID_var)
+        entry_AID.grid(row=0, column=1, padx=10, pady=10)
 
         #CAN RX filter enable
-        chk_bold = tk.Checkbutton(self, text="Enable RX filter", font=font_hdr2, variable=self.rxFilter_var, onvalue=True, offvalue=False)
-        chk_bold.grid(row=1, column=0 ,columnspan=2, padx=10, pady=(0,10), sticky=tk.W)
+        chk_filter = tk.Checkbutton(self.frm_main, text="Enable RX filter", font=font_hdr2, variable=self.rxFilter_var, onvalue=True, offvalue=False)
+        chk_filter.grid(row=1, column=0 ,columnspan=2, padx=10, pady=(0,10), sticky=tk.W)
+
+        #separator line
+        ttk.Separator(self.frm_main, orient=tk.HORIZONTAL).grid(row=2, column=0, columnspan=2, padx=10, pady=(0,10), sticky=tk.EW)
+
+        #OBD2_en
+        chk_OBD2 = tk.Checkbutton(self.frm_main, text="OBD2 CAN Enable", font=font_hdr2, variable=self.obd2_var, onvalue=True, offvalue=False, command=self.OBD2_en)
+        chk_OBD2.grid(row=3, column=0 ,columnspan=2, padx=10, pady=(0,10), sticky=tk.W)
+
+        #OBD2_ECU_IDtx - only enable if OBD2_en is TRUE
+        lbl_ECUtx = tk.Label(self.frm_main, text="OBD2 ECU txID", font=font_hdr2)
+        lbl_ECUtx.grid(row=4, column=0, padx=10, pady=(0,10))
+        self.entry_ECUtx = tk.Entry(self.frm_main, width=10, textvariable=self.ECUtx_var)
+        self.entry_ECUtx.grid(row=4, column=1, padx=10, pady=(0,10))
+        
+        #OBD2_ECU_IDrx - only enable if OBD2_en is TRUE
+        lbl_ECUrx = tk.Label(self.frm_main, text="OBD2 ECU rxID", font=font_hdr2)
+        lbl_ECUrx.grid(row=5, column=0, padx=10, pady=(0,10))
+        self.entry_ECUrx = tk.Entry(self.frm_main, width=10, textvariable=self.ECUrx_var)
+        self.entry_ECUrx.grid(row=5, column=1, padx=10, pady=(0,10))
 
         #---control buttons
         self.frm_cntl = tk.Frame(self, highlightthickness=0)
-        self.frm_cntl.grid(row=7, column=0, columnspan=2)
+        self.frm_cntl.grid(row=6, column=0, columnspan=2)
         btn_save=tk.Button(self.frm_cntl,text="Save Settings", command=self.on_save)
         btn_save.grid(row=0, column=0, padx=10, pady=(0,10))
         btn_cancel=tk.Button(self.frm_cntl,text="Cancel", command=self.on_close)
@@ -1066,16 +1088,36 @@ class wndw_CANcore(tk.Toplevel):
 
     def load_settings(self):
         """function loads the currently defined information into the editor window"""
-        self.PID_var.set(self.CAN_ref.base_PID or sys_CAN_base_PID)
+        self.AID_var.set(self.CAN_ref.base_AID or sys_CAN_base_AID)
         self.rxFilter_var.set(self.CAN_ref.rx_filter or False)
+        self.obd2_var.set(self.CAN_ref.OBD2_en or False)
+        self.ECUtx_var.set(self.CAN_ref.OBD2_ECU_IDtx or '')
+        self.ECUrx_var.set(self.CAN_ref.OBD2_ECU_IDrx or '')
+
+        self.OBD2_en()      #enable or disable the OBD2 fields based on the set value
+
+    def OBD2_en(self):
+        """function handles auxiliary field setting when the OBD2 field is enabled or disabled.
+        If OBD2 is disabled, any related fields should be disabled and set to blank. If OBD2 is enabled, it should
+        enable related fields."""
+
+        if self.obd2_var.get():     #OBD2 is enabled: allow entry to fields
+            self.entry_ECUtx.config(state='normal')
+            self.entry_ECUrx.config(state='normal')
+        else:                       #OBD2 is disabled: don't allow field entry, clear any entries
+            self.entry_ECUtx.config(state='disabled'); self.ECUtx_var.set('')
+            self.entry_ECUrx.config(state='disabled'); self.ECUrx_var.set('')
 
     def on_save(self):
         """function sets the alert colors in the theme definition on save."""
         if self.missing_req_fields() :                      #missing required fields, show warning
             messagebox.showwarning("Warning", "Required fields are missing, cannot save.")
         else:                                               #otherwise update config
-            self.CAN_ref.base_PID = self.PID_var.get()
+            self.CAN_ref.base_AID = self.AID_var.get()
             self.CAN_ref.rx_filter = self.rxFilter_var.get()
+            self.CAN_ref.OBD2_en = self.obd2_var.get()
+            self.CAN_ref.OBD2_ECU_IDtx = self.ECUtx_var.get()
+            self.CAN_ref.OBD2_ECU_IDrx = self.ECUrx_var.get()
             self.destroy()
 
     def on_close(self):
@@ -1089,7 +1131,10 @@ class wndw_CANcore(tk.Toplevel):
         :rtype: `bool` - true if required fields are missing
         """
         #--create tuple of required fields
-        req_fields = (self.PID_var.get() or None,)
+        req_fields = (self.AID_var.get() or None,)
+        if (self.obd2_var.get() is True):
+            req_fields = (self.ECUtx_var.get() or None,)
+            req_fields = (self.ECUrx_var.get() or None,)
 
         if None in req_fields: return True  #if at least one required field is missing, return true
         else: return False
@@ -1131,7 +1176,10 @@ class wndw_CANch(tk.Toplevel):
         """function populates the listbox of available config definitions based on the current theme values"""
         self.lstbx_ch.delete(0,tk.END)                          #clear any existing entries
         for key, val in self.CAN_ref.data_ch.items():
-            self.lstbx_ch.insert(tk.END, f"{key}:{val.PID}")    #populate with current list
+            if val.OBD2 is False:
+                self.lstbx_ch.insert(tk.END, f"{key}:{val.AID}")    #populate with current list
+            else:
+                self.lstbx_ch.insert(tk.END, f"{key}:OBD2 {val.OBD2_PID}")    #populate with current list
 
     def ch_add(self):
         """function calls the config modification window for a new entry."""
@@ -1195,7 +1243,7 @@ class wndw_CANch(tk.Toplevel):
 
             #--working vars to store properties
             self.name_var = tk.StringVar()
-            self.PID_var = tk.StringVar()
+            self.AID_var = tk.StringVar()
             self.ext_var = tk.BooleanVar()
             self.dlc_var = tk.StringVar()
             self.RTR_var = tk.BooleanVar()
@@ -1203,6 +1251,9 @@ class wndw_CANch(tk.Toplevel):
             self.calc_frames_var = tk.StringVar()
             self.calc_scalar_var = tk.StringVar()
             self.calc_offset_var = tk.StringVar()
+            self.OBD2_var = tk.BooleanVar()
+            self.OBD2_PID_var = tk.StringVar()
+            self.OBD2_bytes_var = tk.StringVar()
 
             #--field entry widgets
             self.frm_main = tk.Frame(self, highlightthickness=0)
@@ -1214,24 +1265,49 @@ class wndw_CANch(tk.Toplevel):
             entry_name = tk.Entry(self.frm_main, width=20, textvariable=self.name_var)
             entry_name.grid(row=0, column=1, padx=10, pady=(10,0))
 
-            #-PID
-            lbl_PID = tk.Label(self.frm_main, text="PID (in HEX)", font=font_hdr2)
-            lbl_PID.grid(row=1, column=0, padx=10, pady=(10,0))
-            entry_PID = tk.Entry(self.frm_main, width=20, textvariable=self.PID_var)
-            entry_PID.grid(row=1, column=1, padx=10, pady=(10,0))
-
-            #-Extended frame
-            chk_bold = tk.Checkbutton(self.frm_main, text="Extended Frame", font=font_hdr2, variable=self.ext_var, onvalue=True, offvalue=False)
-            chk_bold.grid(row=2, column=0 ,columnspan=2, padx=10, pady=(10,0), sticky=tk.W)
-
-            #-DLC
-            lbl_DLC = tk.Label(self.frm_main, text="DLC (expected frames)", font=font_hdr2)
-            lbl_DLC.grid(row=3, column=0, padx=10, pady=10)
-            entry_DLC = tk.Entry(self.frm_main, width=20, textvariable=self.dlc_var)
-            entry_DLC.grid(row=3, column=1, padx=10, pady=10)
+            #-OBD2
+            chk_OBD2 = tk.Checkbutton(self.frm_main, text="OBD2", font=font_hdr2, variable=self.OBD2_var, onvalue=True, offvalue=False, command=self.OBD2_en)
+            chk_OBD2.grid(row=1, column=0 ,columnspan=2, padx=10, pady=(10,0), sticky=tk.W)
 
             #separator line
-            ttk.Separator(self.frm_main, orient=tk.HORIZONTAL).grid(row=4, column=0, columnspan=2, padx=10, sticky=tk.EW)
+            ttk.Separator(self.frm_main, orient=tk.HORIZONTAL).grid(row=2, column=0, columnspan=2, padx=10, pady=(10,0), sticky=tk.EW)
+
+            #-frames for CAN ID information - Different for each type
+            self.frm_CAN_norm = tk.Frame(self.frm_main, highlightthickness=0)
+            self.frm_CAN_norm.grid(row=3, column=0, columnspan=2, padx=10)
+            self.frm_CAN_OBD2 = tk.Frame(self.frm_main, highlightthickness=0)
+            self.frm_CAN_OBD2.grid(row=3, column=0, columnspan=2, padx=10)
+
+            #-AID
+            lbl_AID = tk.Label(self.frm_CAN_norm, text="AID (in HEX)", font=font_hdr2)
+            lbl_AID.grid(row=0, column=0, padx=10, pady=(10,0))
+            self.entry_AID = tk.Entry(self.frm_CAN_norm, width=20, textvariable=self.AID_var)
+            self.entry_AID.grid(row=0, column=1, padx=10, pady=(10,0))
+
+            #-Extended frame
+            self.chk_ext = tk.Checkbutton(self.frm_CAN_norm, text="Extended Frame", font=font_hdr2, variable=self.ext_var, onvalue=True, offvalue=False)
+            self.chk_ext.grid(row=1, column=0 ,columnspan=2, padx=10, pady=(10,0), sticky=tk.W)
+
+            #-DLC
+            lbl_DLC = tk.Label(self.frm_CAN_norm, text="DLC (expected frames)", font=font_hdr2)
+            lbl_DLC.grid(row=2, column=0, padx=10, pady=10)
+            self.entry_DLC = tk.Entry(self.frm_CAN_norm, width=20, textvariable=self.dlc_var)
+            self.entry_DLC.grid(row=2, column=1, padx=10, pady=10)
+
+            #-OBD2 PID
+            lbl_PID = tk.Label(self.frm_CAN_OBD2, text="OBD2 PID (in HEX)", font=font_hdr2)
+            lbl_PID.grid(row=0, column=0, padx=10, pady=(10,0))
+            self.entry_PID = tk.Entry(self.frm_CAN_OBD2, width=20, textvariable=self.OBD2_PID_var)
+            self.entry_PID.grid(row=0, column=1, padx=10, pady=(10,0))
+
+            #-OBD2 #bytes
+            lbl_bytes = tk.Label(self.frm_CAN_OBD2, text="# Bytes", font=font_hdr2)
+            lbl_bytes.grid(row=1, column=0, padx=10, pady=(10,0))
+            self.entry_bytes = tk.Entry(self.frm_CAN_OBD2, width=20, textvariable=self.OBD2_bytes_var)
+            self.entry_bytes.grid(row=1, column=1, padx=10, pady=(10,0))
+
+            #separator line
+            ttk.Separator(self.frm_main, orient=tk.HORIZONTAL).grid(row=4, column=0, columnspan=2, padx=10, pady=(10,0), sticky=tk.EW)
 
             #-Remote Req
             chk_RTR = tk.Checkbutton(self.frm_main, text="RTR (Remote Req)", font=font_hdr2, variable=self.RTR_var, onvalue=True, offvalue=False, command=self.RTR_en)
@@ -1249,8 +1325,8 @@ class wndw_CANch(tk.Toplevel):
             #-Calc Frames
             lbl_frames = tk.Label(self.frm_main, text="Target Frames", font=font_hdr2)
             lbl_frames.grid(row=8, column=0, padx=10, pady=(10,0))
-            entry_frames = tk.Entry(self.frm_main, width=20, textvariable=self.calc_frames_var)
-            entry_frames.grid(row=8, column=1, padx=10, pady=(10,0))
+            self.entry_frames = tk.Entry(self.frm_main, width=20, textvariable=self.calc_frames_var)
+            self.entry_frames.grid(row=8, column=1, padx=10, pady=(10,0))
 
             #-Calc scalar
             lbl_scalar = tk.Label(self.frm_main, text="Calc Scalar", font=font_hdr2)
@@ -1276,17 +1352,21 @@ class wndw_CANch(tk.Toplevel):
             if passed_ch is not None:    #if was passed a CAN channel, then populate fields
                 entry_name.configure(state=tk.DISABLED)           #disable the reference name input
                 self.name_var.set(passed_ch.name)
-                self.PID_var.set(passed_ch.PID)
+                self.AID_var.set(passed_ch.AID)
                 self.ext_var.set(passed_ch.ext or False)
                 self.dlc_var.set(passed_ch.dlc)
                 self.RTR_var.set(passed_ch.rem_req or False)
                 self.RTRfreq_var.set(passed_ch.req_freq or '')
                 self.frm_mains_tup = ','.join(str(i) for i in passed_ch.frames)
                 self.calc_frames_var.set(self.frm_mains_tup)
-                self.calc_scalar_var.set(passed_ch.scalar or '')
-                self.calc_offset_var.set(passed_ch.offset or '')
+                self.calc_scalar_var.set(passed_ch.scalar or 1)
+                self.calc_offset_var.set(passed_ch.offset or 0)
+                self.OBD2_var.set(passed_ch.OBD2 or False)
+                self.OBD2_PID_var.set(passed_ch.OBD2_PID or '')
+                self.OBD2_bytes_var.set(passed_ch.OBD2_bytes or '')
 
             self.RTR_en()   #enable or disable RTR freq field based on the check box
+            self.OBD2_en()  #enable or disable OBD2 fields based on the status
             self.protocol("WM_DELETE_WINDOW", self.on_close) # Handle window close button
             self.wait_window()  #wait in this window until destroyed
 
@@ -1300,6 +1380,26 @@ class wndw_CANch(tk.Toplevel):
             else:                       #RTR is disabled: don't allow field entry, clear any entries
                 self.entry_RTRfreq.config(state='disabled'); self.RTRfreq_var.set('')
 
+        def OBD2_en(self):
+            if self.OBD2_var.get():     #OBD2 is enabled: allow entry to fields
+                self.entry_PID.config(state='normal')
+                self.entry_bytes.config(state='normal')
+                self.entry_frames.config(state='disabled'); self.calc_frames_var.set('')
+                self.entry_AID.config(state='disabled'); self.AID_var.set('')
+                self.chk_ext.config(state='disabled'); self.ext_var.set(False)
+                self.entry_DLC.config(state='disabled');self.dlc_var.set(8)
+                self.frm_CAN_norm.grid_remove()
+                self.frm_CAN_OBD2.grid()
+            else:                       #OBD2 is disabled: don't allow field entry, clear any entries
+                self.entry_PID.config(state='disabled'); self.OBD2_PID_var.set('')
+                self.entry_bytes.config(state='disabled'); self.OBD2_bytes_var.set('')
+                self.entry_frames.config(state='normal')
+                self.entry_AID.config(state='normal')
+                self.chk_ext.config(state='normal')
+                self.entry_DLC.config(state='normal')
+                self.frm_CAN_norm.grid()
+                self.frm_CAN_OBD2.grid_remove()
+
         def on_save(self):
             """function is called when the configuration is saved, to set the result dictionary used
             to update the configuraiton definition. Additionally, when saving, required fields for the
@@ -1311,14 +1411,18 @@ class wndw_CANch(tk.Toplevel):
             else:
                 #--assembly CAN channel kwargs
                 ch_kwargs = {'NAME':self.name_var.get(),
-                             'PID':self.PID_var.get(),
+                             'AID':self.AID_var.get(),
                              'EXT':self.ext_var.get(),
                              'DLC':self.dlc_var.get(),
                              'REM_REQ':self.RTR_var.get(),
                              'REQ_FREQ':self.RTRfreq_var.get(),
                              'FRAMES':self.calc_frames_var.get(),
                              'SCALAR':self.calc_scalar_var.get(),
-                             'DEC_OFST':self.calc_offset_var.get()}
+                             'OFFSET':self.calc_offset_var.get(),
+                             'OBD2':self.OBD2_var.get(),
+                             'OBD2_PID':self.OBD2_PID_var.get(),
+                             'OBD2_BYTES':self.OBD2_bytes_var.get()
+                             }
                 
                 self.result = {ch_kwargs.get('NAME'): CAN_ch(**ch_kwargs)} #define CAN channel from entered values
                 self.destroy()
@@ -1335,12 +1439,17 @@ class wndw_CANch(tk.Toplevel):
             """
             #--create tuple of required fields
             req_fields = (self.name_var.get() or None,)
-            req_fields += (self.PID_var.get() or None,)
-            req_fields += (self.dlc_var.get() or None,)
-            req_fields += (self.calc_frames_var.get() or None,)
-
             if self.RTR_var.get():  #if RTR is required, then a frequency must be set
                 req_fields += (self.RTRfreq_var.get() or None,)
+
+            if self.OBD2_var.get() == False:
+                req_fields += (self.AID_var.get() or None,)
+                req_fields += (self.dlc_var.get() or None,)
+                req_fields += (self.calc_frames_var.get() or None,)
+            else:
+                req_fields += (self.OBD2_PID_var.get() or None,)
+                req_fields += (self.OBD2_bytes_var.get() or None,)
+                pass
 
             if None in req_fields: return True  #if at least one required field is missing, return true
             else: return False

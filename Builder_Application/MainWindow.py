@@ -237,7 +237,8 @@ class wndw_Main(tk.Tk):
                     messagebox.showinfo("Success", "Loaded dash config successfully!")              #let the user know it was loaded
                     self.editr_cntl.buildAllPages()                                                 #build all the pages with elements in the loaded config
                     self.editr_cntl.cboFrames_upd()                                                 #update frame select combo box    
-                    self.editr_cntl.gotoEditorCanv(next(iter(self.cfg_pages)))                      #load first page in config into the editor
+                    try:self.editr_cntl.gotoEditorCanv(next(iter(self.cfg_pages)))                  #load first page in config into the editor
+                    except:pass
                     self.editr_cntl.upd_ctl(True)                                                   #enable the user controls
                 #config error message handled in dashCFG_check
             #open error messages handled in XML_open

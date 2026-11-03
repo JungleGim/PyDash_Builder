@@ -17,9 +17,9 @@ import os
 help_companyName = "Langholz Racing and Consulting Services"
 help_html_gitMain = 'https://github.com/JungleGim/PyDash_Builder/'      #github page for the builder
 help_html_gitUserGuide = 'https://github.com/JungleGim/PyDash_Builder/blob/main/User_Guide.md'  #program userguide
-help_email = 'tbd_email@gmail.com'                                      #contact email
-help_versionText = "Version 0.0"                                        #app version
-help_buildDateText = "Build Date: 10/19/2025"                           #app build date
+help_email = 'jlangholz.design@gmail.com'                               #contact email
+help_versionText = "Version 2.0a"                                       #app version
+help_buildDateText = "Build Date: 11/01/2026"                           #app build date
 
 #---fixed hardware PyDash values
 dash_xSz = 1024         #X resolution
@@ -50,7 +50,7 @@ clr_dflt_DNGR= "#C0C0C0"
 #TODO: move these to a global program settings that can be configured by the user on the front-end
 click_delay = 50            #delay in miliseconds to check if left-mouse is still held (indicating a click and drag)
 sys_wrap_len = 400          #custom warning box width
-sys_CAN_base_PID = '0x9A'   #base CAN PID default
+sys_CAN_base_AID = '0x9A'   #base CAN AID default
 
 #---configuration output constants
 dashCFG_PKGname = 'PyDash_Config'       #zip file name of the output package
