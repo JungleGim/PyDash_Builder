@@ -41,7 +41,6 @@
 		<!--images-->
 		<IMAGES>
 			<IMG NAME="IMG_BG">C:/Users/jlang/Desktop/PyDash_Builder/Documentation/example_images/Background.png</IMG>
-			<IMG NAME="IMG_BG_RPM">C:/Users/jlang/Desktop/PyDash_Builder/Documentation/example_images/Background_RPM.png</IMG>
 			<IMG NAME="IMG_LOBM">C:/Users/jlang/Desktop/PyDash_Builder/Documentation/example_images/Headlight_lo.png</IMG>
 			<IMG NAME="IMG_HIBM">C:/Users/jlang/Desktop/PyDash_Builder/Documentation/example_images/Headlight_hi.png</IMG>
 		</IMAGES>
@@ -57,17 +56,20 @@
 	<CAN>
 		<!--global CAN config-->
 		<CORE>
-			<BASE_PID>0x9A</BASE_PID>
+			<BASE_AID>0x9A</BASE_AID>
 			<RX_FILTER>FALSE</RX_FILTER>
 		</CORE>
 		<!--CAN channels-->
 		<CHANNELS>
 			<CH NAME="RPM">			
 				<!--CAN data values-->
-				<PID>0x63</PID>
+				<AID>0x63</AID>
 				<EXT>FALSE</EXT>
 				<DLC>2</DLC>
-				<FRAMES>1,2</FRAMES>
+				<OBD2>False</OBD2>
+        <OBD2_PID />
+        <START_BIT>0</START_BIT>
+        <STOP_BIT>15</STOP_BIT>
 				<SCALAR>1</SCALAR>
 				<OFFSET>0</OFFSET>
 				<REM_REQ>FALSE</REM_REQ>
@@ -75,60 +77,78 @@
 			</CH>
 			<!--....<CH_n></CH_n>-->
 			<CH NAME="ECT">			
-				<PID>0x43</PID>
+				<AID>0x43</AID>
 				<EXT>FALSE</EXT>
 				<DLC>2</DLC>
-				<FRAMES>1,2</FRAMES>
+				<OBD2>False</OBD2>
+        <OBD2_PID />
+        <START_BIT>0</START_BIT>
+        <STOP_BIT>15</STOP_BIT>
 				<SCALAR>1</SCALAR>
 				<OFFSET>-65</OFFSET>
 				<REM_REQ>FALSE</REM_REQ>
 				<REQ_FREQ></REQ_FREQ>
 			</CH>
 			<CH NAME="WBO2">			
-				<PID>0x73</PID>
+				<AID>0x73</AID>
 				<EXT>FALSE</EXT>
 				<DLC>2</DLC>
-				<FRAMES>1,2</FRAMES>
+				<OBD2>False</OBD2>
+        <OBD2_PID />
+        <START_BIT>0</START_BIT>
+        <STOP_BIT>15</STOP_BIT>
 				<SCALAR>1/10</SCALAR>
 				<OFFSET>0</OFFSET>
 				<REM_REQ>FALSE</REM_REQ>
 				<REQ_FREQ></REQ_FREQ>
 			</CH>
 			<CH NAME="OILP">			
-				<PID>0x44</PID>
+				<AID>0x44</AID>
 				<EXT>FALSE</EXT>
 				<DLC>2</DLC>
-				<FRAMES>1,2</FRAMES>
+				<OBD2>False</OBD2>
+        <OBD2_PID />
+        <START_BIT>0</START_BIT>
+        <STOP_BIT>15</STOP_BIT>
 				<SCALAR>1</SCALAR>
 				<OFFSET>0</OFFSET>
 				<REM_REQ>FALSE</REM_REQ>
 				<REQ_FREQ></REQ_FREQ>
 			</CH>
 			<CH NAME="MAP">			
-				<PID>0x45</PID>
+				<AID>0x45</AID>
 				<EXT>FALSE</EXT>
 				<DLC>2</DLC>
-				<FRAMES>1,2</FRAMES>
+				<OBD2>False</OBD2>
+        <OBD2_PID />
+        <START_BIT>0</START_BIT>
+        <STOP_BIT>15</STOP_BIT>
 				<SCALAR>1/10</SCALAR>
 				<OFFSET>0</OFFSET>
 				<REM_REQ>FALSE</REM_REQ>
 				<REQ_FREQ></REQ_FREQ>
 			</CH>
 			<CH NAME="LOBM">			
-				<PID>0x2B</PID>
+				<AID>0x2B</AID>
 				<EXT>FALSE</EXT>
 				<DLC>1</DLC>
-				<FRAMES>1</FRAMES>
+				<OBD2>False</OBD2>
+        <OBD2_PID />
+        <START_BIT>0</START_BIT>
+        <STOP_BIT>7</STOP_BIT>
 				<SCALAR>1</SCALAR>
 				<OFFSET>0</OFFSET>
 				<REM_REQ>FALSE</REM_REQ>
 				<REQ_FREQ></REQ_FREQ>
 			</CH>
 			<CH NAME="HIBM">			
-				<PID>0x27</PID>
+				<AID>0x27</AID>
 				<EXT>FALSE</EXT>
 				<DLC>1</DLC>
-				<FRAMES>1</FRAMES>
+				<OBD2>False</OBD2>
+        <OBD2_PID />
+        <START_BIT>0</START_BIT>
+        <STOP_BIT>7</STOP_BIT>
 				<SCALAR>1</SCALAR>
 				<OFFSET>0</OFFSET>
 				<REM_REQ>FALSE</REM_REQ>

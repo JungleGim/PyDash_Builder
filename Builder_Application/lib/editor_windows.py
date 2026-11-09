@@ -16,6 +16,7 @@ from .com_defs import Move_Page             #needed for page manipulation
 from .com_defs import updPages              #needed to update pages on config changes
 from .com_defs import strvar_str            #needed for the properties display and (none) stringvars
 from .com_defs import tup_str               #needed for deletion error messages
+from .com_defs import int_str               #needed for various handling
 from .com_defs import elePad_create         #needed for danger/warning color window
 from tkinter import Text, Scrollbar         #needed for help file
 from .com_defs import Label_Static, Label_Data, Indicator_Bullet, Indicator_Bar     #needed for handling properties
@@ -1059,25 +1060,6 @@ class wndw_CANcore(tk.Toplevel):
         chk_filter = tk.Checkbutton(self.frm_main, text="Enable RX filter", font=font_hdr2, variable=self.rxFilter_var, onvalue=True, offvalue=False)
         chk_filter.grid(row=1, column=0 ,columnspan=2, padx=10, pady=(0,10), sticky=tk.W)
 
-        #separator line
-        ttk.Separator(self.frm_main, orient=tk.HORIZONTAL).grid(row=2, column=0, columnspan=2, padx=10, pady=(0,10), sticky=tk.EW)
-
-        #OBD2_en
-        chk_OBD2 = tk.Checkbutton(self.frm_main, text="OBD2 CAN Enable", font=font_hdr2, variable=self.obd2_var, onvalue=True, offvalue=False, command=self.OBD2_en)
-        chk_OBD2.grid(row=3, column=0 ,columnspan=2, padx=10, pady=(0,10), sticky=tk.W)
-
-        #OBD2_ECU_IDtx - only enable if OBD2_en is TRUE
-        lbl_ECUtx = tk.Label(self.frm_main, text="OBD2 ECU txID", font=font_hdr2)
-        lbl_ECUtx.grid(row=4, column=0, padx=10, pady=(0,10))
-        self.entry_ECUtx = tk.Entry(self.frm_main, width=10, textvariable=self.ECUtx_var)
-        self.entry_ECUtx.grid(row=4, column=1, padx=10, pady=(0,10))
-        
-        #OBD2_ECU_IDrx - only enable if OBD2_en is TRUE
-        lbl_ECUrx = tk.Label(self.frm_main, text="OBD2 ECU rxID", font=font_hdr2)
-        lbl_ECUrx.grid(row=5, column=0, padx=10, pady=(0,10))
-        self.entry_ECUrx = tk.Entry(self.frm_main, width=10, textvariable=self.ECUrx_var)
-        self.entry_ECUrx.grid(row=5, column=1, padx=10, pady=(0,10))
-
         #---control buttons
         self.frm_cntl = tk.Frame(self, highlightthickness=0)
         self.frm_cntl.grid(row=6, column=0, columnspan=2)
@@ -1090,23 +1072,6 @@ class wndw_CANcore(tk.Toplevel):
         """function loads the currently defined information into the editor window"""
         self.AID_var.set(self.CAN_ref.base_AID or sys_CAN_base_AID)
         self.rxFilter_var.set(self.CAN_ref.rx_filter or False)
-        self.obd2_var.set(self.CAN_ref.OBD2_en or False)
-        self.ECUtx_var.set(self.CAN_ref.OBD2_ECU_IDtx or '')
-        self.ECUrx_var.set(self.CAN_ref.OBD2_ECU_IDrx or '')
-
-        self.OBD2_en()      #enable or disable the OBD2 fields based on the set value
-
-    def OBD2_en(self):
-        """function handles auxiliary field setting when the OBD2 field is enabled or disabled.
-        If OBD2 is disabled, any related fields should be disabled and set to blank. If OBD2 is enabled, it should
-        enable related fields."""
-
-        if self.obd2_var.get():     #OBD2 is enabled: allow entry to fields
-            self.entry_ECUtx.config(state='normal')
-            self.entry_ECUrx.config(state='normal')
-        else:                       #OBD2 is disabled: don't allow field entry, clear any entries
-            self.entry_ECUtx.config(state='disabled'); self.ECUtx_var.set('')
-            self.entry_ECUrx.config(state='disabled'); self.ECUrx_var.set('')
 
     def on_save(self):
         """function sets the alert colors in the theme definition on save."""
@@ -1115,9 +1080,6 @@ class wndw_CANcore(tk.Toplevel):
         else:                                               #otherwise update config
             self.CAN_ref.base_AID = self.AID_var.get()
             self.CAN_ref.rx_filter = self.rxFilter_var.get()
-            self.CAN_ref.OBD2_en = self.obd2_var.get()
-            self.CAN_ref.OBD2_ECU_IDtx = self.ECUtx_var.get()
-            self.CAN_ref.OBD2_ECU_IDrx = self.ECUrx_var.get()
             self.destroy()
 
     def on_close(self):
@@ -1132,9 +1094,6 @@ class wndw_CANcore(tk.Toplevel):
         """
         #--create tuple of required fields
         req_fields = (self.AID_var.get() or None,)
-        if (self.obd2_var.get() is True):
-            req_fields = (self.ECUtx_var.get() or None,)
-            req_fields = (self.ECUrx_var.get() or None,)
 
         if None in req_fields: return True  #if at least one required field is missing, return true
         else: return False
@@ -1248,12 +1207,12 @@ class wndw_CANch(tk.Toplevel):
             self.dlc_var = tk.StringVar()
             self.RTR_var = tk.BooleanVar()
             self.RTRfreq_var = tk.StringVar()
-            self.calc_frames_var = tk.StringVar()
+            self.startBit_var = tk.StringVar()
+            self.stopBit_var = tk.StringVar()
             self.calc_scalar_var = tk.StringVar()
             self.calc_offset_var = tk.StringVar()
             self.OBD2_var = tk.BooleanVar()
             self.OBD2_PID_var = tk.StringVar()
-            self.OBD2_bytes_var = tk.StringVar()
 
             #--field entry widgets
             self.frm_main = tk.Frame(self, highlightthickness=0)
@@ -1265,80 +1224,75 @@ class wndw_CANch(tk.Toplevel):
             entry_name = tk.Entry(self.frm_main, width=20, textvariable=self.name_var)
             entry_name.grid(row=0, column=1, padx=10, pady=(10,0))
 
-            #-OBD2
-            chk_OBD2 = tk.Checkbutton(self.frm_main, text="OBD2", font=font_hdr2, variable=self.OBD2_var, onvalue=True, offvalue=False, command=self.OBD2_en)
-            chk_OBD2.grid(row=1, column=0 ,columnspan=2, padx=10, pady=(10,0), sticky=tk.W)
-
-            #separator line
-            ttk.Separator(self.frm_main, orient=tk.HORIZONTAL).grid(row=2, column=0, columnspan=2, padx=10, pady=(10,0), sticky=tk.EW)
-
-            #-frames for CAN ID information - Different for each type
-            self.frm_CAN_norm = tk.Frame(self.frm_main, highlightthickness=0)
-            self.frm_CAN_norm.grid(row=3, column=0, columnspan=2, padx=10)
-            self.frm_CAN_OBD2 = tk.Frame(self.frm_main, highlightthickness=0)
-            self.frm_CAN_OBD2.grid(row=3, column=0, columnspan=2, padx=10)
-
             #-AID
-            lbl_AID = tk.Label(self.frm_CAN_norm, text="AID (in HEX)", font=font_hdr2)
-            lbl_AID.grid(row=0, column=0, padx=10, pady=(10,0))
-            self.entry_AID = tk.Entry(self.frm_CAN_norm, width=20, textvariable=self.AID_var)
-            self.entry_AID.grid(row=0, column=1, padx=10, pady=(10,0))
+            lbl_AID = tk.Label(self.frm_main, text="AID (in HEX)", font=font_hdr2)
+            lbl_AID.grid(row=1, column=0, padx=10, pady=(10,0))
+            self.entry_AID = tk.Entry(self.frm_main, width=20, textvariable=self.AID_var)
+            self.entry_AID.grid(row=1, column=1, padx=10, pady=(10,0))
 
             #-Extended frame
-            self.chk_ext = tk.Checkbutton(self.frm_CAN_norm, text="Extended Frame", font=font_hdr2, variable=self.ext_var, onvalue=True, offvalue=False)
-            self.chk_ext.grid(row=1, column=0 ,columnspan=2, padx=10, pady=(10,0), sticky=tk.W)
+            self.chk_ext = tk.Checkbutton(self.frm_main, text="Extended Frame", font=font_hdr2, variable=self.ext_var, onvalue=True, offvalue=False)
+            self.chk_ext.grid(row=2, column=0 ,columnspan=2, padx=10, pady=(10,0), sticky=tk.W)
 
             #-DLC
-            lbl_DLC = tk.Label(self.frm_CAN_norm, text="DLC (expected frames)", font=font_hdr2)
-            lbl_DLC.grid(row=2, column=0, padx=10, pady=10)
-            self.entry_DLC = tk.Entry(self.frm_CAN_norm, width=20, textvariable=self.dlc_var)
-            self.entry_DLC.grid(row=2, column=1, padx=10, pady=10)
+            lbl_DLC = tk.Label(self.frm_main, text="DLC (expected frames)", font=font_hdr2)
+            lbl_DLC.grid(row=3, column=0, padx=10, pady=10)
+            self.entry_DLC = tk.Entry(self.frm_main, width=20, textvariable=self.dlc_var)
+            self.entry_DLC.grid(row=3, column=1, padx=10, pady=10)
 
+            #-OBD2
+            chk_OBD2 = tk.Checkbutton(self.frm_main, text="OBD2", font=font_hdr2, variable=self.OBD2_var, onvalue=True, offvalue=False, command=self.OBD2_en)
+            chk_OBD2.grid(row=4, column=0 ,columnspan=2, padx=10, pady=(10,0), sticky=tk.W)
+            
             #-OBD2 PID
-            lbl_PID = tk.Label(self.frm_CAN_OBD2, text="OBD2 PID (in HEX)", font=font_hdr2)
-            lbl_PID.grid(row=0, column=0, padx=10, pady=(10,0))
-            self.entry_PID = tk.Entry(self.frm_CAN_OBD2, width=20, textvariable=self.OBD2_PID_var)
-            self.entry_PID.grid(row=0, column=1, padx=10, pady=(10,0))
-
-            #-OBD2 #bytes
-            lbl_bytes = tk.Label(self.frm_CAN_OBD2, text="# Bytes", font=font_hdr2)
-            lbl_bytes.grid(row=1, column=0, padx=10, pady=(10,0))
-            self.entry_bytes = tk.Entry(self.frm_CAN_OBD2, width=20, textvariable=self.OBD2_bytes_var)
-            self.entry_bytes.grid(row=1, column=1, padx=10, pady=(10,0))
+            lbl_PID = tk.Label(self.frm_main, text="OBD2 PID (in HEX)", font=font_hdr2)
+            lbl_PID.grid(row=5, column=0, padx=10, pady=(10,0))
+            self.entry_PID = tk.Entry(self.frm_main, width=20, textvariable=self.OBD2_PID_var)
+            self.entry_PID.grid(row=5, column=1, padx=10, pady=(10,0))
 
             #separator line
-            ttk.Separator(self.frm_main, orient=tk.HORIZONTAL).grid(row=4, column=0, columnspan=2, padx=10, pady=(10,0), sticky=tk.EW)
+            ttk.Separator(self.frm_main, orient=tk.HORIZONTAL).grid(row=6, column=0, columnspan=2, padx=10, pady=(10,0), sticky=tk.EW)
 
             #-Remote Req
             chk_RTR = tk.Checkbutton(self.frm_main, text="RTR (Remote Req)", font=font_hdr2, variable=self.RTR_var, onvalue=True, offvalue=False, command=self.RTR_en)
-            chk_RTR.grid(row=5, column=0 ,columnspan=2, padx=10, pady=(10,0), sticky=tk.W)
+            chk_RTR.grid(row=7, column=0 ,columnspan=2, padx=10, pady=(10,0), sticky=tk.W)
 
             #-Remote Req Freq
             lbl_RTRfreq = tk.Label(self.frm_main, text="RTR Frequency (in ms)", font=font_hdr2)
-            lbl_RTRfreq.grid(row=6, column=0, padx=10, pady=10)
+            lbl_RTRfreq.grid(row=8, column=0, padx=10, pady=10)
             self.entry_RTRfreq = tk.Entry(self.frm_main, width=20, textvariable=self.RTRfreq_var)
-            self.entry_RTRfreq.grid(row=6, column=1, padx=10, pady=10)
+            self.entry_RTRfreq.grid(row=8, column=1, padx=10, pady=10)
 
             #separator line
-            ttk.Separator(self.frm_main, orient=tk.HORIZONTAL).grid(row=7, column=0, columnspan=2, padx=10, sticky=tk.EW)
+            ttk.Separator(self.frm_main, orient=tk.HORIZONTAL).grid(row=9, column=0, columnspan=2, padx=(10.0), sticky=tk.EW)
 
-            #-Calc Frames
-            lbl_frames = tk.Label(self.frm_main, text="Target Frames", font=font_hdr2)
-            lbl_frames.grid(row=8, column=0, padx=10, pady=(10,0))
-            self.entry_frames = tk.Entry(self.frm_main, width=20, textvariable=self.calc_frames_var)
-            self.entry_frames.grid(row=8, column=1, padx=10, pady=(10,0))
+            #-Calc Start Bit
+            lbl_frames = tk.Label(self.frm_main, text="Start Bit", font=font_hdr2)
+            lbl_frames.grid(row=10, column=0, padx=10, pady=(10,0))
+            self.entry_frames = tk.Entry(self.frm_main, width=20, textvariable=self.startBit_var)
+            self.entry_frames.grid(row=10, column=1, padx=10, pady=(10,0))
+
+            #-Calc Stop Bit
+            lbl_frames = tk.Label(self.frm_main, text="Stop Bit", font=font_hdr2)
+            lbl_frames.grid(row=11, column=0, padx=10, pady=(10,0))
+            self.entry_frames = tk.Entry(self.frm_main, width=20, textvariable=self.stopBit_var)
+            self.entry_frames.grid(row=11, column=1, padx=10, pady=(10,0))
+
+            #--bit helper window for start/stop bits
+            btn_save=tk.Button(self.frm_main,text="Start/Stop Bit Helper", command=self.launch_BitRange_helper)
+            btn_save.grid(row=12, column=0, padx=10, pady=(10,0), columnspan=2)
 
             #-Calc scalar
             lbl_scalar = tk.Label(self.frm_main, text="Calc Scalar", font=font_hdr2)
-            lbl_scalar.grid(row=9, column=0, padx=10, pady=(10,0))
+            lbl_scalar.grid(row=13, column=0, padx=10, pady=(10,0))
             entry_scalar = tk.Entry(self.frm_main, width=20, textvariable=self.calc_scalar_var)
-            entry_scalar.grid(row=9, column=1, padx=10, pady=(10,0))
+            entry_scalar.grid(row=13, column=1, padx=10, pady=(10,0))
 
             #-Calc Offset
             lbl_ofst = tk.Label(self.frm_main, text="Calc Offset", font=font_hdr2)
-            lbl_ofst.grid(row=10, column=0, padx=10, pady=10)
+            lbl_ofst.grid(row=14, column=0, padx=10, pady=10)
             entry_ofst = tk.Entry(self.frm_main, width=20, textvariable=self.calc_offset_var)
-            entry_ofst.grid(row=10, column=1, padx=10, pady=10)
+            entry_ofst.grid(row=14, column=1, padx=10, pady=10)
 
             #---control buttons
             self.frm_cntl = tk.Frame(self, highlightthickness=0)
@@ -1353,20 +1307,21 @@ class wndw_CANch(tk.Toplevel):
                 entry_name.configure(state=tk.DISABLED)           #disable the reference name input
                 self.name_var.set(passed_ch.name)
                 self.AID_var.set(passed_ch.AID)
-                self.ext_var.set(passed_ch.ext or False)
+                self.ext_var.set(passed_ch.ext)
                 self.dlc_var.set(passed_ch.dlc)
-                self.RTR_var.set(passed_ch.rem_req or False)
-                self.RTRfreq_var.set(passed_ch.req_freq or '')
-                self.frm_mains_tup = ','.join(str(i) for i in passed_ch.frames)
-                self.calc_frames_var.set(self.frm_mains_tup)
-                self.calc_scalar_var.set(passed_ch.scalar or 1)
-                self.calc_offset_var.set(passed_ch.offset or 0)
-                self.OBD2_var.set(passed_ch.OBD2 or False)
-                self.OBD2_PID_var.set(passed_ch.OBD2_PID or '')
-                self.OBD2_bytes_var.set(passed_ch.OBD2_bytes or '')
+                self.RTR_var.set(passed_ch.rem_req)
+                self.RTRfreq_var.set(passed_ch.req_freq)
+                self.startBit_var.set(passed_ch.start_bit)
+                self.stopBit_var.set(passed_ch.stop_bit)
+                self.calc_scalar_var.set(passed_ch.scalar)
+                self.calc_offset_var.set(passed_ch.offset)
+                self.OBD2_var.set(passed_ch.OBD2)
+                self.OBD2_PID_var.set(passed_ch.OBD2_PID)
 
-            self.RTR_en()   #enable or disable RTR freq field based on the check box
-            self.OBD2_en()  #enable or disable OBD2 fields based on the status
+            t = self.dlc_var.get()
+
+            self.RTR_en()       #enable or disable RTR freq field based on the check box
+            self.OBD2_en(True)  #enable or disable OBD2 fields based on the status
             self.protocol("WM_DELETE_WINDOW", self.on_close) # Handle window close button
             self.wait_window()  #wait in this window until destroyed
 
@@ -1380,25 +1335,18 @@ class wndw_CANch(tk.Toplevel):
             else:                       #RTR is disabled: don't allow field entry, clear any entries
                 self.entry_RTRfreq.config(state='disabled'); self.RTRfreq_var.set('')
 
-        def OBD2_en(self):
+        def OBD2_en(self, on_load=False):
             if self.OBD2_var.get():     #OBD2 is enabled: allow entry to fields
                 self.entry_PID.config(state='normal')
-                self.entry_bytes.config(state='normal')
-                self.entry_frames.config(state='disabled'); self.calc_frames_var.set('')
-                self.entry_AID.config(state='disabled'); self.AID_var.set('')
-                self.chk_ext.config(state='disabled'); self.ext_var.set(False)
-                self.entry_DLC.config(state='disabled');self.dlc_var.set(8)
-                self.frm_CAN_norm.grid_remove()
-                self.frm_CAN_OBD2.grid()
+                self.chk_ext.config(state='disabled');
+                self.entry_DLC.config(state='disabled')
+                if on_load is not True: self.ext_var.set(False);self.dlc_var.set(8)
             else:                       #OBD2 is disabled: don't allow field entry, clear any entries
-                self.entry_PID.config(state='disabled'); self.OBD2_PID_var.set('')
-                self.entry_bytes.config(state='disabled'); self.OBD2_bytes_var.set('')
-                self.entry_frames.config(state='normal')
-                self.entry_AID.config(state='normal')
+                self.entry_PID.config(state='disabled'); 
                 self.chk_ext.config(state='normal')
-                self.entry_DLC.config(state='normal')
-                self.frm_CAN_norm.grid()
-                self.frm_CAN_OBD2.grid_remove()
+                self.entry_DLC.config(state='normal');
+                if on_load is not True: self.dlc_var.set('');self.OBD2_PID_var.set('')
+
 
         def on_save(self):
             """function is called when the configuration is saved, to set the result dictionary used
@@ -1416,16 +1364,123 @@ class wndw_CANch(tk.Toplevel):
                              'DLC':self.dlc_var.get(),
                              'REM_REQ':self.RTR_var.get(),
                              'REQ_FREQ':self.RTRfreq_var.get(),
-                             'FRAMES':self.calc_frames_var.get(),
+                             'START_BIT':self.startBit_var.get(),
+                             'STOP_BIT':self.stopBit_var.get(),
                              'SCALAR':self.calc_scalar_var.get(),
                              'OFFSET':self.calc_offset_var.get(),
                              'OBD2':self.OBD2_var.get(),
-                             'OBD2_PID':self.OBD2_PID_var.get(),
-                             'OBD2_BYTES':self.OBD2_bytes_var.get()
+                             'OBD2_PID':self.OBD2_PID_var.get()
                              }
                 
                 self.result = {ch_kwargs.get('NAME'): CAN_ch(**ch_kwargs)} #define CAN channel from entered values
                 self.destroy()
+
+        def launch_BitRange_helper(self):
+            """helper function to launch the bit range selector. This window is meant to populate the start and stop
+            bits used for calculation. function handles error checking before launching and then updating of the results
+            when the user is done"""
+            ch_bytes = self.dlc_var.get()   #local temp for dlc
+            sel_bits = None                 #local temp for selected bits
+            if ch_bytes is None or ch_bytes =='' or int_str(ch_bytes) < 1:       #unable to select start/stop if DLC is not set
+                messagebox.showwarning("Warning", "DLC is not set. DLC value is required before selecting bit range")
+            else:
+                sel_bits = self.BitRangeHelper(self,ch_bytes)
+
+            #if a valid result was set (signified by no "none" values in result)
+            if sel_bits is not None and sel_bits.result is not None:
+                self.startBit_var.set(str(sel_bits.result[0]))      #then update start and stop bits
+                self.stopBit_var.set(str(sel_bits.result[1]))
+
+        class BitRangeHelper(tk.Toplevel):
+            """toplevel window for modifing CAN channel configuration definitions. When instancing, if no configuration
+            information is passed, all fields are left blank. If a configuration is passed, the available entry fields
+            are populated with the passed values for modification."""
+            def __init__(self, master, byte_count):
+                super().__init__(master)
+                self.grab_set()                         #force focus
+                self.title("CAN Byte Range Selector")   #title bar
+                self.resizable(False,False)             #fixed size
+                self.result = None                      #var to hold updated font
+                self.byte_count = int_str(byte_count)
+                self.bit_count = self.byte_count * 8
+
+                #-state handling
+                self.first_click = None
+                self.start_bit = None
+                self.end_bit = None
+                self.buttons = []
+
+                #----build the selection interface
+                bits_frame = tk.Frame(self, padx=10, pady=10); bits_frame.pack()
+
+                for byte_index in range(self.byte_count):   #loop through all the bytes for the passed DLC
+                    byte_frame = tk.Frame(bits_frame)       #make a frame for each byte for better visual separation
+                    byte_frame.grid(row=0, column=byte_index, padx=(0, 5), sticky="n")
+
+                    byte_label = tk.Label(byte_frame,text=f"Byte {byte_index}",font=font_hdr2)  #add a label to the top of each byte
+                    byte_label.grid(row=0, column=0, columnspan=8)
+
+                    for bit_offset in range(8):             #then cycle through all the bits to make the selection buttons
+                        bit_index = byte_index * 8 + bit_offset
+                        button = tk.Button(byte_frame, text=str(bit_index),width=2,padx=0,command=lambda bit=bit_index: self.select_bit(bit))
+                        button.grid(row=1, column=bit_offset, padx=0, pady=4)
+                        self.buttons.append(button)
+
+                self.range_label = tk.Label(self, text="Select a start bit", font=font_hdr2)   #lastly add a selection label
+                self.range_label.pack(pady=(0, 8))
+
+                #----build the controls interface
+                controls = tk.Frame(self); controls.pack(pady=(0, 10))
+                tk.Button(controls, text="OK", command=self.accept).pack(side="left", padx=4)
+                tk.Button(controls, text="Cancel", command=self.destroy).pack(side="left", padx=4)
+                
+                self.wait_window()  #wait in this window until destroyed
+
+            def select_bit(self, bit_index):
+                """function to handle the user selecting start/end bits"""
+                if self.first_click is None or self.end_bit is not None:    #if nothing is set, then the start bit is being chosen
+                    self.first_click = bit_index
+                    self.start_bit = bit_index
+                    self.end_bit = None
+                else:                                                       #otherwise the stop bit is being selected
+                    self.start_bit = min(self.first_click, bit_index)
+                    self.end_bit = max(self.first_click, bit_index)
+                self.update_display()                                       #update results when done
+
+            def update_display(self):
+                """function to update the visual appearance of the selected buttons to help with visual ques.
+                This function is called anytime an update to the selection is made"""
+                for bit_index, button in enumerate(self.buttons):           #cycle through all buttons that have been generated
+                    if self.end_bit is None:                                    #no end button has been selected
+                        selected = bit_index == self.start_bit                      #so the updated "sunken" display should only be the start bit
+                    else:                                                       #otherwise
+                        selected = self.start_bit <= bit_index <= self.end_bit      #an end button has been selected, so the "selected" status falls between them
+
+                    button.configure(                                                   #update the button configuration
+                        relief="sunken" if selected else "raised",                          #to "sunken" if "selected" means the bit buttons are within range
+                        background="#a8d5ff" if selected else "SystemButtonFace",         #and change the background color
+                    )
+
+                if self.start_bit is None:                                          #update the selection label based on the selection status
+                    self.range_label.configure(text="Select a start bit.")
+                elif self.end_bit is None:
+                    self.range_label.configure(text=f"Start bit: {self.start_bit} — select an end bit.")
+                else:
+                    total_bits = self.end_bit - self.start_bit + 1
+                    self.range_label.configure(
+                        text=(
+                            f"Start bit: {self.start_bit}  |  "
+                            f"End bit: {self.end_bit}  |  "
+                            f"Total bits: {total_bits}"
+                        )
+                    )
+
+            def accept(self):
+                if self.start_bit is None or self.end_bit is None:      #hasn't been selected so display error
+                    messagebox.showinfo("Select a range","Click a start bit and an end bit before selecting OK.",parent=self)
+                    return
+                self.result = (self.start_bit, self.end_bit)            #otherwise set result
+                self.destroy()                                          #and close
 
         def on_close(self): #make no changes
             """function is called when the close or exit buttons are selected. No configuraiton is saved."""
@@ -1439,17 +1494,16 @@ class wndw_CANch(tk.Toplevel):
             """
             #--create tuple of required fields
             req_fields = (self.name_var.get() or None,)
-            if self.RTR_var.get():  #if RTR is required, then a frequency must be set
+            req_fields += (self.AID_var.get() or None,)
+            req_fields += (self.dlc_var.get() or None,)
+            req_fields += (self.startBit_var.get() or None,)
+            req_fields += (self.stopBit_var.get() or None,)
+
+            if self.RTR_var.get():          #if RTR is required, then a frequency must be set
                 req_fields += (self.RTRfreq_var.get() or None,)
 
-            if self.OBD2_var.get() == False:
-                req_fields += (self.AID_var.get() or None,)
-                req_fields += (self.dlc_var.get() or None,)
-                req_fields += (self.calc_frames_var.get() or None,)
-            else:
+            if self.OBD2_var.get() == True: #if channel is OBD2 then a PID must be selected
                 req_fields += (self.OBD2_PID_var.get() or None,)
-                req_fields += (self.OBD2_bytes_var.get() or None,)
-                pass
 
             if None in req_fields: return True  #if at least one required field is missing, return true
             else: return False

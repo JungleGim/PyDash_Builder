@@ -722,27 +722,21 @@ class CAN_core:
         """
         self.base_AID = None        #CAN AID of the dash itself
         self.rx_filter = None       #enable RX CAN filter based on defined CAN channels
-        self.OBD2_en = None         #enable OBD2 protocols
-        self.OBD2_ECU_IDtx = None   #OBD2 ECU ID - transmit
-        self.OBD2_ECU_IDrx = None   #OBD2 ECU ID - response
         self.data_ch = {}           #dictionary for display chan channels. Format is {ch_NAME : class[CAN_ch]}
 
         #-----external reference dicts: contains where/which named elements that reference CAN channel objects
         self.CAN_CH_ext_ref = {}
 
         #--create tupple for class attributes used to save editor XML file
-        self.fields_editorCFG = ('base_AID', 'rx_filter', 'OBD2_en', 'OBD2_ECU_IDtx', 'OBD2_ECU_IDrx')
+        self.fields_editorCFG = ('base_AID', 'rx_filter')
 
         #--create tupple for class attributes used to generate dash config file
-        self.fields_dashCFG = ('base_AID', 'rx_filter', 'OBD2_ECU_IDtx', 'OBD2_ECU_IDrx')
+        self.fields_dashCFG = self.fields_editorCFG
     
     def set_dflt_cfg(self):
         """function sets the default values for the editor config"""
         self.base_AID = sys_CAN_base_AID
         self.rx_filter = False
-        self.OBD2_en = False
-        self.OBD2_ECU_IDtx = None
-        self.OBD2_ECU_IDrx = None
 
     def upd_cfg(self, **kwargs):
         """ function sets attributes based on the passed KWARGs. All KWARGs have default values
@@ -754,9 +748,6 @@ class CAN_core:
         kwargs = {k.upper(): v for k, v in kwargs.items()}  #convert kwarg names to uppercase. Allows for use with XML and editor attributes
         if 'BASE_AID' in kwargs: self.base_AID = kwargs.get('BASE_AID')
         if 'RX_FILTER' in kwargs: self.rx_filter = bool_str(kwargs.get('RX_FILTER'))
-        if 'OBD2_EN' in kwargs: self.OBD2_en = bool_str(kwargs.get('OBD2_EN'))
-        if 'OBD2_ECU_IDTX' in kwargs: self.OBD2_ECU_IDtx = kwargs.get('OBD2_ECU_IDTX')
-        if 'OBD2_ECU_IDRX' in kwargs: self.OBD2_ECU_IDrx = kwargs.get('OBD2_ECU_IDRX')
 
     def len(self):
         """function counts the number of set attributes and returns how many are set. Intended to emulate
@@ -769,9 +760,6 @@ class CAN_core:
         tmp_count = 0   #temp count of any filled fields
         if self.base_AID is not None: tmp_count += 1
         if self.rx_filter is True: tmp_count += 1
-        if self.OBD2_en is True: tmp_count += 1
-        if self.OBD2_ECU_IDtx is not None: tmp_count += 1
-        if self.OBD2_ECU_IDrx is not None: tmp_count += 1
         tmp_count += len(self.data_ch)
         return tmp_count
     
@@ -780,9 +768,6 @@ class CAN_core:
         self.data_ch.clear()
         self.base_AID = None
         self.rx_filter = None
-        self.OBD2_en = None
-        self.OBD2_ECU_IDtx = None
-        self.OBD2_ECU_IDrx = None
     
     def set_CAN_ch(self, passed_ch):
         """function updates the data_ch dictionary of stored chan channles with the passed `CAN_ch` class object.
@@ -846,17 +831,9 @@ class CAN_core:
 
         if self.base_AID is None or self.base_AID == '': tmp_err_list.update({'Base_AID':'No base AID is defined and is required'})
         if self.rx_filter is None or self.rx_filter == '': tmp_err_list.update({'RX_Filter':'CAN RX message filter can be set to true or false but is undefined'})
-        if self.OBD2_en is True and (self.OBD2_ECU_IDrx =='' 
-                                     or self.OBD2_ECU_IDrx is None): tmp_err_list.update({'OBD2 CFG':'OBD2 is enabled but ECU RX ID is null'})
-        if self.OBD2_en is True and (self.OBD2_ECU_IDtx =='' 
-                                     or self.OBD2_ECU_IDrx is None): tmp_err_list.update({'OBD2 CFG':'OBD2 is enabled but ECU TX ID is null'})
 
-        CAN_ch_OBD2 = False #temp var for checking CAN channels for OBD2
         for v in self.data_ch.values():                     #cycle through all CAN channels
             tmp_err_list.update(v.XML_dashCFG_checkErrs())  #and add any errors
-            if v.OBD2 is True: CAN_ch_OBD2 = True           #if a channel is OBD2 linked, set temp var
-
-        if CAN_ch_OBD2 is True and self.OBD2_en is False: tmp_err_list.update({'OBD2 CFG':'Defined CANch is OBD2 related but core config is not.'})
 
         return tmp_err_list
 
@@ -878,7 +855,7 @@ class CAN_ch:
         kwargs = {k.upper(): v for k, v in kwargs.items()}      #convert kwarg names to uppercase. Allows for use with XML and editor attributes
         #-----control params
         self.name = kwargs.get('NAME', None)                    #channel name
-        self.AID = kwargs.get('AID', 0x00)                      #CAN data AID
+        self.AID = kwargs.get('AID', 0x00)                      #CAN data AID and/or ECU AID
         self.ext = bool_str(kwargs.get('EXT', False))           #extended CAN frame
         self.dlc = int_str(kwargs.get('DLC', 8))                #expected number of frames
 
@@ -889,19 +866,17 @@ class CAN_ch:
         #--OBD2 specific channel information
         self.OBD2 = bool_str(kwargs.get('OBD2', False))         #data channel is an OBD2 format channel
         self.OBD2_PID = kwargs.get('OBD2_PID', 0x00)            #PID being requested
-        self.OBD2_bytes = kwargs.get('OBD2_BYTES', 0x00)        #number of bytes PID will send
 
         #-----math conversion and value
-        #NOTE: the frame offset for the 0-index isn't needed here or when generating the config. that's handled at the dash
-        self.frames = list_str(kwargs.get('FRAMES', 8), 0)      #list of frames used to calculating decimal value
-        self.scalar = int_str(kwargs.get('SCALAR', 1))          #scalar to apply after multiplying
-        self.offset = int_str(kwargs.get('OFFSET', 0))          #decimal offset
+        self.start_bit = int_str(kwargs.get('START_BIT', 0))           #start bit of calculation
+        self.stop_bit = int_str(kwargs.get('STOP_BIT', self.dlc*8))    #stop bit of calculation
+        self.scalar = int_str(kwargs.get('SCALAR', 1))                      #scalar to apply after multiplying
+        self.offset = int_str(kwargs.get('OFFSET', 0))                      #decimal offset        
 
         #--create tupple for class attributes used to save editor XML file
-        self.fields_editorCFG = ('AID', 'ext', 'dlc', 'rem_req', 'req_freq', 'frames', 'scalar', 'offset', 'OBD2', 'OBD2_PID', 'OBD2_bytes')
+        self.fields_editorCFG = ('AID', 'ext', 'dlc', 'rem_req', 'req_freq', 'start_bit', 'stop_bit', 'scalar', 'offset', 'OBD2', 'OBD2_PID')
         #--editor XML needs some additional resolution for OBD2 vs normal channel types
-        self.fields_CAN_norm = ('name','AID', 'ext', 'dlc', 'rem_req', 'req_freq', 'frames', 'scalar', 'offset')
-        self.fields_CAN_OBD2 = ('name','rem_req', 'req_freq', 'scalar', 'offset', 'OBD2', 'OBD2_PID', 'OBD2_bytes')
+        self.fields_CAN_all = ('name','AID', 'ext', 'dlc', 'rem_req', 'req_freq', 'start_bit', 'calc_stop_bit', 'scalar', 'offset')
 
         #--create tupple for class attributes used to generate dash config file
         self.fields_dashCFG = self.fields_editorCFG
@@ -917,24 +892,23 @@ class CAN_ch:
         :rtype: `dictionary` {attribute_name:"error message"}
         """
         tmp_err_list = {}   #temp dict for compiling errors
-        b_obd2 = self.__dict__['OBD2']  #temp bool value for obd2 enabled true/false
         for attr, val in self.__dict__.items():
-            if b_obd2 is False and attr in self.fields_CAN_norm:
-                if (attr != 'req_freq') and ((val is None) or val == ''):
+            if self.OBD2 is False and attr in self.fields_CAN_all:
+                if (attr != 'req_freq' and attr != 'scalar') and ((val is None) or val == ''):
                     tmp_err_list.update({self.name +'-'+ attr:'Required value for CAN data channel is undefined'})
-                elif attr == 'req_freq' and (self.rem_req == True) and ((val is None) or val == ''):
-                    tmp_err_list.update({self.name +'-'+ attr:'Remote request is enabled but no frequency is defined'})
                 elif attr == 'scalar' and (self.scalar == 0 or self.scalar == ''):
                     tmp_err_list.update({self.name +'-'+ attr:'Scalar value is invalid. Cannot be 0 or blank.'})
-            elif b_obd2 is True and attr in self.fields_CAN_OBD2:
-                if (attr != 'OBD2_PID') and (attr != 'OBD2_bytes') and (attr != 'req_freq') and ((val is None) or val == ''):
-                    tmp_err_list.update({self.name +'-'+ attr:'Required value for CAN data channel is undefined'})
-                if attr == 'OBD2_PID' and (val is None or val == ''):
-                    tmp_err_list.update({self.name +'-'+ attr:'OBD2 enabled channel must have a PID defined.'})
-                elif attr == 'OBD2_bytes' and (val is None or val == ''):
-                    tmp_err_list.update({self.name +'-'+ attr:'OBD2 enabled channel must define number of data bytes'})
-                elif attr == 'req_freq' and (self.rem_req == True) and ((val is None) or val == ''):
-                    tmp_err_list.update({self.name +'-'+ attr:'Remote request is enabled but no frequency is defined'})
+
+        if self.OBD2 is True and (self.OBD2_PID is None or self.OBD2_PID == ''):
+            tmp_err_list.update({self.name +'-'+ attr:'OBD2 enabled channel must have a PID defined.'})
+
+        #--RTR parameter Checks
+        if self.rem_req == True and (self.req_freq is None or self.req_freq == ''):
+            tmp_err_list.update({self.name +'-'+ 'RTR':'RTR is en but no freq defined'})
+
+        #--start/stop bit checks
+        if self.stop_bit < self.start_bit:
+            tmp_err_list.update({self.name +'-'+ 'bits':'Calculation stop bit cannot be before start bit'})
 
         return tmp_err_list #return error list
 
